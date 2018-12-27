@@ -12,6 +12,7 @@
 
 template<class Number>
 class InputDatabase {
+// Mock class for db
 private:
 	std::vector<int> _db;
 
@@ -26,14 +27,19 @@ public:
 	Number get(int i) const { Number::static_from_int(_db[i]); }
 };
 
-
-
-
-
-
 template<class Number>
 inline void sketch(int out_size, Number *out, const InputDatabase<Number> &input) {
+    /* Description:
+     * Build sketch vector of matched indices
+     * */
+
 	Matrix<unsigned int> m(out_size, input.size());
+
+    /*TODO
+     * 1. Generate sketch matrix with Saffron.py
+     * 2. Write to file result
+     * 3. Read from file
+     * */
 
 	for (int i_out = 0; i_out < out_size; ++i_out)
 		out[i_out] = Number::static_from_int(0);
@@ -42,27 +48,26 @@ inline void sketch(int out_size, Number *out, const InputDatabase<Number> &input
 		Number x = input.get(i_input);
 
 		for (int i_out = 0; i_out < out_size; ++i_out) {
+            printf("i_out: %d \n", i_out);
 			if (m(i_out, i_input) == 1)
 				out[i_out] += x;
 		}
 	}
 }
 
-
 template<class Number>
 bool test_sketch(int input_size, int sparsity) {
+    // Initialize X - input vector
 	std::vector<int> input(input_size);
 	for (int i_input = 0; i_input < input_size; ++i_input)
 		input[i_input] = 0;
 	for (int i_output = 0; i_output < sparsity; ++i_output)
 		input[rand() % input_size] = 1;
 
+    // Initialize db
 	InputDatabase<Number> input_db(input);
-
 	Number sketchEnc[sparsity];
-
 	sketch(sparsity, sketchEnc, input_db);
-
 
 	int sketch[sparsity];
 

@@ -11,12 +11,14 @@
 int main(int argc, char**argv) {
 	HelibKeys keys;
 
+    // Default args
 	int p = 0;
 	long r = 1;
 	int L = 0;
 	int size = 1000;
 	int sparsity = 10;
 
+    // Parse args
 	for (int argc_i = 0; argc_i < argc; ++argc_i) {
 		if (memcmp(argv[argc_i], "--r=", 4) == 0)
 			r = atoi(argv[argc_i] + 4);
@@ -65,7 +67,7 @@ int main(int argc, char**argv) {
 
 	keys.initKeys(s, R, p, r, d, c, k, 64, L, chosen_m, gens, ords);
 	HelibNumber::set_global_keys(&keys);
-
+    // Test sketch
 	test_sketch<HelibNumber>(size, sparsity);
 }
 

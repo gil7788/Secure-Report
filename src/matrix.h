@@ -6,6 +6,9 @@
 
 template<class Number>
 class Matrix {
+/* Description:
+ * This class hold matrix
+ * */
 private:
 	std::vector< std::vector<Number> > _data;
 public:
