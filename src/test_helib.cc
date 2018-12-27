@@ -2,7 +2,6 @@
 #include <string.h>
 
 #include <helib_number.h>
-#include <he>
 #include <eq.h>
 #include <binomial_tournament.h>
 #include <first_non_zero.h>
