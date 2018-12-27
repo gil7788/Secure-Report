@@ -1,0 +1,82 @@
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib
+using p =  1009
+using L =  1
+*** Bound N=1742, choosing m=1877, phi(m)=1876
+G = [0 1]
+generating key-switching matrices... done
+computing masks and tables for rotation...ea.size == 67
+done
+*** Error in `/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib': double free or corruption (fasttop): 0x0000000001ceca60 ***
+i_out: 0 
+======= Backtrace: =========
+i_out: 1 
+i_out: 2 
+i_out: 3 
+i_out: 4 
+i_out: 5 
+i_out: 6 
+i_out: 7 
+i_out: 8 
+i_out: 9 
+/lib/x86_64-linux-gnu/libc.so.6(+0x777e5)[0x7f68730aa7e5]
+/lib/x86_64-linux-gnu/libc.so.6(+0x8037a)[0x7f68730b337a]
+/lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7f68730b753c]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZN9__gnu_cxx13new_allocatorImE10deallocateEPmm+0x20)[0x471a16]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZNSt16allocator_traitsISaImEE10deallocateERS0_Pmm+0x2b)[0x471333]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZNSt13_Bvector_baseISaIbEE13_M_deallocateEv+0x66)[0x470c54]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZNSt13_Bvector_baseISaIbEED1Ev+0x18)[0x470b0e]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZNSt6vectorIbSaIbEED1Ev+0x18)[0x470386]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZN8IndexSetD1Ev+0x18)[0x46fe9e]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZN4CtxtD2Ev+0x1c)[0x46ffe4]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_ZN11HelibNumberD1Ev+0x2d)[0x47010d]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_Z6sketchI11HelibNumberEviPT_RK13InputDatabaseIS1_E+0x1c7)[0x471070]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_Z11test_sketchI11HelibNumberEbii+0x226)[0x47075d]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(main+0x4de)[0x46fd94]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf0)[0x7f6873053830]
+/home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib(_start+0x29)[0x46f7e9]
+======= Memory map: ========
+00400000-006e8000 r-xp 00000000 08:02 9048008                            /home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib
+008e7000-008e8000 r--p 002e7000 08:02 9048008                            /home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib
+008e8000-00cba000 rw-p 002e8000 08:02 9048008                            /home/gil/University/semester19a/crypto_lab/work/secure_report/cmake-build-debug/src/test_helib
+00cba000-00cbe000 rw-p 00000000 00:00 0 
+0197b000-01e51000 rw-p 00000000 00:00 0                                  [heap]
+7f686c000000-7f686c021000 rw-p 00000000 00:00 0 
+7f686c021000-7f6870000000 ---p 00000000 00:00 0 
+7f6873033000-7f68731f3000 r-xp 00000000 08:02 131155                     /lib/x86_64-linux-gnu/libc-2.23.so
+7f68731f3000-7f68733f3000 ---p 001c0000 08:02 131155                     /lib/x86_64-linux-gnu/libc-2.23.so
+7f68733f3000-7f68733f7000 r--p 001c0000 08:02 131155                     /lib/x86_64-linux-gnu/libc-2.23.so
+7f68733f7000-7f68733f9000 rw-p 001c4000 08:02 131155                     /lib/x86_64-linux-gnu/libc-2.23.so
+7f68733f9000-7f68733fd000 rw-p 00000000 00:00 0 
+7f68733fd000-7f6873413000 r-xp 00000000 08:02 135699                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f6873413000-7f6873612000 ---p 00016000 08:02 135699                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f6873612000-7f6873613000 rw-p 00015000 08:02 135699                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f6873613000-7f687371b000 r-xp 00000000 08:02 131077                     /lib/x86_64-linux-gnu/libm-2.23.so
+7f687371b000-7f687391a000 ---p 00108000 08:02 131077                     /lib/x86_64-linux-gnu/libm-2.23.so
+7f687391a000-7f687391b000 r--p 00107000 08:02 131077                     /lib/x86_64-linux-gnu/libm-2.23.so
+7f687391b000-7f687391c000 rw-p 00108000 08:02 131077                     /lib/x86_64-linux-gnu/libm-2.23.so
+7f687391c000-7f6873a8e000 r-xp 00000000 08:02 8782258                    /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f6873a8e000-7f6873c8e000 ---p 00172000 08:02 8782258                    /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f6873c8e000-7f6873c98000 r--p 00172000 08:02 8782258                    /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f6873c98000-7f6873c9a000 rw-p 0017c000 08:02 8782258                    /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f6873c9a000-7f6873c9e000 rw-p 00000000 00:00 0 
+7f6873c9e000-7f6873cb6000 r-xp 00000000 08:02 131097                     /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f6873cb6000-7f6873eb5000 ---p 00018000 08:02 131097                     /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f6873eb5000-7f6873eb6000 r--p 00017000 08:02 131097                     /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f6873eb6000-7f6873eb7000 rw-p 00018000 08:02 131097                     /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f6873eb7000-7f6873ebb000 rw-p 00000000 00:00 0 
+7f6873ebb000-7f6873f31000 r-xp 00000000 08:02 8949452                    /usr/local/lib/libgmp.so.10.3.2
+7f6873f31000-7f6874131000 ---p 00076000 08:02 8949452                    /usr/local/lib/libgmp.so.10.3.2
+7f6874131000-7f6874132000 r--p 00076000 08:02 8949452                    /usr/local/lib/libgmp.so.10.3.2
+7f6874132000-7f6874133000 rw-p 00077000 08:02 8949452                    /usr/local/lib/libgmp.so.10.3.2
+7f6874133000-7f6874159000 r-xp 00000000 08:02 131089                     /lib/x86_64-linux-gnu/ld-2.23.so
+7f6874304000-7f6874334000 rw-p 00000000 00:00 0 
+7f6874357000-7f6874358000 rw-p 00000000 00:00 0 
+7f6874358000-7f6874359000 r--p 00025000 08:02 131089                     /lib/x86_64-linux-gnu/ld-2.23.so
+7f6874359000-7f687435a000 rw-p 00026000 08:02 131089                     /lib/x86_64-linux-gnu/ld-2.23.so
+7f687435a000-7f687435b000 rw-p 00000000 00:00 0 
+7ffd249a0000-7ffd249c1000 rw-p 00000000 00:00 0                          [stack]
+7ffd249f5000-7ffd249f8000 r--p 00000000 00:00 0                          [vvar]
+7ffd249f8000-7ffd249fa000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+Process finished with exit code 134 (interrupted by signal 6: SIGABRT)
