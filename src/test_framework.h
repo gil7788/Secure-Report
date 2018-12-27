@@ -97,7 +97,7 @@ bool test_sketch(int input_size, int sparsity) {
 	for (int i_output = 0; i_output < sparsity; ++i_output)
 		sketch[i_output] = sketchEnc[i_output].to_int();
 
-    // TODO: 6. Decode sketch.
+    // TODO: 5. Decode sketch.
     // decode sketch into decoded
 	std::vector<int> decoded(input_size);
 
