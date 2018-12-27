@@ -24,7 +24,7 @@ public:
 	InputDatabase &operator=(const InputDatabase &a) { copy(a); return *this; }
 
 	int size() const { return _db.size(); }
-	Number get(int i) const { Number::static_from_int(_db[i]); }
+    Number get(int i) const { return Number::static_from_int(_db[i]); }
 };
 
 template<class Number>
@@ -48,7 +48,6 @@ inline void sketch(int out_size, Number *out, const InputDatabase<Number> &input
 		Number x = input.get(i_input);
 
 		for (int i_out = 0; i_out < out_size; ++i_out) {
-            printf("i_out: %d \n", i_out);
 			if (m(i_out, i_input) == 1)
 				out[i_out] += x;
 		}
