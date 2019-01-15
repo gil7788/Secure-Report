@@ -20,8 +20,9 @@ Ce: used to determine the success of rate of the decoding
 
 
 class Saffron:
-    def __init__(self, n, Ce, d=2):
+    def __init__(self, n, d=2):
         # initializing the algorithm's parameters, as written above/in the documentation/in the paper
+        Ce = 11.36
         self.n = n
         self.d = d
         self.L = int(np.ceil(np.log2(n)))
@@ -167,8 +168,33 @@ class Saffron:
         return G
 
 
-if __name__ == '__main__':
+def save_sketch_to_file(n, d, file_path):
+    #saffron = Saffron(n, d)
+    matrix = np.ones((n, d))
+    #matrix = saffron.get_sketch_matrix()
+    try:
+        with open(file_path, 'wb') as f:
+            for row in matrix:
+                np.savetxt(f, row)
+    except IOError as e:
+        print("Couldn't open or write to file (%s)." % e)
 
+def decode_save_to_file(n, d, list, file_path):
+    saffron = Saffron(n, d)
+    array = np.array(list)
+    result = saffron.decode(array)
+    try:
+        with open(file_path, 'wb') as f:
+            for row in result:
+                np.savetxt(f, row)
+    except IOError as e:
+        print("Couldn't open or write to file (%s)." % e)
+
+if __name__ == '__main__':
+    save_sketch_to_file(10, 20, "test")
+    decode_save_to_file(1000, 10, [1, 1, 1, 0, 1, 1, 1, 1, 0, 1], "decoded")
+
+'''
     for j in range(9, 10):
         n = 2 ** j
         d = 2
@@ -199,3 +225,4 @@ if __name__ == '__main__':
         print('\nd = ', d)
         print('succ', cc)
         print('runtime ', runtime)
+'''

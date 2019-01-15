@@ -6,10 +6,20 @@
  * 1. Create matrix with Python
  * 2. Write matrix to file with Python
  * 3. Read matrix with c++
- *
- * TODO:
- * 1. Check if c++ program knows the matrix size that its going to read | Yes - done | No - consider plan of action
  * */
+
+std::string python_api::array_to_python_array(int arr[], int arr_size) {
+    std::string result = "[ ";
+    for(int i = 0; i < arr_size; ++i) {
+        if(i == arr_size - 1) {
+            result += std::to_string(arr[i]);
+        } else {
+            result += std::to_string(arr[i]) + ", ";
+        }
+    }
+    result += " ]";
+    return result;
+}
 
 wchar_t* python_api::getWC(const char *c) {
     /*
@@ -25,17 +35,15 @@ wchar_t* python_api::getWC(const char *c) {
 std::string python_api::build_param_list(std::vector<std::string> params_function) {
     /*
      * Description: build valid params string from vector<std::string> params_function
-     * TODO:
-     * Need more testing on non-string values
      */
     std::string result;
     for(int i = 0; i < params_function.size(); ++i) {
         if(i == params_function.size() - 1) {
 
-            result += "\"" + params_function[i] + "\"";
+            result += params_function[i];
         }
         else {
-            result += "\"" + params_function[i] + "\", ";
+            result += params_function[i] + ", ";
         }
 
     }
@@ -74,13 +82,10 @@ void python_api::build_matrix_example() {
     const int MATRIX_COL = 3;
     std::string proj_dir = "/home/gil/University/semester19a/crypto_lab/work/secure_report/";
     std::string python_src_dir = proj_dir + "python_sketch/";
-    //std::string python_src_dir = "/home/gil/University/semester19a/crypto_lab/work/sandbox/tests/py_cpp_communication/python/";
     std::string matrix_file = "matrix.txt";
     std::string matrix_file_path = proj_dir + "processed/" + matrix_file;
-    //std::string matrix_file_path = proj_dir + matrix_file;
     std::string script_file_name = "write_matrix_to_file";
     std::vector<std::string> params_function(1, matrix_file_path);
-    //params_function.push_back(matrix_file);
     std::string script_function = "file_test";
 
     // Init new matrix
@@ -150,8 +155,9 @@ void python_api::print_matrix(double** matrix, int row_size, int col_size) {
         std::cout << std::endl;
     }
 }
-
+/*
 int main() {
     python_api py;
     py.build_matrix_example();
-}
+
+}*/

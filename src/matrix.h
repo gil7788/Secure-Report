@@ -6,8 +6,8 @@
 
 template<class Number>
 class Matrix {
-/* Description:
- * This class hold matrix
+/*
+ * Description: This class hold matrix
  * */
 private:
 	std::vector< std::vector<Number> > _data;
@@ -16,6 +16,16 @@ public:
 		_data.resize(c);
 		for (unsigned int i = 0; i < _data.size(); ++i)
 			_data[i].resize(r);
+	}
+
+	Matrix(double** matrix, int row, int col) {
+		for (int i = 0; i < row; ++i) {
+            std::vector<Number> row;
+            this->_data.push_back(row);
+			for (int j = 0; j < col; ++j) {
+                this->_data.at(i).push_back((int) matrix[i][j]);
+			}
+		}
 	}
 
 	Matrix(const Matrix &m) : _data(m._data) {}

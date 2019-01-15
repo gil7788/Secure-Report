@@ -15,8 +15,6 @@ class python_api {
 private:
     wchar_t *getWC(const char *c);
 
-    std::string build_param_list(std::vector<std::string> params_function);
-
     void load_matrix(double** matrix, std::string file_path, int row_size, int col_size);
 
 public:
@@ -26,6 +24,11 @@ public:
 
     int build_matrix(double** matrix, std::string script_file_name, std::string script_function, std::string params_function, std::string python_src_dir,
                      std::string matrix_file_path, int row_size, int col_size);
+
+    std::string build_param_list(std::vector<std::string> params_function);
+
+    std::string array_to_python_array(int arr[], int arr_size);
+
     // DEBUG
     void print_matrix(double** matrix, int row_size, int col_size);
 };
