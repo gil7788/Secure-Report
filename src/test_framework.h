@@ -39,6 +39,22 @@ public:
 };
 
 template<class Number>
+inline Matrix<unsigned int> build_sketch_matrix(int out_size, Number *out, const InputDatabase<Number> &input) {
+    // TODO: 2. Read a sketch matrix
+    /*
+     * a. Generate sketch matrix with Saffron.py
+     * b. Write to file result
+     * c. Read from file
+     * */
+}
+
+template<class Number>
+inline void decode_sketch_matrix(Matrix<unsigned int> sketch_matrix, int sketch_vector[]) {
+    // TODO: 5. Decode sketch.
+    // decode sketch into decoded
+}
+
+template<class Number>
 inline void sketch(int out_size, Number *out, const InputDatabase<Number> &input) {
     /* Description:
      * Build sketch vector of matched indices
@@ -47,11 +63,7 @@ inline void sketch(int out_size, Number *out, const InputDatabase<Number> &input
 	Matrix<unsigned int> m(out_size, input.size());
 
     // TODO: 2. Read a sketch matrix
-    /*
-     * a. Generate sketch matrix with Saffron.py
-     * b. Write to file result
-     * c. Read from file
-     * */
+    m = build_sketch_matrix(out_size, out, input);
 
 	for (int i_out = 0; i_out < out_size; ++i_out)
 		out[i_out] = Number::static_from_int(0);
@@ -100,7 +112,7 @@ bool test_sketch(int input_size, int sparsity) {
     // TODO: 5. Decode sketch.
     // decode sketch into decoded
 	std::vector<int> decoded(input_size);
-
+    decoded = decode_sketch_matrix(m, sketch);
     // Test if result is valid
 	for (int i_input = 0; i_input < input_size; ++i_input)
 		if (decoded[i_input] != input[i_input])

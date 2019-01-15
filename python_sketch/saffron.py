@@ -53,6 +53,10 @@ class Saffron:
         # running time: O(|v|)
         return np.sum(1 * v)
 
+    def get_sketch_matrix(self):
+        # returns <class 'numpy.ndarray'>
+        return self.M
+
     @staticmethod
     def square_plus(b, a):
         # input: 2 binary vectors a,b
@@ -172,6 +176,7 @@ if __name__ == '__main__':
         Ce = 11.36
         t0 = time.time()
         saff = Saffron(n, Ce, d)
+        saff.get_sketch_matrix()
         t = time.time() - t0
         cc = 0
         runtime = 0
