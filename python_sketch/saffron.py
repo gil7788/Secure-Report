@@ -1,6 +1,9 @@
+import h5py
+
 import numpy as np
 from disjunct import generateVector
 import time
+from tempfile import TemporaryFile
 
 """
 M: d-disjunct matrix
@@ -20,7 +23,10 @@ Ce: used to determine the success of rate of the decoding
 
 
 class Saffron:
-    def __init__(self, n, d=2):
+    def __init__(self): pass
+
+    # Regular constructor (First constructor)
+    def build_matrix(self, n, d):
         # initializing the algorithm's parameters, as written above/in the documentation/in the paper
         Ce = 11.36
         self.n = n
@@ -32,6 +38,18 @@ class Saffron:
         m = self.h / self.d
         H = self.incidence_matrix(m)
         self.M = self.tensor_product(H, self.U)
+
+    # Build object from file (Second constructor)
+    def construct_from_file(self, n, d, L, h, U, matrix):
+        # initializing the algorithm's parameters, as written above/in the documentation/in the paper
+        Ce = 11.36
+        self.n = n
+        self.d = d
+        self.L = L
+        self.h = h
+        self.U = U
+        self.pi3_inv = self.pi5_inv = None
+        self.M = matrix
 
     def b(self, i):
         # input: int i, int n
@@ -167,62 +185,3 @@ class Saffron:
                         G.append(ind1)
         return G
 
-
-def save_sketch_to_file(n, d, file_path):
-    #saffron = Saffron(n, d)
-    matrix = np.ones((n, d))
-    #matrix = saffron.get_sketch_matrix()
-    try:
-        with open(file_path, 'wb') as f:
-            for row in matrix:
-                np.savetxt(f, row)
-    except IOError as e:
-        print("Couldn't open or write to file (%s)." % e)
-
-def decode_save_to_file(n, d, list, file_path):
-    saffron = Saffron(n, d)
-    array = np.array(list)
-    result = saffron.decode(array)
-    try:
-        with open(file_path, 'wb') as f:
-            for row in result:
-                np.savetxt(f, row)
-    except IOError as e:
-        print("Couldn't open or write to file (%s)." % e)
-
-if __name__ == '__main__':
-    save_sketch_to_file(10, 20, "test")
-    decode_save_to_file(1000, 10, [1, 1, 1, 0, 1, 1, 1, 1, 0, 1], "decoded")
-
-'''
-    for j in range(9, 10):
-        n = 2 ** j
-        d = 2
-        tries = 1000
-        Ce = 11.36
-        t0 = time.time()
-        saff = Saffron(n, Ce, d)
-        saff.get_sketch_matrix()
-        t = time.time() - t0
-        cc = 0
-        runtime = 0
-        for i in range(tries):
-            if i % 100 == 0:
-                saff = Saffron(n, Ce, d)
-                print('-')
-            indices = np.random.choice(n, d, False)
-            import disjunct
-
-            x = disjunct.generateVector(n, d, indices)
-            y = saff.encode(x)
-            t0 = time.time()  # timing the running time of the algorithm
-            dec = saff.decode(y)
-            t = time.time() - t0
-            runtime += t
-            if np.array_equal(np.sort(dec), np.sort(indices)):
-                cc += 1
-        print('\nn = ', n)
-        print('\nd = ', d)
-        print('succ', cc)
-        print('runtime ', runtime)
-'''
