@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include <iterator>
 
 using Eigen::MatrixXi;
 using Eigen::VectorXi;
+
 
 /*
     M: d-disjunct matrix
@@ -24,46 +26,62 @@ using Eigen::VectorXi;
  * */
 
 class sketch_matrix {
-    // TODO:
-    /*
-     * 1. Define class variables on demand
-     * */
+// Class variables
 public:
-    // Build class from matrix
-    sketch_matrix(int n, int d);
+    const double Ce = 11.36;
+    int _n;
+    int _d;
+    int _L;
+    int _h;
+    int _m;
 
-    // Build class from params
-    sketch_matrix(int n, int d, int L, int h, MatrixXi U,MatrixXi matrix);
+    VectorXi _pi3_inv;
+    VectorXi _pi5_inv;
+
+    MatrixXi _U;
+    MatrixXi _H;
+    MatrixXi _M;
+
+// Class interface
+public:
+    sketch_matrix(int n, int d);
 
     VectorXi encode(VectorXi vector);
 
     VectorXi decode(VectorXi vector);
 
-// Class variables
-private:
-
 // Helper functions
-private:
-    // Operations on single number
+public:
     VectorXi number_to_binary(int i);
 
-    // Operations on single vector
     int binary_to_number(VectorXi vector);
 
+    static VectorXi generate_binary_vector(int n, int d);
+
+private:
     int hamming_weight(VectorXi vector);
 
     // Operations on 2 vectors
-    VectorXi square_plus(VectorXi vector_a, VectorXi vector_b);
+    static VectorXi square_plus(VectorXi vector_a, VectorXi vector_b);
 
-    VectorXi line_plus(VectorXi vector_a, VectorXi vector_b);
+    static VectorXi line_plus(VectorXi vector_a, VectorXi vector_b);
 
     // Operations on 2 matrices
-    MatrixXi tensor_product(MatrixXi matrix_a, MatrixXi matrix_b);
+    static MatrixXi tensor_product(MatrixXi matrix_a, MatrixXi matrix_b);
 
     MatrixXi signature_matrix();
 
-    MatrixXi incidence_matrix(int m);
-};
+    MatrixXi incidence_matrix();
 
+    std::vector<int> find_singletons(VectorXi vector, VectorXi* vector_tag, int* count);
+
+    VectorXi find_doubletons(std::vector<int> G, VectorXi vector_tag, int count);
+
+    static VectorXi generate_permutation(int n);
+
+    static VectorXi sort_indirect(VectorXi x);
+
+    static VectorXi bitwise_not(VectorXi x);
+};
 
 #endif //SECURE_REPORT_SKETCH_MATRIX_H
