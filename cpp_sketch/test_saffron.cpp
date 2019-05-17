@@ -2,9 +2,8 @@
 #include <ctime>
 #include <Eigen/Dense>
 
-#include "sketch_matrix.h"
+#include "sketch_encoder.h"
 
-using namespace Eigen;
 using Eigen::MatrixXi;
 using Eigen::VectorXi;
 
@@ -20,7 +19,7 @@ std::vector<int> getMatches(VectorXi x) {
 }
 
 bool saffron_test(int n, int d) {
-    sketch_matrix sketch_test(n, d);
+    sketch_encoder sketch_test(n, d);
 
     // Init input
     VectorXi input;

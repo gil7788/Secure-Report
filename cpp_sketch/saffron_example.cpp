@@ -1,7 +1,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-#include "sketch_matrix.h"
+#include "sketch_encoder.h"
 
 using namespace Eigen;
 using Eigen::MatrixXi;
@@ -9,7 +9,7 @@ using Eigen::VectorXi;
 
 int main() {
     int n = 1028, d = 3;
-    sketch_matrix sketch_test(n, d);
+    sketch_encoder sketch_test(n, d);
 
     // Params
     const double Ce = 11.36;
@@ -20,19 +20,7 @@ int main() {
     int _m = int(std::floor(_h / d));
 
     std::cout << "Params: " << std::endl;
-    std::cout << "n: " << n << std::endl;
-    std::cout << "d: " << d << std::endl;
-    std::cout << "Ce: " << Ce << std::endl;
-    std::cout << "_L: " << _L << std::endl;
-    std::cout << "_n: " << _n << std::endl;
-    std::cout << "_d: " << _d << std::endl;
-    std::cout << "_h: " << _h << std::endl;
-    std::cout << "_m: " << _m << std::endl;
-    // Matrices sizes
-    std::cout << "_H: " << sketch_test._H.rows() << ", " << sketch_test._H.cols() << std::endl;
-    std::cout << "_M: " << sketch_test._M.rows() << ", " << sketch_test._M.cols() << std::endl;
-    std::cout << "_U: " << sketch_test._U.rows() << ", " << sketch_test._U.cols() << std::endl;
-
+    std::cout << sketch_test << std::endl;
     std::cout << "=====================================" << std::endl;
     std::cout<< "TEST 001 - Encode" << std::endl;
     VectorXi input;

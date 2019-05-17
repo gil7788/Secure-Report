@@ -10,7 +10,7 @@ using Eigen::VectorXi;
 
 
 /*
-    M: d-disjunct matrix
+    M: d-disjunct matrix denoted as sketch of type MatrixXi
     U: signature matrix
     d: number of defectives items
     h: number of right nodes- number of bundles of tests
@@ -25,9 +25,9 @@ using Eigen::VectorXi;
     Ce: used to determine the success of rate of the decoding
  * */
 
-class sketch_matrix {
+class sketch_encoder {
 // Class variables
-public:
+private:
     const double Ce = 11.36;
     int _n;
     int _d;
@@ -40,11 +40,12 @@ public:
 
     MatrixXi _U;
     MatrixXi _H;
-    MatrixXi _M;
+public:
+    MatrixXi sketch;
 
 // Class interface
 public:
-    sketch_matrix(int n, int d);
+    sketch_encoder(int n, int d);
 
     VectorXi encode(VectorXi vector);
 
@@ -82,6 +83,8 @@ private:
     static VectorXi sort_indirect(VectorXi x);
 
     static VectorXi bitwise_not(VectorXi x);
+
+    friend std::ostream& operator<< (std::ostream& stream, const sketch_encoder& matrix);
 };
 
 #endif //SECURE_REPORT_SKETCH_MATRIX_H

@@ -3,8 +3,6 @@
 
 #include <helib_number.h>
 #include <eq.h>
-#include <binomial_tournament.h>
-#include <first_non_zero.h>
 
 #include "test_framework.h"
 
@@ -15,8 +13,8 @@ int main(int argc, char**argv) {
 	int p = 0;
 	long r = 1;
 	int L = 0;
-	int size = 1000;
-	int sparsity = 10;
+	int size = 256;
+	int sparsity = 3;
 
     // Parse args
 	for (int argc_i = 0; argc_i < argc; ++argc_i) {
@@ -68,6 +66,8 @@ int main(int argc, char**argv) {
 	keys.initKeys(s, R, p, r, d, c, k, 64, L, chosen_m, gens, ords);
 	HelibNumber::set_global_keys(&keys);
     // Test sketch
-	test_sketch<HelibNumber>(size, sparsity);
+	bool is_successful = test_sketch<HelibNumber>(size, sparsity);
+    std::cout << "is_successful: " << is_successful << std::endl;
+
 }
 

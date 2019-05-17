@@ -3,7 +3,6 @@
 
 #include <zp.h>
 #include <eq.h>
-#include <primes.h>
 
 #include "test_framework.h"
 
@@ -11,8 +10,8 @@
 typedef ZP<SIMD_FACTOR> MyZP;
 
 int main(int argc, char** argv) {
-	int size = 1000;
-	int sparsity = 10;
+	int size = 256;
+	int sparsity = 6;
 
 	for (int argc_i = 0; argc_i < argc; ++argc_i) {
 		if (memcmp(argv[argc_i], "--s=", 4) == 0)
