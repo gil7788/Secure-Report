@@ -12,6 +12,7 @@ Dependencies:
 4. FHE
 5. Liphe
 6. Google Tests (gtest)
+7. Eigen3
 
 * All dependencies include files should be at: "/usr/include" or "/usr/local/include" 
-and all lib files should be at: "/usr/lib" "/usr/local/lib"Linux
+and all lib files should be at: "/usr/lib" "/usr/local/lib" Linux
