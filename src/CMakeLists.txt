@@ -5,14 +5,10 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 file(GLOB SOURCE_FILES *.cpp)
 
-# main
-add_executable(main main.cpp)
-target_link_libraries(main liphe fhe ntl gmp pthread)
-
 # helib_test
-add_executable(test_helib ../cpp_sketch/sketch_encoder.cpp test_helib.cc test_framework.h matrix.h)
+add_executable(test_helib test_helib.cc SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h)
 target_link_libraries(test_helib Eigen3::Eigen liphe fhe ntl gmp pthread)
 
 # zp_test
-add_executable(test_zp ../cpp_sketch/sketch_encoder test_zp.cc test_framework.h matrix.h)
+add_executable(test_zp test_zp.cc SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h)
 target_link_libraries(test_zp Eigen3::Eigen liphe fhe ntl gmp pthread)

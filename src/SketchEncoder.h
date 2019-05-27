@@ -25,7 +25,7 @@ using Eigen::VectorXi;
     Ce: used to determine the success of rate of the decoding
  * */
 
-class sketch_encoder {
+class SketchEncoder {
 // Class variables
 private:
     const double Ce = 11.36;
@@ -40,19 +40,20 @@ private:
 
     MatrixXi _U;
     MatrixXi _H;
-public:
-    MatrixXi sketch;
+    MatrixXi _sketch;
 
 // Class interface
 public:
-    sketch_encoder(int n, int d);
+    SketchEncoder(int n, int d);
+
+    MatrixXi get_sketch();
 
     VectorXi encode(VectorXi vector);
 
     VectorXi decode(VectorXi vector);
 
 // Helper functions
-public:
+private:
     VectorXi number_to_binary(int i);
 
     int binary_to_number(VectorXi vector);
@@ -74,6 +75,8 @@ private:
 
     MatrixXi incidence_matrix();
 
+    void construct_sketch_matrix();
+
     std::vector<int> find_singletons(VectorXi vector, VectorXi* vector_tag, int* count);
 
     VectorXi find_doubletons(std::vector<int> G, VectorXi vector_tag, int count);
@@ -84,7 +87,7 @@ private:
 
     static VectorXi bitwise_not(VectorXi x);
 
-    friend std::ostream& operator<< (std::ostream& stream, const sketch_encoder& matrix);
+    friend std::ostream& operator<< (std::ostream& stream, const SketchEncoder& matrix);
 };
 
 #endif //SECURE_REPORT_SKETCH_MATRIX_H

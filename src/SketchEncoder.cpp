@@ -1,25 +1,33 @@
-#include "sketch_encoder.h"
+#include "SketchEncoder.h"
 
 
-sketch_encoder::sketch_encoder(int n, int d): _n(n), _d(d) {
+SketchEncoder::SketchEncoder(int n, int d): _n(n), _d(d) {
     _L = int(std::ceil(std::log2(n)));
     _h = _L * int(std::ceil(Ce * _d));
     _m = int(std::floor(_h / _d));
-    _U = signature_matrix();
-    _H = incidence_matrix();
-    sketch = tensor_product(_H, _U);
 }
 
-VectorXi sketch_encoder::encode(VectorXi vector) {
+MatrixXi SketchEncoder::get_sketch() {
+    if(_sketch.size() == 0) {
+        construct_sketch_matrix();
+    }
+    return _sketch;
+}
+
+VectorXi SketchEncoder::encode(VectorXi vector) {
     /*
     input: binary vector x with d 1s
     output: binary vector
     description: returns y = Mx
     running time: O(n+d^3*logn)
 */
-    VectorXi result = VectorXi::Zero(sketch.rows());
+    if(_sketch.size() == 0) {
+        construct_sketch_matrix();
+    }
 
-    result = sketch * vector;
+    VectorXi result = VectorXi::Zero(_sketch.rows());
+
+    result = _sketch * vector;
 
     for (int i = 0; i < result.size(); ++i) {
         (result[i] > 0) ? result[i] = 1 : result[i] = 0;
@@ -28,7 +36,7 @@ VectorXi sketch_encoder::encode(VectorXi vector) {
     return result;
 }
 
-VectorXi sketch_encoder::decode(VectorXi vector) {
+VectorXi SketchEncoder::decode(VectorXi vector) {
 /*
     input: binary vector y=Mx
     output: binary vector
@@ -37,6 +45,10 @@ VectorXi sketch_encoder::decode(VectorXi vector) {
     implement the psuedo code on page 17 on the paper on:
     https://pdfs.semanticscholar.org/c051/52418cc0a666eaa333efc119ea3c639279b1.pdf
  */
+    if(_sketch.size() == 0) {
+        construct_sketch_matrix();
+    }
+
     int count = 0;
     VectorXi vector_tag;
     std::vector<int> result_singletons = find_singletons(vector, &vector_tag, &count);
@@ -50,7 +62,7 @@ VectorXi sketch_encoder::decode(VectorXi vector) {
     return result;
 }
 
-std::vector<int> sketch_encoder::find_singletons(VectorXi vector, VectorXi* vector_tag, int* count) {
+std::vector<int> SketchEncoder::find_singletons(VectorXi vector, VectorXi* vector_tag, int* count) {
     const int letter_size = _L;
     const int word_size = letter_size * 6;
     std::vector<int> G;
@@ -86,7 +98,7 @@ std::vector<int> sketch_encoder::find_singletons(VectorXi vector, VectorXi* vect
     return G;
 }
 
-VectorXi sketch_encoder::find_doubletons(std::vector<int> G, VectorXi vector_tag, int count) {
+VectorXi SketchEncoder::find_doubletons(std::vector<int> G, VectorXi vector_tag, int count) {
     VectorXi result;
     const int letter_size = _L;
     const int word_size = letter_size * 6;
@@ -140,7 +152,7 @@ VectorXi sketch_encoder::find_doubletons(std::vector<int> G, VectorXi vector_tag
     return result;
 }
 
-VectorXi sketch_encoder::number_to_binary(int value) {
+VectorXi SketchEncoder::number_to_binary(int value) {
 /*
     input: int i, int n
     output: array of size log(n)
@@ -159,7 +171,7 @@ VectorXi sketch_encoder::number_to_binary(int value) {
     return binary_value_vector;
 }
 
-int sketch_encoder::binary_to_number(VectorXi vector) {
+int SketchEncoder::binary_to_number(VectorXi vector) {
     // base10
 /*
     input: binary array
@@ -177,7 +189,7 @@ int sketch_encoder::binary_to_number(VectorXi vector) {
     return value;
 }
 
-int sketch_encoder::hamming_weight(VectorXi vector) {
+int SketchEncoder::hamming_weight(VectorXi vector) {
 // Returns the hamming weight of vector
 /*
     input: binary vector v
@@ -188,7 +200,7 @@ int sketch_encoder::hamming_weight(VectorXi vector) {
     return vector.sum();
 }
 
-VectorXi sketch_encoder::square_plus(VectorXi  vector_a, VectorXi  vector_b) {
+VectorXi SketchEncoder::square_plus(VectorXi  vector_a, VectorXi  vector_b) {
 /*
     input: 2 binary vectors a,b
     output: vector over {0,1,?} when ? is 2 or 3
@@ -198,7 +210,7 @@ VectorXi sketch_encoder::square_plus(VectorXi  vector_a, VectorXi  vector_b) {
     return vector_a + 2 * vector_b;
 }
 
-VectorXi sketch_encoder::line_plus(VectorXi vector_a, VectorXi vector_b) {
+VectorXi SketchEncoder::line_plus(VectorXi vector_a, VectorXi vector_b) {
 /*
     input: 2 vectors a,b over {0,1,?} when ? is 2 or 3
     output: binary vector
@@ -217,7 +229,7 @@ VectorXi sketch_encoder::line_plus(VectorXi vector_a, VectorXi vector_b) {
     return result;
 }
 
-MatrixXi sketch_encoder::tensor_product(MatrixXi matrix_a, MatrixXi matrix_b) {
+MatrixXi SketchEncoder::tensor_product(MatrixXi matrix_a, MatrixXi matrix_b) {
 /*
     input: h by n incidence matrix H of type np.matrix, k by n signature matrix U of type np.matrix
     output: h*k by n d-disjunct matrix of type np.matrix
@@ -237,7 +249,7 @@ MatrixXi sketch_encoder::tensor_product(MatrixXi matrix_a, MatrixXi matrix_b) {
     return result;
 }
 
-MatrixXi sketch_encoder::signature_matrix() {
+MatrixXi SketchEncoder::signature_matrix() {
 /*
     input: int n
     output: 6log(n) by n signature matrix of type np.array
@@ -289,7 +301,7 @@ MatrixXi sketch_encoder::signature_matrix() {
     return result;
 }
 
-MatrixXi sketch_encoder::incidence_matrix() {
+MatrixXi SketchEncoder::incidence_matrix() {
 /*
     input: none
     output: h by n matrix of type np.array
@@ -306,7 +318,13 @@ MatrixXi sketch_encoder::incidence_matrix() {
     return result.transpose();
 }
 
-VectorXi sketch_encoder::generate_binary_vector(int n, int d) {
+void SketchEncoder::construct_sketch_matrix() {
+    _U = signature_matrix();
+    _H = incidence_matrix();
+    _sketch = tensor_product(_H, _U);
+}
+
+VectorXi SketchEncoder::generate_binary_vector(int n, int d) {
     int p = n;
     int t = d;
     VectorXi result(p);
@@ -332,7 +350,7 @@ VectorXi sketch_encoder::generate_binary_vector(int n, int d) {
     return result;
 }
 
-VectorXi sketch_encoder::generate_permutation(int n) {
+VectorXi SketchEncoder::generate_permutation(int n) {
     // Create vector from 0 to n-1
     MatrixXi vector = VectorXi::LinSpaced(n, 0, n-1);
     // Random generator
@@ -345,7 +363,7 @@ VectorXi sketch_encoder::generate_permutation(int n) {
     return vector;
 }
 
-VectorXi sketch_encoder::sort_indirect(VectorXi x) {
+VectorXi SketchEncoder::sort_indirect(VectorXi x) {
     /*
     Indirect sort is defined:
      Given array = permutation([0,n-1])
@@ -359,7 +377,7 @@ VectorXi sketch_encoder::sort_indirect(VectorXi x) {
     return result;
 }
 
-VectorXi sketch_encoder::bitwise_not(VectorXi x) {
+VectorXi SketchEncoder::bitwise_not(VectorXi x) {
     VectorXi result(x.size());
     for (int i = 0; i < x.size(); ++i) {
         x[i] != 0 ? result[i] = 0 : result[i] = 1;
@@ -367,7 +385,7 @@ VectorXi sketch_encoder::bitwise_not(VectorXi x) {
     return result;
 }
 
-std::ostream& operator<< (std::ostream& stream, const sketch_encoder& matrix) {
+std::ostream& operator<< (std::ostream& stream, const SketchEncoder& matrix) {
     std::cout << "Ce: " << matrix.Ce << std::endl;
     std::cout << "_L: " << matrix._L << std::endl;
     std::cout << "_n: " << matrix._n << std::endl;
@@ -378,5 +396,5 @@ std::ostream& operator<< (std::ostream& stream, const sketch_encoder& matrix) {
     // Matrices sizes
     std::cout << "_H: " << matrix._H.rows() << ", " << matrix._H.cols() << std::endl;
     std::cout << "_U: " << matrix._U.rows() << ", " << matrix._U.cols() << std::endl;
-    std::cout << "_M: " << matrix.sketch.rows() << ", " << matrix.sketch.cols() << std::endl;
+    std::cout << "_M: " << matrix._sketch.rows() << ", " << matrix._sketch.cols() << std::endl;
 }
