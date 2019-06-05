@@ -4,7 +4,7 @@
 #include <helib_number.h>
 #include <eq.h>
 
-#include "test_framework.h"
+#include "FHEDatabase.h"
 
 int main(int argc, char**argv) {
     /*TODO

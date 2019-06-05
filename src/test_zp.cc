@@ -4,12 +4,17 @@
 #include <zp.h>
 #include <eq.h>
 
-#include "test_framework.h"
+#include "FHEDatabase.h"
 
 #define SIMD_FACTOR 1
 typedef ZP<SIMD_FACTOR> MyZP;
 
 int main(int argc, char** argv) {
+	/*TODO
+    * 1. Understand parameters
+    * 2. Consider whether to export parameters to FHEDatabase class or
+    * keep FHEDatabase as a generic Database and create Database for each type of FHE library, i.e. Helib, ZP(plain text HElib interface), etc
+    * */
 	int size = 256;
 	int sparsity = 6;
 

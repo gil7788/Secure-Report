@@ -20,7 +20,6 @@ VectorXi VectorUtils::number_to_binary(int value, int n) {
 }
 
 int VectorUtils::binary_to_number(VectorXi vector) {
-    // base10
 /*
     input: binary array
     output: int
@@ -77,4 +76,15 @@ std::vector<int> VectorUtils::getMatches(VectorXi x) {
         }
     }
     return indices;
+}
+
+std::string VectorUtils::to_string(VectorXi vector) {
+    /*
+     * VectorXi to std::string converter
+     * */
+    std::string result;
+    for (int i = 0; i < vector.size(); ++i) {
+        result += std::to_string(vector(i)) + "\n";
+    }
+    return result;
 }

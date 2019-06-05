@@ -9,8 +9,12 @@
  * TODO
  * 1. Split test flow into functions - Done
  * 2. Add real queries - read and understand max's email about fhe_is_equal function
- * 3. Integrate real db
- * 4. Build db that contains costume type of objects (i.e. structs, classes)
+ * 3. Integrate real db - Done
+ * 4. Build db that contains costume type of objects (i.e. structs, classes) -
+ *      I. Current solution, build functions and api that supports students needs (include enhancing Plaindatabase class)
+ *      II. Ideal solution - Integrate SQL parser to the system, such that FHEDatabase will support a
+ *      subset of SQL queries, and then parser is not needed
+ *
  * */
 
 template<class Number>
@@ -18,15 +22,59 @@ class FHEDatabase {
 private:
     int _d;
     int _n;
+    PlainDatabase _database;
+    const std::string _TABLE_NAME = "table_vector";
 public:
     SketchEncoder _encoder;
 
 public:
-    FHEDatabase(int db_size, int sparsity): _n(db_size),
-                                            _d(sparsity),
-                                            _encoder(db_size, sparsity) {}
+    FHEDatabase(int db_size, int sparsity):
+            _n(db_size),
+            _d(sparsity),
+            _encoder(db_size, sparsity),
+            _database()
+            {}
 
+    // Database related functions
+    bool connect() {
+        /*
+         * Description: Connect to database
+         * */
+        bool database_connected = _database.connect();
+        return database_connected;
+    }
+
+    bool build_database_table(VectorXi& vector) {
+        /*
+         * Description: Build database table with unique prime key and value columns
+         * */
+        /*TODO
+         * 1. Add costume types build of database
+         * 2. Add encrypted build
+         * */
+        bool table_constructed = false;
+        if(_database.table_exists(_TABLE_NAME)) {
+            table_constructed =_database.update_table(_TABLE_NAME, vector);
+        }
+        else {
+            table_constructed = _database.initiate_table(_TABLE_NAME, vector);
+        }
+
+        if(!table_constructed) {
+            if(DEBUG_LEVEL >= 2) {
+                string str_vector = VectorUtils::to_string(vector);
+                cerr << str_vector << endl;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    // Encryption/encoding related functions
     VectorXi decode(VectorXi encoded) {
+        /*
+         * Description: Decode plain vector
+         * */
         for (int i = 0; i < encoded.size(); ++i) {
             (encoded[i] > 0) ? encoded[i] = 1 : encoded[i] = 0;
         }
@@ -35,6 +83,9 @@ public:
     }
 
     VectorXi fhe_decrypt(Number* sketchEnc) {
+        /*
+         * Description: decrypt encrypted vector
+         * */
         MatrixXi sketch = _encoder.get_sketch();
         VectorXi encoded(sketch.rows());
         for (int i_output = 0; i_output < sketch.rows(); ++i_output) {
@@ -44,12 +95,32 @@ public:
         return encoded;
     }
 
-    inline Number* fhe_encode(VectorXi plain_vector) {
-        /* Description:
-         * Build sketch vector of matched indices
+    VectorXi build_match_indices_vector(Number value) {
+        /*
+         * Description: build matches vector based on database and query operator
          * */
         /*TODO
-         * 1. Validate plain vector size, should be _n(db_size, as it plain_vector represents the db)
+         * Currently this function is a dummy implementation.
+         * 1. Implement fhe equality
+         * 2. Implement few or one generic function that can implement few comparison types, i.e. eq, leq, less, geq, greater
+         * */
+        VectorXi db_vector = _database.table_to_vector(_TABLE_NAME);
+        VectorXi result(db_vector.size());
+        for (int i = 0; i < db_vector.size(); ++i) {
+            // TODO TEST equality
+            result(i) = db_vector(i);
+        }
+        return result;
+    }
+
+    inline Number* fhe_encode(VectorXi plain_vector) {
+        /*
+        * Description: Encode under full homomorphic encryption
+        * */
+        /*TODO
+         * 1. Change implementation, currently the database values are saved plain and encrypted when fhe_encode function access them.
+         * Desired behavior: add selection to to save values encrypted/plain, if selected decision is to save them encrypted,
+         * then save them in encrypted database
          * */
         MatrixXi sketch = _encoder.get_sketch();
         Number* out = new Number[sketch.rows()];
@@ -70,14 +141,34 @@ public:
 // Test functions
 public:
     bool test_sketch() {
+        // Dummy data
+        // Dummy database data
         VectorXi plain_vector = VectorUtils::generate_binary_vector(_n, _d);
-        MatrixXi sketch = _encoder.get_sketch();
+        // Dummy query value
+        Number query_value = Number::static_from_int(0);
 
         // Save matched indices for to indicate success/failure
         std::vector<int> indices = VectorUtils::getMatches(plain_vector);
 
+        // Connect to plain database
+        bool database_connected = connect();
+        if(!database_connected) {
+            std::cerr << "Failed to connect to database" << std::endl;
+            return false;
+        }
+
+        // Build database table
+        bool database_built = build_database_table(plain_vector);
+        if(!database_built) {
+            std::cerr << "Failed to build database" << std::endl;
+            return false;
+        }
+
+        // Query database
+        VectorXi matches_vector = build_match_indices_vector(query_value);
+
         // Encode encrypted data
-        Number* sketchEnc = fhe_encode(plain_vector);
+        Number* sketchEnc = fhe_encode(matches_vector);
 
         // Decrypt sketchEnc (which is encrypted encoding)
         VectorXi encoded = fhe_decrypt(sketchEnc);

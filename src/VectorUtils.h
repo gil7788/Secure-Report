@@ -16,6 +16,8 @@ public:
     static VectorXi generate_binary_vector(int n, int d);
 
     static std::vector<int> getMatches(VectorXi x);
+
+    static std::string to_string(VectorXi vector);
 };
 
 
