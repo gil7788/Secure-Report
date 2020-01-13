@@ -6,4 +6,3 @@ set(SOURCE_FILES src/*)
 
 add_subdirectory(src)
 add_subdirectory(tests)
-add_subdirectory(cpp_sketch)

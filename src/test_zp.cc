@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
 	std::cout << "Going over an array with " << size << " entries " << "which is " << sparsity << " sparse" << std::endl;
 	std::cout << "using p =  " << p << std::endl;
-	
+
 	FHEDatabase<MyZP> fhe_db = FHEDatabase<MyZP>(size, sparsity);
 	bool is_successful = fhe_db.test_sketch();
 	std::cout << "is_successful: " << is_successful << std::endl;
