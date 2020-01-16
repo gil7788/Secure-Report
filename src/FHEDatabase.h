@@ -41,6 +41,59 @@ public:
             _database()
             {}
 
+    // Test function
+    bool test_sketch() {
+        // Dummy database data
+        VectorXi plain_data = VectorUtils::generate_binary_vector(_n, _d);
+
+        // Dummy query value
+        Number* lookup_value = new Number[1];
+        lookup_value[0] = Number::static_from_int(1);
+
+        // Save matched indices to indicate success/failure
+        std::vector<int> indices = VectorUtils::getMatches(plain_data);
+
+        // Connect to plain database
+        bool database_connected = connect();
+        if(!database_connected) {
+            std::cerr << "Failed to connect to database" << std::endl;
+            return false;
+        }
+
+        // TODO build encrypted database - use encrypt_input method for it
+        bool database_built = build_database_table(plain_data);
+        if(!database_built) {
+            std::cerr << "Failed to build database" << std::endl;
+            return false;
+        }
+
+        // Query database
+        Number* matches_indicators = evaluate_matches_indicators(lookup_value, FHEUtils<Number>::areEqualBinary);
+
+        // Encode encrypted data
+        Number* encoded_encrypted_matches = fhe_encode(matches_indicators);
+
+        // Decrypt encoded_encrypted_matches (which is encrypted encoding)
+        VectorXi encoded_matches = fhe_decrypt(encoded_encrypted_matches);
+
+        // Decode encoded into decoded
+        VectorXi matches = decode(encoded_matches);
+
+        // Print input and result
+        std::cout << "Input indices: " << std::endl;
+        for (auto i = indices.begin(); i != indices.end(); ++i)
+            std::cout << *i << ' ';
+        std::cout << std::endl;
+        std::cout << "Decoded matches: " << matches << std::endl;
+
+        // Test if result is valid
+        std::vector<int> decoded_std(matches.data(), matches.data() + matches.rows() * matches.cols());
+        bool is_successful_decode = std::is_permutation(indices.begin(), indices.end(), decoded_std.begin());
+
+        delete [] encoded_encrypted_matches;
+        return is_successful_decode;
+    }
+
     // Database related functions
     bool connect() {
         /*
@@ -97,34 +150,34 @@ public:
         return decoded;
     }
 
-    VectorXi fhe_decrypt(Number* sketchEnc) {
+    VectorXi fhe_decrypt(Number* encrypted_array) {
         /*
          * Description: decrypt encrypted vector
          * */
         MatrixXi sketch = _encoder.get_sketch();
         VectorXi encoded(sketch.rows());
         for (int i_output = 0; i_output < sketch.rows(); ++i_output) {
-            encoded[i_output] = sketchEnc[i_output].to_int();
+            encoded[i_output] = encrypted_array[i_output].to_int();
         }
 
         return encoded;
     }
 
-    Number* build_match_indices_vector(Number* lookup_value, Number (*isMatch)(Number*, Number*, int)) {
+    Number* evaluate_matches_indicators(Number* lookup_value, Number (*isMatch)(Number*, Number*, int)) {
         /*
          * Description: build matches vector based on database and query operator
          * */
 
-        VectorXi db_vector = _database.table_to_vector(_TABLE_NAME);
+        VectorXi database_row = _database.table_to_vector(_TABLE_NAME);
         Number* result = new Number[_n];
 
-        for (int i = 0; i < db_vector.size(); ++i) {
+        for (int i = 0; i < database_row.size(); ++i) {
             /* TODO
              * 1. Once data is save as encrypted binary array, update isMatch activation
              * */
 
             Number* encrypted_element = new Number[1];
-            encrypted_element[0] = Number::static_from_int(db_vector(i));
+            encrypted_element[0] = Number::static_from_int(database_row(i));
             result[i] = isMatch(lookup_value, encrypted_element, 1);
         }
         return result;
@@ -148,60 +201,6 @@ public:
             }
         }
         return out;
-    }
-
-// Test functions
-public:
-    bool test_sketch() {
-        // Dummy database data
-        VectorXi plain_vector = VectorUtils::generate_binary_vector(_n, _d);
-
-        // Dummy query value
-        Number* query_value = new Number[1];
-        query_value[0] = Number::static_from_int(1);
-
-        // Save matched indices to indicate success/failure
-        std::vector<int> indices = VectorUtils::getMatches(plain_vector);
-
-        // Connect to plain database
-        bool database_connected = connect();
-        if(!database_connected) {
-            std::cerr << "Failed to connect to database" << std::endl;
-            return false;
-        }
-
-        // TODO build encrypted database - use encrypt_input method for it
-        bool database_built = build_database_table(plain_vector);
-        if(!database_built) {
-            std::cerr << "Failed to build database" << std::endl;
-            return false;
-        }
-
-        // Query database
-        Number* matches_vector = build_match_indices_vector(query_value, FHEUtils<Number>::areEqualBinary);
-
-        // Encode encrypted data
-        Number* sketchEnc = fhe_encode(matches_vector);
-
-        // Decrypt sketchEnc (which is encrypted encoding)
-        VectorXi encoded = fhe_decrypt(sketchEnc);
-
-        // Decode encoded into decoded
-        VectorXi decoded = decode(encoded);
-
-        // Print input and result
-        std::cout << "Input indices: " << std::endl;
-        for (auto i = indices.begin(); i != indices.end(); ++i)
-            std::cout << *i << ' ';
-        std::cout << std::endl;
-        std::cout << "Decoded: " << decoded << std::endl;
-
-        // Test if result is valid
-        std::vector<int> decoded_std(decoded.data(), decoded.data() + decoded.rows() * decoded.cols());
-        bool is_successful_decode = std::is_permutation(indices.begin(), indices.end(), decoded_std.begin());
-
-        delete [] sketchEnc;
-        return is_successful_decode;
     }
 };
 
