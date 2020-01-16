@@ -18,8 +18,8 @@ int main(int argc, char**argv) {
     // Default args
 	int p = 0;
 	long r = 1;
-	int L = 0;
-	int size = 256;
+	int L = 7;
+	int size = 128;
 	int sparsity = 3;
 
     // Parse args

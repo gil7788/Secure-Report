@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
     * 2. Consider whether to export parameters to FHEDatabase class or
     * keep FHEDatabase as a generic Database and create Database for each type of FHE library, i.e. Helib, ZP(plain text HElib interface), etc
     * */
-	int size = 256;
-	int sparsity = 6;
+	int size = 128;
+	int sparsity = 3;
 
 	for (int argc_i = 0; argc_i < argc; ++argc_i) {
 		if (memcmp(argv[argc_i], "--s=", 4) == 0)

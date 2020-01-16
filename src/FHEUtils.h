@@ -4,7 +4,6 @@
 #include <Eigen/Dense>
 #include <helib_number.h>
 #include <binomial_tournament.h>
-#include "ctxt_heap.h"
 
 using namespace std;
 using Eigen::VectorXi;
@@ -24,7 +23,7 @@ public:
     static Number areEqualBinary(Number* x, Number* y, int length) {
         MulBinomialTournament<Number> product_heap = MulBinomialTournament<Number>();
         for (int i = 0; i < length; ++i) {
-            Number result_at_i = Number::static_from_int(1) - ((x[i] - y[i]) * (x[i] - y[i]));
+            Number result_at_i = Number::static_from_int(1) - (x[i] - y[i]);
             product_heap.add_to_tournament(result_at_i, 0);
         }
 
