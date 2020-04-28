@@ -5,6 +5,8 @@
 #include "SketchEncoder.h"
 #include "VectorUtils.h"
 #include "FHEUtils.h"
+#include "Config.h"
+#include "InputOutput.h"
 #include <binomial_tournament.h>
 #include <Ctxt.h>
 #include <binaryCompare.h>
@@ -19,7 +21,7 @@
  *  C. Improve design
  *      I. Improve debugger design
  *      II. Add option to create plain/encrypted/both database to debugger
- *      III. Add logger
+ *      III. Add logger - [Done]
  *      IV. Move test flow outside this class
  * */
 
@@ -30,6 +32,7 @@ private:
     int _n;
     PlainDatabase _database;
     const std::string _TABLE_NAME = "table_vector";
+    InputOutput _io;
 public:
     SketchEncoder _encoder;
 
@@ -38,7 +41,8 @@ public:
             _n(db_size),
             _d(sparsity),
             _encoder(db_size, sparsity),
-            _database()
+            _database(),
+            _io(OUTPUT_TO_CONSOLE, OUTPUT_FILE_PATH, ERROR)
             {}
 
     // Test function
@@ -56,14 +60,14 @@ public:
         // Connect to plain database
         bool database_connected = connect();
         if(!database_connected) {
-            std::cerr << "Failed to connect to database" << std::endl;
+            _io.output("Failed to connect to database\n", ERROR);
             return false;
         }
 
         // TODO build encrypted database - use encrypt_input method for it
         bool database_built = build_database_table(plain_data);
         if(!database_built) {
-            std::cerr << "Failed to build database" << std::endl;
+            _io.output("Failed to build database \n", ERROR);
             return false;
         }
 
@@ -80,11 +84,10 @@ public:
         VectorXi matches = decode(encoded_matches);
 
         // Print input and result
-        std::cout << "Input indices: " << std::endl;
+        _io.output("Input indices: \n", DEBUG);
         for (auto i = indices.begin(); i != indices.end(); ++i)
             std::cout << *i << ' ';
-        std::cout << std::endl;
-        std::cout << "Decoded matches: " << matches << std::endl;
+        _io.output("\n Decoded matches: \n", DEBUG);
 
         // Test if result is valid
         std::vector<int> decoded_std(matches.data(), matches.data() + matches.rows() * matches.cols());
@@ -122,10 +125,7 @@ public:
         }
 
         if(!table_constructed) {
-            if(DEBUG_LEVEL >= 2) {
-                string str_vector = VectorUtils::to_string(vector);
-                cerr << str_vector << endl;
-            }
+            _io.output("Failed to construct database. Database values: " + VectorUtils::to_string(vector), ERROR);
             return false;
         }
         return true;
