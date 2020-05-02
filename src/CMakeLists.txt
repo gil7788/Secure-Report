@@ -14,10 +14,5 @@ link_directories(${MYSQLPP_LIBRARY})
 
 file(GLOB SOURCE_FILES *.cpp)
 
-# helib_test
-add_executable(test_helib test_helib.cc SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h FHEUtils.h InputOutput.cpp InputOutput.h Config.h)
-target_link_libraries(test_helib Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp)
-
-# zp_test
-add_executable(test_zp test_zp.cc SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h FHEUtils.h InputOutput.cpp InputOutput.h Config.h)
-target_link_libraries(test_zp Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp)
+add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h FHEUtils.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Database.cpp Database.cpp Database.h)
+target_link_libraries(run Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp)

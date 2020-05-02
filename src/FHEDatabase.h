@@ -42,7 +42,7 @@ public:
             _d(sparsity),
             _encoder(db_size, sparsity),
             _database(),
-            _io(OUTPUT_TO_CONSOLE, OUTPUT_FILE_PATH, ERROR)
+            _io(OUTPUT_TO_CONSOLE, OUTPUT_FILE_PATH, OUTPUT_LEVEL)
             {}
 
     // Test function
@@ -51,8 +51,9 @@ public:
         VectorXi plain_data = VectorUtils::generate_binary_vector(_n, _d);
 
         // Dummy query value
-        Number* lookup_value = new Number[1];
-        lookup_value[0] = Number::static_from_int(1);
+        std::unique_ptr<Number> lookup_value = std::unique_ptr<Number>(new Number(1));
+        int x = (*lookup_value.get()).to_int();
+//        lookup_value = std::make_unique<Number>(Number::static_from_int(1));
 
         // Save matched indices to indicate success/failure
         std::vector<int> indices = VectorUtils::getMatches(plain_data);
@@ -83,6 +84,10 @@ public:
         // Decode encoded into decoded
         VectorXi matches = decode(encoded_matches);
 
+        _io.output("matches size: " + std::to_string(matches.size()) +"\n", DEBUG);
+        for (auto i = 0; i < matches.size(); ++i)
+            _io.output(std::to_string(matches(i)) + " ", DEBUG);
+
         // Print input and result
         _io.output("Input indices: \n", DEBUG);
         for (auto i = indices.begin(); i != indices.end(); ++i)
@@ -93,7 +98,7 @@ public:
         std::vector<int> decoded_std(matches.data(), matches.data() + matches.rows() * matches.cols());
         bool is_successful_decode = std::is_permutation(indices.begin(), indices.end(), decoded_std.begin());
 
-        delete [] encoded_encrypted_matches;
+        delete[] matches_indicators;
         return is_successful_decode;
     }
 
@@ -132,7 +137,7 @@ public:
     }
 
     Number* encrypt_input(VectorXi& plain_input) {
-        Number* encrypted_input = new Number[_n];
+        auto encrypted_input = new Number[_n];
         for (int i = 0; i < plain_input.size(); ++i) {
             encrypted_input[i] = Number::static_from_int(plain_input(i));
         }
@@ -163,21 +168,21 @@ public:
         return encoded;
     }
 
-    Number* evaluate_matches_indicators(Number* lookup_value, Number (*isMatch)(Number*, Number*, int)) {
+    Number* evaluate_matches_indicators(std::unique_ptr<Number>& lookup_value,
+                                        Number (*isMatch)(std::unique_ptr<Number>&, std::unique_ptr<Number>&, int)) {
         /*
          * Description: build matches vector based on database and query operator
          * */
 
         VectorXi database_row = _database.table_to_vector(_TABLE_NAME);
-        Number* result = new Number[_n];
+        auto result = new Number[_n];
 
         for (int i = 0; i < database_row.size(); ++i) {
             /* TODO
              * 1. Once data is save as encrypted binary array, update isMatch activation
              * */
 
-            Number* encrypted_element = new Number[1];
-            encrypted_element[0] = Number::static_from_int(database_row(i));
+            auto encrypted_element = std::unique_ptr<Number>(new Number(database_row(i)));
             result[i] = isMatch(lookup_value, encrypted_element, 1);
         }
         return result;
@@ -188,7 +193,7 @@ public:
         * Description: Encode under full homomorphic encryption
         * */
         MatrixXi sketch = _encoder.get_sketch();
-        Number* out = new Number[sketch.rows()];
+        auto out = new Number[sketch.rows()];
         for (int i_out = 0; i_out < sketch.rows(); ++i_out)
             out[i_out] = Number::static_from_int(0);
 
@@ -203,6 +208,4 @@ public:
         return out;
     }
 };
-
-
 #endif
