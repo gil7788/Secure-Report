@@ -20,9 +20,9 @@
  *  B. Order functions
  *  C. Improve design
  *      I. Improve debugger design
- *      II. Add option to create plain/encrypted/both database to debugger
+ *      II. Add option to create plain/encrypted/both database to debugger - [Done partially] implemented plain and encrypted
  *      III. Add logger - [Done]
- *      IV. Move test flow outside this class
+ *      IV. Move test flow outside this class - [Done]
  * */
 
 template<class Number>
@@ -37,70 +37,13 @@ public:
     SketchEncoder _encoder;
 
 public:
-    FHEDatabase(int db_size, int sparsity):
+    FHEDatabase(int db_size, int sparsity, InputOutput& io):
             _n(db_size),
             _d(sparsity),
             _encoder(db_size, sparsity),
             _database(),
-            _io(OUTPUT_TO_CONSOLE, OUTPUT_FILE_PATH, OUTPUT_LEVEL)
+            _io(io)
             {}
-
-    // Test function
-    bool test_sketch() {
-        // Dummy database data
-        VectorXi plain_data = VectorUtils::generate_binary_vector(_n, _d);
-
-        // Dummy query value
-        std::unique_ptr<Number> lookup_value = std::unique_ptr<Number>(new Number(1));
-        int x = (*lookup_value.get()).to_int();
-//        lookup_value = std::make_unique<Number>(Number::static_from_int(1));
-
-        // Save matched indices to indicate success/failure
-        std::vector<int> indices = VectorUtils::getMatches(plain_data);
-
-        // Connect to plain database
-        bool database_connected = connect();
-        if(!database_connected) {
-            _io.output("Failed to connect to database\n", ERROR);
-            return false;
-        }
-
-        // TODO build encrypted database - use encrypt_input method for it
-        bool database_built = build_database_table(plain_data);
-        if(!database_built) {
-            _io.output("Failed to build database \n", ERROR);
-            return false;
-        }
-
-        // Query database
-        Number* matches_indicators = evaluate_matches_indicators(lookup_value, FHEUtils<Number>::areEqualBinary);
-
-        // Encode encrypted data
-        Number* encoded_encrypted_matches = fhe_encode(matches_indicators);
-
-        // Decrypt encoded_encrypted_matches (which is encrypted encoding)
-        VectorXi encoded_matches = fhe_decrypt(encoded_encrypted_matches);
-
-        // Decode encoded into decoded
-        VectorXi matches = decode(encoded_matches);
-
-        _io.output("matches size: " + std::to_string(matches.size()) +"\n", DEBUG);
-        for (auto i = 0; i < matches.size(); ++i)
-            _io.output(std::to_string(matches(i)) + " ", DEBUG);
-
-        // Print input and result
-        _io.output("Input indices: \n", DEBUG);
-        for (auto i = indices.begin(); i != indices.end(); ++i)
-            std::cout << *i << ' ';
-        _io.output("\n Decoded matches: \n", DEBUG);
-
-        // Test if result is valid
-        std::vector<int> decoded_std(matches.data(), matches.data() + matches.rows() * matches.cols());
-        bool is_successful_decode = std::is_permutation(indices.begin(), indices.end(), decoded_std.begin());
-
-        delete[] matches_indicators;
-        return is_successful_decode;
-    }
 
     // Database related functions
     bool connect() {
@@ -130,7 +73,7 @@ public:
         }
 
         if(!table_constructed) {
-            _io.output("Failed to construct database. Database values: " + VectorUtils::to_string(vector), ERROR);
+            _io.output("Failed to construct database. Database values: " + VectorUtils::to_string(vector), constants::OUTPUT_LEVELS::ERROR);
             return false;
         }
         return true;
@@ -155,7 +98,7 @@ public:
         return decoded;
     }
 
-    VectorXi fhe_decrypt(Number* encrypted_array) {
+    VectorXi fhe_decrypt(std::unique_ptr<Number[]>& encrypted_array) {
         /*
          * Description: decrypt encrypted vector
          * */
@@ -188,14 +131,15 @@ public:
         return result;
     }
 
-    inline Number* fhe_encode(Number* encrypted_matches_indicator) {
+    inline std::unique_ptr<Number[]> fhe_encode(std::unique_ptr<Number[]>& encrypted_matches_indicator) {
         /*
         * Description: Encode under full homomorphic encryption
         * */
         MatrixXi sketch = _encoder.get_sketch();
-        auto out = new Number[sketch.rows()];
+        std::unique_ptr<Number[]> out(new Number[sketch.rows()]);
+
         for (int i_out = 0; i_out < sketch.rows(); ++i_out)
-            out[i_out] = Number::static_from_int(0);
+            out.get()[i_out] = Number::static_from_int(0);
 
         for (int i_input = 0; i_input < _n; ++i_input) {
             Number x = encrypted_matches_indicator[i_input];

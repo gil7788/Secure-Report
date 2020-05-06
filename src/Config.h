@@ -7,16 +7,11 @@
 
 #include <string>
 
-
-static const bool OUTPUT_TO_CONSOLE = true;
-static const std::string OUTPUT_FILE_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/output_file.txt";
-enum OUTPUT_LEVELS {ERROR, REGULAR, LOG, DEBUG};
-static const int OUTPUT_LEVEL = OUTPUT_LEVELS::REGULAR;
-
-
-class Config {
-public:
-
-};
+namespace constants {
+    const bool OUTPUT_TO_CONSOLE = true;
+    const std::string OUTPUT_FILE_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/output_file.txt";
+    enum OUTPUT_LEVELS {ERROR, REGULAR, LOG, DEBUG};
+    const int OUTPUT_LEVEL = OUTPUT_LEVELS::REGULAR;
+}
 
 #endif //SECURE_REPORT_CONFIG_H

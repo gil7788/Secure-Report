@@ -7,13 +7,12 @@
 #include "InputOutput.h"
 
 
-InputOutput::InputOutput(bool output_to_console, const std::string output_file_path, int output_level):
-        _output_to_console(output_to_console),
-        _output_file_path(output_file_path),
-        _output_level(output_level){
-    _output_to_file = (not output_file_path.empty());
+InputOutput::InputOutput(bool output_to_console, const std::string& output_file_path, int output_level):
+        _output_to_console{output_to_console},
+        _output_file_path{output_file_path},
+        _output_level{output_level}{
+    _output_to_file = {not output_file_path.empty()};
 }
-
 
 bool InputOutput::output(const std::string& message, int output_level){
     if(not at_output_level(output_level)) {
@@ -33,7 +32,6 @@ bool InputOutput::output(const std::string& message, int output_level){
 
     return output_successful;
 }
-
 
 bool InputOutput::create_or_append_to_file(const std::string& message, const std::string& file_path) {
     std::ofstream outfile;
