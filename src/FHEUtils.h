@@ -20,7 +20,7 @@ public:
      *  5. Greater
      * */
 
-    static Number areEqualBinary(std::unique_ptr<Number>& x, std::unique_ptr<Number>& y, int length) {
+    static Number areEqualBinary(Number& x, Number& y, int length) {
         MulBinomialTournament<Number> product_heap = MulBinomialTournament<Number>();
 
 //         TODO: Implement comparison for variables with costume length, rather single digit numbers
@@ -30,8 +30,8 @@ public:
 //        Number result = product_heap.unite_all(MulBinomialTournament<Number>::mul);
 //    }
 
-        Number result = Number::static_from_int(1) - (*x.get() - *y.get());
-        Number z = x.get() - y.get();
+        Number result = Number::static_from_int(1) - (x - y);
+        Number z = x - y;
         return result;
     }
 

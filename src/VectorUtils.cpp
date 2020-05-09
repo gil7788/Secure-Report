@@ -65,6 +65,35 @@ VectorXi VectorUtils::generate_binary_vector(int n, int d) {
     return result;
 }
 
+std::vector<int> VectorUtils::generate_binary_std_vector(int n, int d) {
+    /*
+     * Generate binary vector of size n and hamming weight d
+     * */
+
+    std::vector<int> result(n, 0);
+//    result = VectorXi::Zero(p);
+
+    //Get a random position in the 1xp matrix from 0-p
+    for (int i = 0; i < d; ++i)
+    {
+        // Define random number generator
+        std::random_device rd;
+        std::mt19937 mt(rd());
+        std::uniform_int_distribution<int> dis(0, n-1);
+
+        // Generate values until new unique index is generated
+        int randPos = dis(mt) % n;
+        while (result[randPos] == 1)
+            randPos = dis(mt) % n;
+
+        //Change the random position from a 0 to a 1
+        result[randPos] = 1;
+    }
+
+    return result;
+}
+
+
 std::vector<int> VectorUtils::getMatches(VectorXi x) {
     /*
      * Helper function for binary vectors, returns "True" (1) indices
@@ -78,6 +107,20 @@ std::vector<int> VectorUtils::getMatches(VectorXi x) {
     return indices;
 }
 
+std::vector<int> VectorUtils::get_matches_std_vector(std::vector<int> binary_vector) {
+    /*
+     * Helper function for binary vectors, returns "True" (1) indices
+     * */
+    std::vector<int> indices;
+    for (int i = 0; i < binary_vector.size(); ++i) {
+        if(binary_vector[i] == 1) {
+            indices.push_back(i);
+        }
+    }
+
+    return indices;
+}
+
 std::string VectorUtils::to_string(VectorXi vector) {
     /*
      * VectorXi to std::string converter
@@ -87,4 +130,18 @@ std::string VectorUtils::to_string(VectorXi vector) {
         result += std::to_string(vector(i)) + "\n";
     }
     return result;
+}
+
+std::string VectorUtils::std_vector_to_string(std::vector<int>& vector) {
+    std::stringstream string_stream;
+    for(auto& elem: vector) {
+        string_stream << elem << " ";
+    }
+
+    return string_stream.str();
+}
+
+std::vector<int> VectorUtils::eigen_vector_to_std_vector(VectorXi eigen_vector) {
+    std::vector<int> std_vector(eigen_vector.data(), eigen_vector.data() + eigen_vector.size());
+    return std_vector;
 }

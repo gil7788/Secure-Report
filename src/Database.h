@@ -13,6 +13,7 @@ typedef ZP<SIMD_FACTOR> MyZP;
 #include "FHEDatabase.h"
 #include "FHEDatabaseConfig.h"
 #include "FHEUtils.h"
+#include "Client.h"
 
 template <typename DataType>
 class Database {
@@ -42,7 +43,7 @@ public:
     }
 
 
-    bool upload(VectorXi data) {
+    bool upload(std::vector<int>& data) {
         connect();
         if(not _is_connected){
             _io.output("Failed to connect to database \n", constants::OUTPUT_LEVELS::ERROR);
@@ -56,25 +57,15 @@ public:
         }
     }
 
-    std::unique_ptr<DataType[]> evaluate_matches_indices(std::unique_ptr<DataType>& lookup_value,
-                                                    DataType (*isMatch)(std::unique_ptr<DataType>&,
-                                                                        std::unique_ptr<DataType>&, int)) {
+    std::vector<DataType> send_matches_indices_to_client(EncryptedSecureReportQuery<DataType>& encrypted_query,
+                                                         TrustedThirdParty& trusted_third_party) {
         // Query database
-        std::unique_ptr<DataType[]> matches_indicators(_fhe_database.evaluate_matches_indicators(lookup_value, isMatch));
+        std::vector<DataType> matches_indicators {_fhe_database.evaluate_matches_indicators(encrypted_query)};
 
         // Encode encrypted data
-        auto encoded_encrypted_matches(_fhe_database.fhe_encode(matches_indicators));
+        std::vector<DataType> encoded_encrypted_matches {_fhe_database.fhe_encode(matches_indicators, trusted_third_party)};
 
         return encoded_encrypted_matches;
-    }
-
-    VectorXi client_retrieve_matches_indices(std::unique_ptr<DataType[]>& encoded_encrypted_matches) {
-        VectorXi encoded_matches = _fhe_database.fhe_decrypt(encoded_encrypted_matches);
-
-        // Decode encoded into decoded
-        VectorXi matches = _fhe_database.decode(encoded_matches);
-
-        return matches;
     }
 
     void initialize_data_type() {

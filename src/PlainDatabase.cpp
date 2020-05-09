@@ -29,7 +29,7 @@ bool PlainDatabase::insert(string table_name, int value) {
     return executed_successfully;
 }
 
-bool PlainDatabase::fill_table(string &table_name, VectorXi vector) {
+bool PlainDatabase::fill_table(string &table_name, std::vector<int>& vector) {
     /*
     * Description: Fill table_name table with vector
     * */
@@ -38,7 +38,7 @@ bool PlainDatabase::fill_table(string &table_name, VectorXi vector) {
     * 1. Expand to costume class table structure
     * */
     for (int i = 0; i < vector.size(); ++i) {
-        bool inserted_successfully = insert(table_name, vector(i));
+        bool inserted_successfully = insert(table_name, vector[i]);
         if(!inserted_successfully) {
             cerr << "Failed to initiate table, table name: " << table_name << "\n" << endl;
             return false;
@@ -47,7 +47,7 @@ bool PlainDatabase::fill_table(string &table_name, VectorXi vector) {
     return true;
 }
 
-bool PlainDatabase::initiate_table(string table_name, VectorXi& init_vector) {
+bool PlainDatabase::initiate_table(string table_name, std::vector<int>& init_vector) {
     /*
    * Description: Create table_name table and initiate it with VectorXi
    * */
@@ -110,7 +110,7 @@ bool PlainDatabase::truncate_table(string &table_name) {
     return executed_successfully;
 }
 
-bool PlainDatabase::update_table(string table_name, VectorXi& vector) {
+bool PlainDatabase::update_table(string table_name, std::vector<int>& vector) {
     /*
     * Description: Rewrite/Create new table with table_name
     * */

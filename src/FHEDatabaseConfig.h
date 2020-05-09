@@ -9,7 +9,17 @@
 #include "Config.h"
 #include "InputOutput.h"
 
-enum class DATA_TYPES {PLAIN, ENCRYPTED, BOTH};
+#include "PlainDatabase.h"
+#include "SketchEncoder.h"
+#include "VectorUtils.h"
+#include "FHEUtils.h"
+#include "Config.h"
+#include "InputOutput.h"
+#include <binomial_tournament.h>
+#include <Ctxt.h>
+#include <binaryCompare.h>
+
+enum class DATA_TYPES {PLAIN, ENCRYPTED, MIXED};
 
 class DatabaseDataType {
     public:

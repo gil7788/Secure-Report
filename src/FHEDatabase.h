@@ -7,6 +7,8 @@
 #include "FHEUtils.h"
 #include "Config.h"
 #include "InputOutput.h"
+#include "Client.h"
+#include "TrustedThirdParty.h"
 #include <binomial_tournament.h>
 #include <Ctxt.h>
 #include <binaryCompare.h>
@@ -33,14 +35,11 @@ private:
     PlainDatabase _database;
     const std::string _TABLE_NAME = "table_vector";
     InputOutput _io;
-public:
-    SketchEncoder _encoder;
 
 public:
     FHEDatabase(int db_size, int sparsity, InputOutput& io):
             _n(db_size),
             _d(sparsity),
-            _encoder(db_size, sparsity),
             _database(),
             _io(io)
             {}
@@ -54,7 +53,7 @@ public:
         return database_connected;
     }
 
-    bool build_database_table(VectorXi vector) {
+    bool build_database_table(std::vector<int>& vector) {
         /*
          * Description: Build database table with unique prime key and value columns
          * */
@@ -73,73 +72,39 @@ public:
         }
 
         if(!table_constructed) {
-            _io.output("Failed to construct database. Database values: " + VectorUtils::to_string(vector), constants::OUTPUT_LEVELS::ERROR);
+            _io.output("Failed to construct database. Database values: " + VectorUtils::std_vector_to_string(vector), constants::OUTPUT_LEVELS::ERROR);
             return false;
         }
         return true;
     }
 
-    Number* encrypt_input(VectorXi& plain_input) {
-        auto encrypted_input = new Number[_n];
-        for (int i = 0; i < plain_input.size(); ++i) {
-            encrypted_input[i] = Number::static_from_int(plain_input(i));
-        }
-        return encrypted_input;
-    }
-
-    VectorXi decode(VectorXi encoded) {
-        /*
-         * Description: Decode plain vector
-         * */
-        for (int i = 0; i < encoded.size(); ++i) {
-            (encoded[i] > 0) ? encoded[i] = 1 : encoded[i] = 0;
-        }
-        VectorXi decoded = _encoder.decode(encoded);
-        return decoded;
-    }
-
-    VectorXi fhe_decrypt(std::unique_ptr<Number[]>& encrypted_array) {
-        /*
-         * Description: decrypt encrypted vector
-         * */
-        MatrixXi sketch = _encoder.get_sketch();
-        VectorXi encoded(sketch.rows());
-        for (int i_output = 0; i_output < sketch.rows(); ++i_output) {
-            encoded[i_output] = encrypted_array[i_output].to_int();
-        }
-
-        return encoded;
-    }
-
-    Number* evaluate_matches_indicators(std::unique_ptr<Number>& lookup_value,
-                                        Number (*isMatch)(std::unique_ptr<Number>&, std::unique_ptr<Number>&, int)) {
+    std::vector<Number> evaluate_matches_indicators(EncryptedSecureReportQuery<Number>& encrypted_query) {
         /*
          * Description: build matches vector based on database and query operator
          * */
 
         VectorXi database_row = _database.table_to_vector(_TABLE_NAME);
-        auto result = new Number[_n];
+
+        std::vector<Number> result(_n);
 
         for (int i = 0; i < database_row.size(); ++i) {
             /* TODO
              * 1. Once data is save as encrypted binary array, update isMatch activation
              * */
 
-            auto encrypted_element = std::unique_ptr<Number>(new Number(database_row(i)));
-            result[i] = isMatch(lookup_value, encrypted_element, 1);
+            Number encrypted_element{database_row(i)};
+            result[i] = encrypted_query._isMatch(encrypted_query._encrypted_lookup_value, encrypted_element, 1);
         }
         return result;
     }
 
-    inline std::unique_ptr<Number[]> fhe_encode(std::unique_ptr<Number[]>& encrypted_matches_indicator) {
+    inline std::vector<Number> fhe_encode(std::vector<Number>& encrypted_matches_indicator,
+                                          TrustedThirdParty& trusted_third_party) {
         /*
         * Description: Encode under full homomorphic encryption
         * */
-        MatrixXi sketch = _encoder.get_sketch();
-        std::unique_ptr<Number[]> out(new Number[sketch.rows()]);
-
-        for (int i_out = 0; i_out < sketch.rows(); ++i_out)
-            out.get()[i_out] = Number::static_from_int(0);
+        MatrixXi sketch = get_sketch(trusted_third_party);
+        std::vector<Number> out(sketch.rows(), Number::static_from_int(0));
 
         for (int i_input = 0; i_input < _n; ++i_input) {
             Number x = encrypted_matches_indicator[i_input];
@@ -150,6 +115,10 @@ public:
             }
         }
         return out;
+    }
+
+    MatrixXi get_sketch(TrustedThirdParty& trusted_third_party) {
+        return trusted_third_party._encoder.get_sketch();
     }
 };
 #endif
