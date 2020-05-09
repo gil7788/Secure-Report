@@ -16,7 +16,7 @@ typedef ZP<SIMD_FACTOR> MyZP;
 #include "Client.h"
 
 template <typename DataType>
-class Database {
+class Server {
 public:
     int _size;
     int _sparsity;
@@ -25,28 +25,28 @@ public:
     InputOutput _io = InputOutput(constants::OUTPUT_TO_CONSOLE, constants::OUTPUT_FILE_PATH, constants::OUTPUT_LEVEL);
     bool _is_connected = false;
 
-    Database(int size, int sparsity, DatabaseDataType& data_type):
+    Server(int size, int sparsity, DatabaseDataType& data_type):
             _size{size},
             _sparsity{sparsity},
             _fhe_database(_size, _sparsity, _io),
             _data_type(data_type){}
 
-    void connect() {
+    void connect_database() {
         if(_is_connected)
             return;
 
         // Connect to plain database
         _is_connected = _fhe_database.connect();
         if(!_is_connected) {
-            _io.output("Failed to connect to database\n", constants::OUTPUT_LEVELS::ERROR);
+            _io.output("Failed to connect_database to database\n", constants::OUTPUT_LEVELS::ERROR);
         }
     }
 
 
     bool upload(std::vector<int>& data) {
-        connect();
+        connect_database();
         if(not _is_connected){
-            _io.output("Failed to connect to database \n", constants::OUTPUT_LEVELS::ERROR);
+            _io.output("Failed to connect_database to database \n", constants::OUTPUT_LEVELS::ERROR);
         }
 
         // TODO build encrypted database - use encrypt_input method for it
@@ -68,23 +68,23 @@ public:
         return encoded_encrypted_matches;
     }
 
-    void initialize_data_type() {
+    void initialize() {
         _data_type.initialize_data_type();
     };
 };
 
 
-class RegularDatabase: public Database<MyZP> {
+class PlainServer: public Server<MyZP> {
 public:
 
-    RegularDatabase(int size, int sparsity, PlainDataType& plain_data_type);
+    PlainServer(int size, int sparsity, PlainDataType& plain_data_type);
 
 };
 
-class EncryptedDatabase: public Database<HelibNumber> {
+class EncryptedServer: public Server<HelibNumber> {
 public:
 
-    EncryptedDatabase(int size, int sparsity, EncryptedDataType& data_type);
+    EncryptedServer(int size, int sparsity, EncryptedDataType& data_type);
 
 };
 #endif //SECURE_REPORT_DATABASE_H

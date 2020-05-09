@@ -8,15 +8,14 @@
 #include <eq.h>
 
 #include "FHEDatabase.h"
-#include "FHEDatabaseConfig.h"
-#include "Database.h"
+#include "Server.h"
 
 
 #define SIMD_FACTOR 1
 typedef ZP<SIMD_FACTOR> MyZP;
 
 template <typename DataType>
-void test_client(Client<DataType>& client, Database<DataType>& server, TrustedThirdParty& trusted_third_party) {
+void test_client(Client<DataType>& client, Server<DataType>& server, TrustedThirdParty& trusted_third_party) {
     // Client
     client.initialize();
 
@@ -27,7 +26,7 @@ void test_client(Client<DataType>& client, Database<DataType>& server, TrustedTh
     auto encrypted_data = client.upload_data_to_server(plain_data);
 
     // Server
-    server.initialize_data_type();
+    server.initialize();
     server.upload(plain_data);
 
     // Client
@@ -54,14 +53,14 @@ void test_client(Client<DataType>& client, Database<DataType>& server, TrustedTh
 void test_plain_client(int database_size, int sparsity, PlainDataType plain_data_type) {
     TrustedThirdParty trusted_third_party{database_size, sparsity};
     Client<MyZP> client(database_size, sparsity, plain_data_type);
-    auto database = RegularDatabase(database_size, sparsity, plain_data_type);
+    auto database = PlainServer(database_size, sparsity, plain_data_type);
     test_client(client, database, trusted_third_party);
 }
 
 void test_encrypted_client(int database_size, int sparsity, EncryptedDataType encrypted_data_type) {
     TrustedThirdParty trusted_third_party{database_size, sparsity};
     Client<HelibNumber> client(database_size, sparsity, encrypted_data_type);
-    auto database = EncryptedDatabase(database_size, sparsity, encrypted_data_type);
+    auto database = EncryptedServer(database_size, sparsity, encrypted_data_type);
     test_client(client, database, trusted_third_party);
 }
 

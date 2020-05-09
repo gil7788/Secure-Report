@@ -44,7 +44,7 @@ public:
             _io(io)
             {}
 
-    // Database related functions
+    // Server related functions
     bool connect() {
         /*
          * Description: Connect to database
@@ -72,7 +72,7 @@ public:
         }
 
         if(!table_constructed) {
-            _io.output("Failed to construct database. Database values: " + VectorUtils::std_vector_to_string(vector), constants::OUTPUT_LEVELS::ERROR);
+            _io.output("Failed to construct database. Server values: " + VectorUtils::std_vector_to_string(vector), constants::OUTPUT_LEVELS::ERROR);
             return false;
         }
         return true;
