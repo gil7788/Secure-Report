@@ -10,6 +10,7 @@
 #include "FHEDatabase.h"
 #include "Server.h"
 
+#include "FileUtils.h"
 
 #define SIMD_FACTOR 1
 typedef ZP<SIMD_FACTOR> MyZP;
@@ -57,7 +58,7 @@ void test_plain_client(int database_size, int sparsity, PlainDataType plain_data
     test_client(client, database, trusted_third_party);
 }
 
-void test_encrypted_client(int database_size, int sparsity, EncryptedDataType encrypted_data_type) {
+void test_encrypted_client(int database_size, int sparsity, EncryptedDataTypeFromParameters encrypted_data_type) {
     TrustedThirdParty trusted_third_party{database_size, sparsity};
     Client<HelibNumber> client(database_size, sparsity, encrypted_data_type);
     auto database = EncryptedServer(database_size, sparsity, encrypted_data_type);
@@ -80,9 +81,10 @@ int main(int argc, char** argv) {
     long chosen_m = 0;
     Vec<long> gens;
     Vec<long> ords;
+    const std::string key_file_path = "../../key";
 
     PlainDataType plain_data_type(sparsity);
-    EncryptedDataType encrypted_data_type(size, s, R, r, d, c, k, L, chosen_m, gens, ords);
+    EncryptedDataTypeFromParameters encrypted_data_type(size, s, R, r, d, c, k, L, chosen_m, gens, ords, key_file_path);
 
     test_plain_client(size, sparsity, plain_data_type);
     test_encrypted_client(size, sparsity, encrypted_data_type);

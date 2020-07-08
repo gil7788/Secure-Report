@@ -14,5 +14,5 @@ PlainServer::PlainServer(int size, int sparsity, PlainDataType& plain_data_type)
         Server<MyZP>(size, sparsity, plain_data_type ){}
 
 // Encrypted database
-EncryptedServer::EncryptedServer(int size, int sparsity, EncryptedDataType& encrypted_data_type):
+EncryptedServer::EncryptedServer(int size, int sparsity, EncryptedDataTypeFromParameters& encrypted_data_type):
         Server<HelibNumber>(size, sparsity, encrypted_data_type){}

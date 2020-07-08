@@ -26,7 +26,11 @@ class DatabaseDataType {
 
     virtual DATA_TYPES get_data_type() = 0;
 
-    virtual void initialize_data_type() = 0;
+    virtual void initialize() = 0;
+
+    virtual void write_key_to_file(const std::string& key_file_path) = 0;
+
+    virtual void read_key_from_file(const std::string& key_file_path) = 0;
 
     virtual ~DatabaseDataType() {};
 };
@@ -40,11 +44,14 @@ public:
 
     DATA_TYPES get_data_type() override;
 
-    void initialize_data_type() override;
+    virtual void write_key_to_file(const std::string& key_file_path) override;
+
+    virtual void read_key_from_file(const std::string& key_file_path) override;
+
+    void initialize() override;
 };
 
-class EncryptedDataType: public DatabaseDataType {
-public:
+class EncryptedDataTypeFromParameters: public DatabaseDataType {
     int _database_size;
     long _s;
     long _R;
@@ -57,12 +64,19 @@ public:
     Vec<long>& _gens;
     Vec<long>& _ords;
     HelibKeys _keys;
+    const std::string& _key_file_path;
 
-    EncryptedDataType(int database_size, long s, long R, long r,
-                      long d, long c, long k, int L, long chosen_m, Vec<long>& gens, Vec<long>& ords);
+public:
+    EncryptedDataTypeFromParameters(int database_size, long s, long R, long r,
+                                    long d, long c, long k, int L, long chosen_m, Vec<long>& gens, Vec<long>& ords,
+                                    const std::string& key_file_path);
 
     DATA_TYPES get_data_type() override;
 
-    void initialize_data_type() override;
+    void initialize() override;
+
+    void write_key_to_file(const std::string& key_file_path) override;
+
+    void read_key_from_file(const std::string& key_file_path) override;
 };
 #endif //SECURE_REPORT_FHEDATABASECONFIG_H

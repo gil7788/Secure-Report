@@ -9,8 +9,11 @@ bool PlainDatabase::connect() {
         _connection = mysqlpp::Connection(_DB_NAME.c_str(), _LOCALHOST.c_str(), _USERNAME.c_str(), _PASSWORD.c_str());
         return true;
     }
-    catch(mysqlpp::Exception& e) {
-        cerr << "Failed to connect to database\n" << endl;
+    catch(mysqlpp::ConnectionFailed& e) {
+        cerr << "Failed to connect to database: " << _DB_NAME.c_str()
+        << "\n Host: " << _LOCALHOST.c_str()
+        << "\n Username: " << _USERNAME.c_str();
+
         throw e.what();
     }
 }

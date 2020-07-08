@@ -12,11 +12,13 @@
 #define SIMD_FACTOR 1
 typedef ZP<SIMD_FACTOR> MyZP;
 
+namespace fs = std::experimental::filesystem;
+
 // Data type constructors
 PlainDataType::PlainDataType(int database_matches_sparsity):
         _database_matches_sparsity{database_matches_sparsity} {}
 
-void PlainDataType::initialize_data_type() {
+void PlainDataType::initialize() {
     int prime = Primes::find_prime_bigger_than(_database_matches_sparsity);
     MyZP::set_global_p(prime);
 }
@@ -25,8 +27,14 @@ DATA_TYPES PlainDataType::get_data_type() {
     return DATA_TYPES::PLAIN;
 }
 
-EncryptedDataType::EncryptedDataType(int database_size, long s, long R, long r,
-                  long d, long c, long k, int L, long chosen_m, Vec<long>& gens, Vec<long>& ords):
+void PlainDataType::write_key_to_file(const std::string& key_file_path) {}
+
+void PlainDataType::read_key_from_file(const std::string& key_file_path) {}
+
+// EncryptedDataTypeFromParameters
+EncryptedDataTypeFromParameters::EncryptedDataTypeFromParameters(int database_size, long s, long R, long r,
+                  long d, long c, long k, int L, long chosen_m, Vec<long>& gens, Vec<long>& ords,
+                  const std::string& key_file_path):
         _database_size(database_size),
         _s(s),
         _R(R),
@@ -37,15 +45,33 @@ EncryptedDataType::EncryptedDataType(int database_size, long s, long R, long r,
         _L(L),
         _chosen_m(chosen_m),
         _gens(gens),
-        _ords(ords){}
+        _ords(ords),
+        _key_file_path{key_file_path}{}
 
-DATA_TYPES EncryptedDataType::get_data_type() {
+DATA_TYPES EncryptedDataTypeFromParameters::get_data_type() {
     return DATA_TYPES::ENCRYPTED;
 }
 
-void EncryptedDataType::initialize_data_type() {
-    int prime = Primes::find_prime_bigger_than(_database_size);
+void EncryptedDataTypeFromParameters::initialize() {
+    if(fs::is_regular_file(_key_file_path)) {
+        read_key_from_file(_key_file_path);
+        HelibNumber::set_global_keys(&_keys);
+    }
+    else {
+        int prime = Primes::find_prime_bigger_than(_database_size);
 
-    _keys.initKeys(_s, _R, prime, _r, _d, _c, _k, 64, _L, _chosen_m, _gens, _ords);
-    HelibNumber::set_global_keys(&_keys);
+        _keys.initKeys(_s, _R, prime, _r, _d, _c, _k, 64, _L, _chosen_m, _gens, _ords);
+        HelibNumber::set_global_keys(&_keys);
+        write_key_to_file(_key_file_path);
+    }
+}
+
+void EncryptedDataTypeFromParameters::write_key_to_file(const std::string& key_file_path) {
+    std::ofstream key_file_path_stream {key_file_path};
+    _keys.write_to_file(key_file_path_stream);
+}
+
+void EncryptedDataTypeFromParameters::read_key_from_file(const std::string &key_file_path) {
+    std::ifstream key_file_path_stream {key_file_path};
+    _keys.read_from_file(key_file_path_stream);
 }

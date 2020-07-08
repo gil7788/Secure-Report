@@ -12,6 +12,7 @@ using Eigen::VectorXi;
 #include <bits/unique_ptr.h>
 #include "FHEDatabaseConfig.h"
 #include "TrustedThirdParty.h"
+#include "FileUtils.h"
 
 template <typename DataType>
 class EncryptedSecureReportQuery {
@@ -58,9 +59,8 @@ public:
             _data_type(data_type){}
 
     bool initialize() {
-        _data_type.initialize_data_type();
+        _data_type.initialize();
     }
-
 
     std::vector<DataType> upload_data_to_server(std::vector<int>& data) {
         // Encrypt
@@ -71,10 +71,9 @@ public:
     }
 
     std::vector<DataType> encrypt_data(std::vector<int>& plain_input) {
-        std::vector<DataType> encrypted_input(_datase_size);
-        for (int i = 0; i < plain_input.size(); ++i) {
-            encrypted_input[i] = DataType::static_from_int(plain_input[i]);
-        }
+        std::vector<DataType> encrypted_input;
+        for_each(plain_input.begin(), plain_input.end(),
+                 [&](int entry){encrypted_input.push_back(DataType::static_from_int(entry)); });
         return encrypted_input;
     }
 
@@ -93,6 +92,7 @@ public:
         return matches;
     }
 
+private:
     std::vector<int> decrypt_encrypted_encoded_matches(std::vector<DataType>& encrypted_encoded_matches) {
         std::vector<int> encoded_matches(encrypted_encoded_matches.size());
         for (int i_output = 0; i_output < encrypted_encoded_matches.size(); ++i_output) {

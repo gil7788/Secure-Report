@@ -1,4 +1,4 @@
-//
+    //
 // Created by gil on 29/04/20.
 //
 
@@ -69,7 +69,7 @@ public:
     }
 
     void initialize() {
-        _data_type.initialize_data_type();
+        _data_type.initialize();
     };
 };
 
@@ -84,7 +84,7 @@ public:
 class EncryptedServer: public Server<HelibNumber> {
 public:
 
-    EncryptedServer(int size, int sparsity, EncryptedDataType& data_type);
+    EncryptedServer(int size, int sparsity, EncryptedDataTypeFromParameters& data_type);
 
 };
 #endif //SECURE_REPORT_DATABASE_H
