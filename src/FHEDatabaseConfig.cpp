@@ -14,13 +14,9 @@ typedef ZP<SIMD_FACTOR> MyZP;
 
 namespace fs = std::experimental::filesystem;
 
-// Data type constructors
-PlainDataType::PlainDataType(int database_matches_sparsity):
-        _database_matches_sparsity{database_matches_sparsity} {}
-
 void PlainDataType::initialize() {
-    int prime = Primes::find_prime_bigger_than(_database_matches_sparsity);
-    MyZP::set_global_p(prime);
+    int modulu = 2;
+    MyZP::set_global_p(modulu);
 }
 
 DATA_TYPES PlainDataType::get_data_type() {
@@ -58,9 +54,9 @@ void EncryptedDataTypeFromParameters::initialize() {
         HelibNumber::set_global_keys(&_keys);
     }
     else {
-        int prime = Primes::find_prime_bigger_than(_database_size);
+        int modulo = 2;
 
-        _keys.initKeys(_s, _R, prime, _r, _d, _c, _k, 64, _L, _chosen_m, _gens, _ords);
+        _keys.initKeys(_s, _R, modulo, _r, _d, _c, _k, 64, _L, _chosen_m, _gens, _ords);
         HelibNumber::set_global_keys(&_keys);
         write_key_to_file(_key_file_path);
     }

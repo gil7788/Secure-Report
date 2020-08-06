@@ -42,19 +42,18 @@ public:
         }
     }
 
-
-    bool upload(std::vector<int>& data) {
+    bool upload(std::vector<DataType>& data) {
         connect_database();
         if(not _is_connected){
             _io.output("Failed to connect_database to database \n", constants::OUTPUT_LEVELS::ERROR);
         }
 
-        // TODO build encrypted database - use encrypt_input method for it
         bool database_built = _fhe_database.build_database_table(data);
         if(!database_built) {
             _io.output("Failed to build database \n", constants::OUTPUT_LEVELS::ERROR);
             return false;
         }
+        return database_built;
     }
 
     std::vector<DataType> send_matches_indices_to_client(EncryptedSecureReportQuery<DataType>& encrypted_query,

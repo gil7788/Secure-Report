@@ -38,9 +38,6 @@ class DatabaseDataType {
 class PlainDataType: public DatabaseDataType {
 public:
     const DATA_TYPES _data_type = DATA_TYPES ::PLAIN;
-    int _database_matches_sparsity;
-
-    explicit PlainDataType(int database_matches_sparsity);
 
     DATA_TYPES get_data_type() override;
 

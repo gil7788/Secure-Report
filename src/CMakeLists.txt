@@ -27,5 +27,9 @@ link_directories(${MYSQLPP_LIBRARY})
 
 file(GLOB SOURCE_FILES *.cpp)
 
-add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.cpp Server.cpp Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp FileUtils.h)
+add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.cpp Server.cpp Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp FileUtils.h PlainFileSystemDatabase.cpp PlainFileSystemDatabase.h test_read_write_encrypted_number.cpp)
+#add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.cpp Server.cpp Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp )
 target_link_libraries(run Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)
+
+#add_executable(test_read_write_encrypted_number test_read_write_encrypted_number.cpp FHEUtils.h InputOutput.cpp InputOutput.h)
+#target_link_libraries(test_read_write_encrypted_number Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)

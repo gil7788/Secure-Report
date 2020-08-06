@@ -9,22 +9,13 @@
 #include "InputOutput.h"
 #include "Client.h"
 #include "TrustedThirdParty.h"
+#include "PlainFileSystemDatabase.h"
 #include <binomial_tournament.h>
 #include <Ctxt.h>
 #include <binaryCompare.h>
 
 /* TODO
- * 1. Encrypt data before database init, such that database will be encrypted (currently database is saved plain)
- * 2. Expand database structure
- * 3. Expand test to int from binary values
- * 4. Code refactoring
- *  A. Better naming
- *  B. Order functions
- *  C. Improve design
- *      I. Improve debugger design
- *      II. Add option to create plain/encrypted/both database to debugger - [Done partially] implemented plain and encrypted
- *      III. Add logger - [Done]
- *      IV. Move test flow outside this class - [Done]
+ * 1. Expand test to int from binary values
  * */
 
 template<class Number>
@@ -32,7 +23,7 @@ class FHEDatabase {
 private:
     int _d;
     int _n;
-    PlainDatabase _database;
+    PlainFileSystemDatabase<Number> _database;
     const std::string _TABLE_NAME = "table_vector";
     InputOutput _io;
 
@@ -53,14 +44,9 @@ public:
         return database_connected;
     }
 
-    bool build_database_table(std::vector<int>& vector) {
+    bool build_database_table(std::vector<Number>& vector) {
         /*
          * Description: Build database table with unique prime key and value columns
-         * */
-        /* TODO
-         * 1. Should get Number* encrypted_input and init database with it
-         * 2. Deiced how to store data -
-         * Given simple database with int value (converted to binary array and encrypted) how are they represented in database
          * */
 
         bool table_constructed;
@@ -83,19 +69,16 @@ public:
          * Description: build matches vector based on database and query operator
          * */
 
-        VectorXi database_row = _database.table_to_vector(_TABLE_NAME);
+        std::vector<Number> vectorized_database = _database.table_to_vector(_TABLE_NAME);
 
-        std::vector<Number> result(_n);
-
-        for (int i = 0; i < database_row.size(); ++i) {
-            /* TODO
-             * 1. Once data is save as encrypted binary array, update isMatch activation
-             * */
-
-            Number encrypted_element{database_row(i)};
-            result[i] = encrypted_query._isMatch(encrypted_query._encrypted_lookup_value, encrypted_element, 1);
+        std::vector<Number> encrypted_matches_indicator;
+        std::vector<int> matches_indicator;
+        for(auto& database_element: vectorized_database) {
+            Number isMatch_indicator = encrypted_query._isMatch(encrypted_query._encrypted_lookup_value, database_element, 1);
+            encrypted_matches_indicator.push_back(isMatch_indicator);
         }
-        return result;
+
+        return encrypted_matches_indicator;
     }
 
     inline std::vector<Number> fhe_encode(std::vector<Number>& encrypted_matches_indicator,
@@ -119,6 +102,14 @@ public:
 
     MatrixXi get_sketch(TrustedThirdParty& trusted_third_party) {
         return trusted_third_party._encoder.get_sketch();
+    }
+
+    std::string table_to_string() {
+        return _database.table_to_string(_TABLE_NAME);
+    }
+
+    bool database_table_exists() {
+        return _database.table_exists(_TABLE_NAME);
     }
 };
 #endif

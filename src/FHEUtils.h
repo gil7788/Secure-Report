@@ -24,15 +24,12 @@ public:
         MulBinomialTournament<Number> product_heap = MulBinomialTournament<Number>();
 
 //         TODO: Implement comparison for variables with costume length, rather single digit numbers
-//        for (int i = 0; i < length; ++i) {
-//          product_heap.add_to_tournament(result_at_i, 0);
-//
-//        Number result = product_heap.unite_all(MulBinomialTournament<Number>::mul);
-//    }
-
-        Number result = Number::static_from_int(1) - (x - y);
-        Number z = x - y;
-        return result;
+        for (int i = 0; i < length; ++i) {
+          Number result_at_i = Number::static_from_int(1) - x + y;
+          product_heap.add_to_tournament(result_at_i, 0);
+        }
+    Number result = product_heap.unite_all(MulBinomialTournament<Number>::mul);
+    return result;
     }
 
     static VectorXi encryptVectorXi(VectorXi plainVector);

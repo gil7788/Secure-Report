@@ -1,3 +1,4 @@
+#include <iostream>
 #include "VectorUtils.h"
 
 VectorXi VectorUtils::number_to_binary(int value, int n) {
@@ -65,29 +66,36 @@ VectorXi VectorUtils::generate_binary_vector(int n, int d) {
     return result;
 }
 
-std::vector<int> VectorUtils::generate_binary_std_vector(int n, int d) {
+std::vector<int> VectorUtils::generate_binary_std_vector(int vector_size, int value_occurences) {
+    /*
+     * Generate binary vector of size n and hamming weight d
+     * */
+    return generate_int_vector(vector_size, value_occurences, 1);
+}
+
+std::vector<int> VectorUtils::generate_int_vector(int vector_size, int value_occurences, int value) {
     /*
      * Generate binary vector of size n and hamming weight d
      * */
 
-    std::vector<int> result(n, 0);
+    std::vector<int> result(vector_size, 0);
 //    result = VectorXi::Zero(p);
 
     //Get a random position in the 1xp matrix from 0-p
-    for (int i = 0; i < d; ++i)
+    for (int i = 0; i < value_occurences; ++i)
     {
         // Define random number generator
         std::random_device rd;
         std::mt19937 mt(rd());
-        std::uniform_int_distribution<int> dis(0, n-1);
+        std::uniform_int_distribution<int> dis(0, vector_size-1);
 
         // Generate values until new unique index is generated
-        int randPos = dis(mt) % n;
-        while (result[randPos] == 1)
-            randPos = dis(mt) % n;
+        int randPos = dis(mt) % vector_size;
+        while (result[randPos] == value)
+            randPos = dis(mt) % vector_size;
 
         //Change the random position from a 0 to a 1
-        result[randPos] = 1;
+        result[randPos] = value;
     }
 
     return result;
@@ -107,18 +115,18 @@ std::vector<int> VectorUtils::getMatches(VectorXi x) {
     return indices;
 }
 
-std::vector<int> VectorUtils::get_matches_std_vector(std::vector<int> binary_vector) {
+std::vector<int> VectorUtils::get_matches_std_vector(std::vector<int> binary_vector, int comparison_value) {
     /*
      * Helper function for binary vectors, returns "True" (1) indices
      * */
-    std::vector<int> indices;
-    for (int i = 0; i < binary_vector.size(); ++i) {
-        if(binary_vector[i] == 1) {
-            indices.push_back(i);
+    std::vector<int> matches_indices;
+
+    for(int i =0; i < binary_vector.size(); ++i) {
+        if(binary_vector[i] == comparison_value) {
+            matches_indices.push_back(i);
         }
     }
-
-    return indices;
+    return matches_indices;
 }
 
 std::string VectorUtils::to_string(VectorXi vector) {
@@ -130,15 +138,6 @@ std::string VectorUtils::to_string(VectorXi vector) {
         result += std::to_string(vector(i)) + "\n";
     }
     return result;
-}
-
-std::string VectorUtils::std_vector_to_string(std::vector<int>& vector) {
-    std::stringstream string_stream;
-    for(auto& elem: vector) {
-        string_stream << elem << " ";
-    }
-
-    return string_stream.str();
 }
 
 std::vector<int> VectorUtils::eigen_vector_to_std_vector(VectorXi eigen_vector) {
