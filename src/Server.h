@@ -6,14 +6,14 @@
 #define SECURE_REPORT_DATABASE_H
 
 #include <zp.h>
-#define SIMD_FACTOR 1
-typedef ZP<SIMD_FACTOR> MyZP;
+#include "Config.h"
 
 #include "Config.h"
 #include "FHEDatabase.h"
 #include "FHEDatabaseConfig.h"
 #include "FHEUtils.h"
 #include "Client.h"
+#include "SimplifiedHelibNumber.h"
 
 template <typename DataType>
 class Server {
@@ -72,18 +72,14 @@ public:
     };
 };
 
-
-class PlainServer: public Server<MyZP> {
+class GenericServer: public Server<GenericZP> {
 public:
-
-    PlainServer(int size, int sparsity, PlainDataType& plain_data_type);
-
+    GenericServer(int size, int sparsity, GenericPlainDataType& plain_data_type);
 };
 
-class EncryptedServer: public Server<HelibNumber> {
+class EncryptedServer: public Server<SimplifiedHelibNumber> {
 public:
-
     EncryptedServer(int size, int sparsity, EncryptedDataTypeFromParameters& data_type);
-
 };
+
 #endif //SECURE_REPORT_DATABASE_H

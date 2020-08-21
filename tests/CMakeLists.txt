@@ -32,7 +32,9 @@ file(GLOB SOURCE_FILES *.cpp)
 add_subdirectory(googletest-master)
 
 
-add_executable(test001 ${SOURCE_FILES})
+#add_executable(test001 ${SOURCE_FILES})
+#target_link_libraries(test001 gtest pthread)
 add_executable(test_encrypted_io ${SOURCE_FILES} test_read_write_encrypted_number.cpp ../src/InputOutput.cpp)
-target_link_libraries(test001 gtest pthread)
 target_link_libraries(test_encrypted_io Eigen3::Eigen gtest pthread stdc++fs)
+add_executable(helib_test ${SOURCE_FILES} test_read_write_encrypted_number.cpp ../src/SimplifiedHelibNumber.cpp ../src/GenericZP.cpp ../src/FHEDatabaseConfig.cpp ../src/FHEDatabaseConfig.h ../src/InputOutput.cpp ../src/VectorUtils.cpp HelibTest.cpp HelibTest.h ../src/SimplifiedHelibKeys.cpp ../src/SimplifiedHelibKeys.h)
+target_link_libraries(helib_test Eigen3::Eigen liphe fhe ntl gmp pthread gtest pthread stdc++fs)

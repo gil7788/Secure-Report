@@ -13,6 +13,7 @@ using Eigen::VectorXi;
 #include "FHEDatabaseConfig.h"
 #include "TrustedThirdParty.h"
 #include "FileUtils.h"
+#include "SimplifiedHelibNumber.h"
 
 template <typename DataType>
 class EncryptedSecureReportQuery {
@@ -41,7 +42,8 @@ public:
     }
 
     EncryptedSecureReportQuery<DataType> encrypt() {
-        DataType encrypted_lookup_value = DataType::static_from_int(_lookup_value);
+//        std::vector<long> binary_lookup_value = VectorUtils::number_to_std_vector(_lookup_value, constants::WORD_LENGTH);
+        DataType encrypted_lookup_value = DataType(_lookup_value);
         return EncryptedSecureReportQuery<DataType>{encrypted_lookup_value, _isMatch};
     }
 };
@@ -72,8 +74,11 @@ public:
 
     std::vector<DataType> encrypt_data(std::vector<int>& plain_input) {
         std::vector<DataType> encrypted_input;
-        for_each(plain_input.begin(), plain_input.end(),
-                 [&](int entry){encrypted_input.push_back(DataType::static_from_int(entry)); });
+        for(auto& entry: plain_input) {
+//            std::vector<long> binary_entry= VectorUtils::number_to_std_vector(entry, constants::WORD_LENGTH);
+            DataType encrypted_entry = DataType(entry);
+            encrypted_input.push_back(encrypted_entry);
+        }
         return encrypted_input;
     }
 
@@ -118,6 +123,16 @@ private:
 
         return matches;
     }
+};
+
+class GenericClient: public Client<GenericZP> {
+public:
+    GenericClient(int size, int sparsity, GenericPlainDataType& plain_data_type);
+};
+
+class EncryptedClient: public Client<SimplifiedHelibNumber> {
+public:
+    EncryptedClient(int size, int sparsity, EncryptedDataTypeFromParameters& data_type);
 };
 
 #endif //SECURE_REPORT_CLIENT_H

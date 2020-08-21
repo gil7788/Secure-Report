@@ -13,6 +13,10 @@ public:
 
     static int binary_to_number(VectorXi vector);
 
+    static std::vector<long> number_to_std_vector(int value, int length);
+
+    static long std_vector_to_number(std::vector<long>& binary_representation);
+
     static VectorXi generate_binary_vector(int n, int d);
 
     static std::vector<int> generate_binary_std_vector(int n, int d);

@@ -9,11 +9,12 @@
 
 #include "FHEDatabase.h"
 #include "Server.h"
-
 #include "FileUtils.h"
+#include "GenericZP.h"
+#include <zp.h>
+#include "SimplifiedHelibNumber.h"
 
-#define SIMD_FACTOR 1
-typedef ZP<SIMD_FACTOR> MyZP;
+#define SIMD_FACTOR constants::WORD_LENGTH
 
 template <typename DataType>
 bool upload(Client<DataType>& client, Server<DataType>& server, std::vector<int> plain_data, int comparison_value) {
@@ -37,6 +38,7 @@ std::vector<int> query(Client<DataType>& client, Server<DataType>& server, Trust
            int lookup_value, DataType (*isMatch)(DataType&, DataType&, int)) {
     // Client
     SecureReportQuery<DataType> query(lookup_value, isMatch);
+
     auto encrypted_query = client.query_server(query);
 
     // Server
@@ -49,7 +51,7 @@ std::vector<int> query(Client<DataType>& client, Server<DataType>& server, Trust
 
 template <typename DataType>
 void test_client(Client<DataType>& client, Server<DataType>& server, TrustedThirdParty& trusted_third_party,
-        int lookup_value, DataType (*isMatch)(DataType&, DataType&, int), std::vector<int> plain_data) {
+        int lookup_value, DataType (*isMatch)(DataType&, DataType&, int), std::vector<int>& plain_data) {
     bool uploaded_successful = upload<DataType>(client, server, plain_data, lookup_value);
 
     if(! uploaded_successful) {
@@ -63,28 +65,37 @@ void test_client(Client<DataType>& client, Server<DataType>& server, TrustedThir
     std::cout << "Result: " << result_string << std::endl;
 }
 
-void test_plain_client(int database_size, int sparsity, PlainDataType plain_data_type,
-                       int lookup_value, MyZP (*isMatch)(MyZP &, MyZP &, int), std::vector<int> plain_data) {
-
+void test_generic_client(int database_size, int sparsity, GenericPlainDataType& generic_plain_data_type,
+                         int lookup_value, GenericZP (*isMatch)(GenericZP &, GenericZP &, int), std::vector<int>& plain_data) {
     TrustedThirdParty trusted_third_party{database_size, sparsity};
-    Client<MyZP> client(database_size, sparsity, plain_data_type);
-    auto database = PlainServer(database_size, sparsity, plain_data_type);
-    test_client(client, database, trusted_third_party, lookup_value, isMatch, plain_data);
+    GenericClient client(database_size, sparsity, generic_plain_data_type);
+    GenericServer server(database_size, sparsity, generic_plain_data_type);
+    test_client(client, server, trusted_third_party, lookup_value, isMatch, plain_data);
 }
 
-void test_encrypted_client(int database_size, int sparsity, EncryptedDataTypeFromParameters encrypted_data_type,
-                           int lookup_value, HelibNumber (*isMatch)(HelibNumber &, HelibNumber &, int), std::vector<int> plain_data) {
+void test_encrypted_client(int database_size, int sparsity, EncryptedDataTypeFromParameters& encrypted_data_type,
+                           int lookup_value, SimplifiedHelibNumber (*isMatch)(SimplifiedHelibNumber &, SimplifiedHelibNumber &, int), std::vector<int>& plain_data) {
     TrustedThirdParty trusted_third_party{database_size, sparsity};
-    Client<HelibNumber> client(database_size, sparsity, encrypted_data_type);
-    auto database = EncryptedServer(database_size, sparsity, encrypted_data_type);
-    test_client(client, database, trusted_third_party, lookup_value, isMatch, plain_data);
+    EncryptedClient client(database_size, sparsity, encrypted_data_type);
+    EncryptedServer server(database_size, sparsity, encrypted_data_type);
+    test_client(client, server, trusted_third_party, lookup_value, isMatch, plain_data);
+}
+
+void serial_test(int database_size, int sparsity, EncryptedDataTypeFromParameters& encrypted_data_type,
+                 int upper_bound, SimplifiedHelibNumber (*isMatch)(SimplifiedHelibNumber &, SimplifiedHelibNumber &, int)) {
+    for(int i = 1; i < upper_bound; ++i) {
+        cout << "Testing value " << i << "\n";
+        std::vector<int> arbitrary_data = VectorUtils::generate_int_vector(database_size, sparsity, i);
+        test_encrypted_client(database_size, sparsity, encrypted_data_type, i, isMatch, arbitrary_data);
+    }
 }
 
 int main(int argc, char** argv) {
-    int size = 2048;
+    std::cout << "Current path is: " << fs::current_path() << "\n";
+    int size = 128;
     int sparsity = 3;
 
-    long r = 1;
+    long r = constants::WORD_LENGTH;
     int L = 7;
     int p = 2;
 
@@ -100,20 +111,34 @@ int main(int argc, char** argv) {
 
     int one_lookup_value = 1;
     int zero_lookup_value = 0;
-    int arbitrary_lookup_value = 48;
-    auto plain_isMatch =  FHEUtils<MyZP>::areEqualBinary;
-    auto encrypted_isMatch =  FHEUtils<HelibNumber>::areEqualBinary;
+    int arbitrary_lookup_value = 59;
+    auto binary_arbitrary_lookup_value = VectorUtils::number_to_std_vector(arbitrary_lookup_value, (int) r);
+
+    auto generic_isMatch =  FHEUtils<GenericZP>::areEqualBinary;
+    auto encrypted_isMatch =  FHEUtils<SimplifiedHelibNumber>::areEqualBinary;
 
     std::vector<int> ones_data = VectorUtils::generate_binary_std_vector(size, sparsity);
     std::vector<int> zeros_data = VectorUtils::generate_binary_std_vector(size, size-sparsity);
     std::vector<int> arbitrary_data = VectorUtils::generate_int_vector(size, sparsity, arbitrary_lookup_value);
 
-    PlainDataType plain_data_type = PlainDataType();
+    GenericPlainDataType generic_plain_data_type = GenericPlainDataType(r);
     EncryptedDataTypeFromParameters encrypted_data_type(size, s, R, r, d, c, k, L, chosen_m, gens, ords, key_file_path);
 
-    test_plain_client(size, sparsity, plain_data_type, one_lookup_value, plain_isMatch, ones_data);
-    test_plain_client(size, sparsity, plain_data_type, zero_lookup_value, plain_isMatch, zeros_data);
-//    test_plain_client(size, sparsity, plain_data_type, arbitrary_lookup_value, plain_isMatch, arbitrary_data);
-    test_encrypted_client(size, sparsity, encrypted_data_type, one_lookup_value, encrypted_isMatch, ones_data);
-    test_encrypted_client(size, sparsity, encrypted_data_type, zero_lookup_value, encrypted_isMatch, zeros_data);
+//    serial_test(size, sparsity, encrypted_data_type, 100, encrypted_isMatch);
+    test_generic_client(size, sparsity, generic_plain_data_type, one_lookup_value,
+                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), ones_data);
+    test_generic_client(size, sparsity, generic_plain_data_type, zero_lookup_value,
+                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), zeros_data);
+    test_generic_client(size, sparsity, generic_plain_data_type, arbitrary_lookup_value,
+                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), arbitrary_data);
+
+    test_encrypted_client(size, sparsity, encrypted_data_type, one_lookup_value,
+                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
+                                                                     int)>(encrypted_isMatch), ones_data);
+    test_encrypted_client(size, sparsity, encrypted_data_type, zero_lookup_value,
+                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
+                                                                     int)>(encrypted_isMatch), zeros_data);
+    test_encrypted_client(size, sparsity, encrypted_data_type, arbitrary_lookup_value,
+                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
+                                                                     int)>(encrypted_isMatch), arbitrary_data);
 }

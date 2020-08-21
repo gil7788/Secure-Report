@@ -37,6 +37,27 @@ int VectorUtils::binary_to_number(VectorXi vector) {
     return value;
 }
 
+std::vector<long> VectorUtils::number_to_std_vector(int value, int length) {
+    int int_value_current = value;
+    std::vector<long> binary_value_vector;
+
+    for(int i = 0; i < length; ++i) {
+        int digit = int_value_current % 2 == 0 ? 0 : 1;
+        binary_value_vector.insert(binary_value_vector.cbegin(), digit);
+        int_value_current /= 2;
+    }
+
+    return binary_value_vector;
+}
+
+long VectorUtils::std_vector_to_number(std::vector<long>& binary_representation) {
+    long value = 0;
+    for(long i = (long) binary_representation.size() - 1, power = 1; i >= 0; --i, power *= 2) {
+        value += binary_representation[i] * power;
+    }
+    return value;
+}
+
 VectorXi VectorUtils::generate_binary_vector(int n, int d) {
     /*
      * Generate binary vector of size n and hamming weight d

@@ -4,6 +4,8 @@
 #include <Eigen/Dense>
 #include <helib_number.h>
 #include <binomial_tournament.h>
+#include "GenericZP.h"
+#include "EncryptedBits.h"
 
 using namespace std;
 using Eigen::VectorXi;
@@ -20,16 +22,30 @@ public:
      *  5. Greater
      * */
 
-    static Number areEqualBinary(Number& x, Number& y, int length) {
-        MulBinomialTournament<Number> product_heap = MulBinomialTournament<Number>();
+    static Number areEqualBinary(Number& x, Number& y) {
+        auto vec = std::vector<long>(x.r(), 1);
+        auto one_vector = VectorUtils::std_vector_to_number(vec);
+        Number encrypted_one(one_vector);
 
-//         TODO: Implement comparison for variables with costume length, rather single digit numbers
-        for (int i = 0; i < length; ++i) {
-          Number result_at_i = Number::static_from_int(1) - x + y;
-          product_heap.add_to_tournament(result_at_i, 0);
+        Number result;
+        if(encrypted_one.r() <= 1) {
+            result = encrypted_one - x + y;
+            return result;
         }
-    Number result = product_heap.unite_all(MulBinomialTournament<Number>::mul);
-    return result;
+        else {
+            MulBinomialTournament<Number> product_heap = MulBinomialTournament<Number>();
+            Bits<Number> encrypted_one_digits = encrypted_one.template to_digits<Bits<Number>>();
+            Bits<Number> x_digits = x.template to_digits<Bits<Number>>();
+            Bits<Number> y_digits = y.template to_digits<Bits<Number>>();
+
+            for(int i = 0; i < encrypted_one_digits.get_bit_length(); ++i) {
+                Number sum(x_digits[i] + y_digits[i]);
+                Number result_at_i(encrypted_one_digits[i] - sum);
+                product_heap.add_to_tournament(result_at_i, 0);
+            }
+            result = product_heap.unite_all(MulBinomialTournament<Number>::mul);
+            return result;
+        }
     }
 
     static VectorXi encryptVectorXi(VectorXi plainVector);

@@ -6,13 +6,11 @@
 
 #include "Server.h"
 
-#define SIMD_FACTOR 1
-typedef ZP<SIMD_FACTOR> MyZP;
 
-// Regular database
-PlainServer::PlainServer(int size, int sparsity, PlainDataType& plain_data_type):
-        Server<MyZP>(size, sparsity, plain_data_type ){}
+// Regular server
+GenericServer::GenericServer(int size, int sparsity, GenericPlainDataType& plain_data_type):
+        Server<GenericZP>(size, sparsity, plain_data_type ){}
 
-// Encrypted database
+// Encrypted server
 EncryptedServer::EncryptedServer(int size, int sparsity, EncryptedDataTypeFromParameters& encrypted_data_type):
-        Server<HelibNumber>(size, sparsity, encrypted_data_type){}
+        Server<SimplifiedHelibNumber>(size, sparsity, encrypted_data_type){}

@@ -18,6 +18,8 @@
 #include <binomial_tournament.h>
 #include <Ctxt.h>
 #include <binaryCompare.h>
+#include "GenericZP.h"
+#include "SimplifiedHelibKeys.h"
 
 enum class DATA_TYPES {PLAIN, ENCRYPTED, MIXED};
 
@@ -35,9 +37,12 @@ class DatabaseDataType {
     virtual ~DatabaseDataType() {};
 };
 
-class PlainDataType: public DatabaseDataType {
+class GenericPlainDataType: public DatabaseDataType {
 public:
     const DATA_TYPES _data_type = DATA_TYPES ::PLAIN;
+    int _r;
+
+    GenericPlainDataType(int r): _r(r) {}
 
     DATA_TYPES get_data_type() override;
 
@@ -60,7 +65,7 @@ class EncryptedDataTypeFromParameters: public DatabaseDataType {
     long _chosen_m;
     Vec<long>& _gens;
     Vec<long>& _ords;
-    HelibKeys _keys;
+    SimplifiedHelibKeys _keys;
     const std::string& _key_file_path;
 
 public:

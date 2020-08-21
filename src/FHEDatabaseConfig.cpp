@@ -14,18 +14,18 @@ typedef ZP<SIMD_FACTOR> MyZP;
 
 namespace fs = std::experimental::filesystem;
 
-void PlainDataType::initialize() {
-    int modulu = 2;
-    MyZP::set_global_p(modulu);
+void GenericPlainDataType::initialize() {
+    int modulo = 2;
+    GenericZP::set_global_p(modulo, _r);
 }
 
-DATA_TYPES PlainDataType::get_data_type() {
+DATA_TYPES GenericPlainDataType::get_data_type() {
     return DATA_TYPES::PLAIN;
 }
 
-void PlainDataType::write_key_to_file(const std::string& key_file_path) {}
+void GenericPlainDataType::write_key_to_file(const std::string& key_file_path) {}
 
-void PlainDataType::read_key_from_file(const std::string& key_file_path) {}
+void GenericPlainDataType::read_key_from_file(const std::string& key_file_path) {}
 
 // EncryptedDataTypeFromParameters
 EncryptedDataTypeFromParameters::EncryptedDataTypeFromParameters(int database_size, long s, long R, long r,
@@ -51,13 +51,13 @@ DATA_TYPES EncryptedDataTypeFromParameters::get_data_type() {
 void EncryptedDataTypeFromParameters::initialize() {
     if(fs::is_regular_file(_key_file_path)) {
         read_key_from_file(_key_file_path);
-        HelibNumber::set_global_keys(&_keys);
+        SimplifiedHelibNumber::set_global_keys(&_keys);
     }
     else {
         int modulo = 2;
 
         _keys.initKeys(_s, _R, modulo, _r, _d, _c, _k, 64, _L, _chosen_m, _gens, _ords);
-        HelibNumber::set_global_keys(&_keys);
+        SimplifiedHelibNumber::set_global_keys(&_keys);
         write_key_to_file(_key_file_path);
     }
 }
