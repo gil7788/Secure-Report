@@ -12,7 +12,7 @@ namespace constants {
     const std::string OUTPUT_FILE_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/output_file.txt";
     enum OUTPUT_LEVELS {ERROR, REGULAR, LOG, DEBUG};
     const int OUTPUT_LEVEL = OUTPUT_LEVELS::REGULAR;
-    const int WORD_LENGTH = 13;
+    const int WORD_LENGTH = 4;
     const int SIMD = 1;
 }
 

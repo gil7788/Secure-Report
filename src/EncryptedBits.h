@@ -41,6 +41,11 @@ public:
     vector<Number> get_bits() {
         return _bits;
     }
+
+    Number to_number() {
+        Number result{_bits};
+        return result;
+    }
 };
 
 #endif //SECURE_REPORT_ENCRYPTEDBITS_H

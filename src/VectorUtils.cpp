@@ -143,7 +143,7 @@ std::vector<int> VectorUtils::get_matches_std_vector(std::vector<int> binary_vec
     std::vector<int> matches_indices;
 
     for(int i =0; i < binary_vector.size(); ++i) {
-        if(binary_vector[i] == comparison_value) {
+        if(binary_vector[i]  != 0) {
             matches_indices.push_back(i);
         }
     }

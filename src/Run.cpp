@@ -96,7 +96,8 @@ int main(int argc, char** argv) {
     int sparsity = 3;
 
     long r = constants::WORD_LENGTH;
-    int L = 7;
+    int L = 9;
+//    int L = (int) ceil(log(r)) + 2;
     int p = 2;
 
     long R = 1;
@@ -111,10 +112,12 @@ int main(int argc, char** argv) {
 
     int one_lookup_value = 1;
     int zero_lookup_value = 0;
-    int arbitrary_lookup_value = 59;
+    int arbitrary_lookup_value = 11;
     auto binary_arbitrary_lookup_value = VectorUtils::number_to_std_vector(arbitrary_lookup_value, (int) r);
 
     auto generic_isMatch =  FHEUtils<GenericZP>::areEqualBinary;
+    auto generic_lessThan = FHEUtils<GenericZP>::lessThan;
+    auto encrypted_lessThan = FHEUtils<SimplifiedHelibNumber>::lessThan;
     auto encrypted_isMatch =  FHEUtils<SimplifiedHelibNumber>::areEqualBinary;
 
     std::vector<int> ones_data = VectorUtils::generate_binary_std_vector(size, sparsity);
@@ -125,20 +128,29 @@ int main(int argc, char** argv) {
     EncryptedDataTypeFromParameters encrypted_data_type(size, s, R, r, d, c, k, L, chosen_m, gens, ords, key_file_path);
 
 //    serial_test(size, sparsity, encrypted_data_type, 100, encrypted_isMatch);
-    test_generic_client(size, sparsity, generic_plain_data_type, one_lookup_value,
-                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), ones_data);
-    test_generic_client(size, sparsity, generic_plain_data_type, zero_lookup_value,
-                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), zeros_data);
+//    test_generic_client(size, sparsity, generic_plain_data_type, one_lookup_value,
+//                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), ones_data);
+//    test_generic_client(size, sparsity, generic_plain_data_type, zero_lookup_value,
+//                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), zeros_data);
+    cout << "Plain areEquals: \n";
     test_generic_client(size, sparsity, generic_plain_data_type, arbitrary_lookup_value,
                         reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_isMatch), arbitrary_data);
+    cout << "Plain lessThan: \n";
+    test_generic_client(size, sparsity, generic_plain_data_type, arbitrary_lookup_value - 1,
+                        reinterpret_cast<GenericZP (*)(GenericZP &, GenericZP &, int)>(generic_lessThan), arbitrary_data);
 
-    test_encrypted_client(size, sparsity, encrypted_data_type, one_lookup_value,
-                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
-                                                                     int)>(encrypted_isMatch), ones_data);
-    test_encrypted_client(size, sparsity, encrypted_data_type, zero_lookup_value,
-                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
-                                                                     int)>(encrypted_isMatch), zeros_data);
-    test_encrypted_client(size, sparsity, encrypted_data_type, arbitrary_lookup_value,
-                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
-                                                                     int)>(encrypted_isMatch), arbitrary_data);
+//    test_encrypted_client(size, sparsity, encrypted_data_type, one_lookup_value,
+//                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
+//                                                                     int)>(encrypted_isMatch), ones_data);
+//    test_encrypted_client(size, sparsity, encrypted_data_type, zero_lookup_value,
+//                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
+//                                                                     int)>(encrypted_isMatch), zeros_data);
+//    cout << "Encrypted areEquals: \n";
+//    test_encrypted_client(size, sparsity, encrypted_data_type, arbitrary_lookup_value,
+//                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
+//                                                                     int)>(encrypted_isMatch), arbitrary_data);
+//    cout << "Encrypted lessThan: \n";
+//    test_encrypted_client(size, sparsity, encrypted_data_type, arbitrary_lookup_value - 1,
+//                          reinterpret_cast<SimplifiedHelibNumber (*)(SimplifiedHelibNumber &, SimplifiedHelibNumber &,
+//                                                                     int)>(encrypted_lessThan), arbitrary_data);
 }
