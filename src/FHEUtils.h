@@ -44,20 +44,12 @@ private:
     }
 
 public:
-    /* TODO
-     * Implement few comparison functions, such as:
-     *  1. Equality - Done
-     *  2. Less or equals
-     *  3. Less than
-     *  4. Greater or equals
-     *  5. Greater
-     * */
     static Number greaterThanOrEquals(Number& x, Number& y) {
-        return lessThan(y, x) || areEqualBinary(x, y);
+        return lessThan(y, x) + areEqualBinary(x, y);
     }
 
     static Number lessThanOrEquals(Number& x, Number& y) {
-        return lessThan(x, y) || areEqualBinary(x, y);
+        return lessThan(x, y) + areEqualBinary(x, y);
     }
 
     static Number areEqualBinary(Number& x, Number& y) {
