@@ -1,4 +1,4 @@
-    //
+//
 // Created by gil on 29/04/20.
 //
 
@@ -15,12 +15,12 @@
 #include "Client.h"
 #include "SimplifiedHelibNumber.h"
 
-template <typename DataType>
+template <class EncryptedQuery, typename DataType>
 class Server {
 public:
     int _size;
     int _sparsity;
-    FHEDatabase<DataType> _fhe_database;
+    FHEDatabase<EncryptedQuery, DataType> _fhe_database;
     DatabaseDataType& _data_type;
     InputOutput _io = InputOutput(constants::OUTPUT_TO_CONSOLE, constants::OUTPUT_FILE_PATH, constants::OUTPUT_LEVEL);
     bool _is_connected = false;
@@ -56,7 +56,7 @@ public:
         return database_built;
     }
 
-    std::vector<DataType> send_matches_indices_to_client(EncryptedSecureReportQuery<DataType>& encrypted_query,
+    std::vector<DataType> send_matches_indices_to_client(EncryptedQuery& encrypted_query,
                                                          TrustedThirdParty& trusted_third_party) {
         // Query database
         std::vector<DataType> matches_indicators {_fhe_database.evaluate_matches_indicators(encrypted_query)};
@@ -72,14 +72,5 @@ public:
     };
 };
 
-class GenericServer: public Server<GenericZP> {
-public:
-    GenericServer(int size, int sparsity, GenericPlainDataType& plain_data_type);
-};
-
-class EncryptedServer: public Server<SimplifiedHelibNumber> {
-public:
-    EncryptedServer(int size, int sparsity, EncryptedDataTypeFromParameters& data_type);
-};
 
 #endif //SECURE_REPORT_DATABASE_H

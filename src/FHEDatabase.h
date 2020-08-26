@@ -14,11 +14,8 @@
 #include <Ctxt.h>
 #include <binaryCompare.h>
 
-/* TODO
- * 1. Expand test to int from binary values
- * */
 
-template<class Number>
+template<class EncryptedQuery, class Number>
 class FHEDatabase {
 private:
     int _d;
@@ -64,19 +61,14 @@ public:
         return true;
     }
 
-    std::vector<Number> evaluate_matches_indicators(EncryptedSecureReportQuery<Number>& encrypted_query) {
+    std::vector<Number> evaluate_matches_indicators(EncryptedQuery& encrypted_query) {
         /*
          * Description: build matches vector based on database and query operator
          * */
 
         std::vector<Number> vectorized_database = _database.table_to_vector(_TABLE_NAME);
 
-        std::vector<Number> encrypted_matches_indicator;
-        std::vector<int> matches_indicator;
-        for(auto& database_element: vectorized_database) {
-            Number isMatch_indicator = encrypted_query._isMatch(encrypted_query._encrypted_lookup_value, database_element, 1);
-            encrypted_matches_indicator.push_back(isMatch_indicator);
-        }
+        std::vector<Number> encrypted_matches_indicator = encrypted_query.evaluate_is_match_on_database(vectorized_database);
 
         return encrypted_matches_indicator;
     }

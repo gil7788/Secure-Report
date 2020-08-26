@@ -27,7 +27,7 @@ link_directories(${MYSQLPP_LIBRARY})
 
 file(GLOB SOURCE_FILES *.cpp)
 
-add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.cpp Server.cpp Server.h Client.cpp Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp FileUtils.h PlainFileSystemDatabase.h test_read_write_encrypted_number.cpp zp_binary.cpp zp_binary.h GenericZP.h GenericZP.cpp SimplifiedHelibNumber.h SimplifiedHelibNumber.cpp SimplifiedHelibKeys.cpp EncryptedBits.h)
+add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp FileUtils.h PlainFileSystemDatabase.h test_read_write_encrypted_number.cpp zp_binary.cpp zp_binary.h GenericZP.h GenericZP.cpp SimplifiedHelibNumber.h SimplifiedHelibNumber.cpp SimplifiedHelibKeys.cpp EncryptedBits.h ../test_secure_batch_retrieval.cpp Queries.h)
 #add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.cpp Server.cpp Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp )
 target_link_libraries(run Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)
 

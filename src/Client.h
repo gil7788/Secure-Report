@@ -15,38 +15,6 @@ using Eigen::VectorXi;
 #include "FileUtils.h"
 #include "SimplifiedHelibNumber.h"
 
-template <typename DataType>
-class EncryptedSecureReportQuery {
-public:
-    DataType _encrypted_lookup_value;
-    DataType (*_isMatch)(DataType&, DataType&, int);
-
-    EncryptedSecureReportQuery(DataType encrypted_lookup_value, DataType (*isMatch)(DataType&, DataType&, int)):
-            _encrypted_lookup_value(encrypted_lookup_value),
-            _isMatch{isMatch} {}
-};
-
-template <typename DataType>
-class SecureReportQuery{
-private:
-    int _lookup_value;
-    DataType (*_isMatch)(DataType&, DataType&, int);
-
-public:
-    SecureReportQuery(int lookup_value, DataType (*isMatch)(DataType&, DataType&, int)):
-            _lookup_value{lookup_value},
-            _isMatch{isMatch} {}
-
-    int get_lookup_value() {
-        return _lookup_value;
-    }
-
-    EncryptedSecureReportQuery<DataType> encrypt() {
-//        std::vector<long> binary_lookup_value = VectorUtils::number_to_std_vector(_lookup_value, constants::WORD_LENGTH);
-        DataType encrypted_lookup_value = DataType(_lookup_value);
-        return EncryptedSecureReportQuery<DataType>{encrypted_lookup_value, _isMatch};
-    }
-};
 
 template <typename DataType>
 class Client {
@@ -75,15 +43,15 @@ public:
     std::vector<DataType> encrypt_data(std::vector<int>& plain_input) {
         std::vector<DataType> encrypted_input;
         for(auto& entry: plain_input) {
-//            std::vector<long> binary_entry= VectorUtils::number_to_std_vector(entry, constants::WORD_LENGTH);
             DataType encrypted_entry = DataType(entry);
             encrypted_input.push_back(encrypted_entry);
         }
         return encrypted_input;
     }
 
-    EncryptedSecureReportQuery<DataType> query_server(SecureReportQuery<DataType> plain_query) {
-        EncryptedSecureReportQuery<DataType> encrypted_query = plain_query.encrypt();
+    template<class PlainQuery, class EncryptedQuery>
+    EncryptedQuery query_server(PlainQuery plain_query) {
+        EncryptedQuery encrypted_query = plain_query.encrypt();
 
         return encrypted_query;
     }
