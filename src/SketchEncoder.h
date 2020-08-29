@@ -52,6 +52,8 @@ public:
 
     VectorXi decode(VectorXi vector);
 
+    void construct_sketch_matrix();
+
 // Helper functions
 private:
     VectorXi number_to_binary(int i);
@@ -74,8 +76,6 @@ private:
     MatrixXi signature_matrix();
 
     MatrixXi incidence_matrix();
-
-    void construct_sketch_matrix();
 
     std::vector<int> find_singletons(VectorXi vector, VectorXi* vector_tag, int* count);
 

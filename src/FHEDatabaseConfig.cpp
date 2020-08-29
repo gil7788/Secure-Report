@@ -14,6 +14,8 @@ typedef ZP<SIMD_FACTOR> MyZP;
 
 namespace fs = std::experimental::filesystem;
 
+GenericPlainDataType::GenericPlainDataType(int r): _r(r) {}
+
 void GenericPlainDataType::initialize() {
     int modulo = 2;
     GenericZP::set_global_p(modulo, _r);

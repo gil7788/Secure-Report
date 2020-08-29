@@ -2,32 +2,25 @@
 #define SECURE_REPORT_FHE_DB_H
 
 #include "PlainDatabase.h"
-#include "SketchEncoder.h"
+#include "SimplifiedHelibNumber.h"
+#include "GenericZP.h"
 #include "VectorUtils.h"
-#include "FHEUtils.h"
 #include "Config.h"
 #include "InputOutput.h"
-#include "Client.h"
-#include "TrustedThirdParty.h"
 #include "PlainFileSystemDatabase.h"
-#include <binomial_tournament.h>
-#include <Ctxt.h>
-#include <binaryCompare.h>
 
 
-template<class EncryptedQuery, class Number>
+template<class Number>
 class FHEDatabase {
 private:
-    int _d;
     int _n;
     PlainFileSystemDatabase<Number> _database;
     const std::string _TABLE_NAME = "table_vector";
     InputOutput _io;
 
 public:
-    FHEDatabase(int db_size, int sparsity, InputOutput& io):
+    FHEDatabase(int db_size, InputOutput& io):
             _n(db_size),
-            _d(sparsity),
             _database(),
             _io(io)
             {}
@@ -61,39 +54,9 @@ public:
         return true;
     }
 
-    std::vector<Number> evaluate_matches_indicators(EncryptedQuery& encrypted_query) {
-        /*
-         * Description: build matches vector based on database and query operator
-         * */
-
+    std::vector<Number> table_to_vector() {
         std::vector<Number> vectorized_database = _database.table_to_vector(_TABLE_NAME);
-
-        std::vector<Number> encrypted_matches_indicator = encrypted_query.evaluate_is_match_on_database(vectorized_database);
-
-        return encrypted_matches_indicator;
-    }
-
-    inline std::vector<Number> fhe_encode(std::vector<Number>& encrypted_matches_indicator,
-                                          TrustedThirdParty& trusted_third_party) {
-        /*
-        * Description: Encode under full homomorphic encryption
-        * */
-        MatrixXi sketch = get_sketch(trusted_third_party);
-        std::vector<Number> out(sketch.rows(), Number::static_from_int(0));
-
-        for (int i_input = 0; i_input < _n; ++i_input) {
-            Number x = encrypted_matches_indicator[i_input];
-
-            for (int i_out = 0; i_out < sketch.rows(); ++i_out) {
-                if (sketch(i_out, i_input) == 1)
-                    out[i_out] += x;
-            }
-        }
-        return out;
-    }
-
-    MatrixXi get_sketch(TrustedThirdParty& trusted_third_party) {
-        return trusted_third_party._encoder.get_sketch();
+        return vectorized_database;
     }
 
     std::string table_to_string() {

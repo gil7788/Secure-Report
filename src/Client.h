@@ -14,6 +14,7 @@ using Eigen::VectorXi;
 #include "TrustedThirdParty.h"
 #include "FileUtils.h"
 #include "SimplifiedHelibNumber.h"
+#include "Queries.h"
 
 
 template <typename DataType>
@@ -28,11 +29,11 @@ public:
             _maximal_number_of_matches_per_query{maximal_number_of_matches_per_query},
             _data_type(data_type){}
 
-    bool initialize() {
+    virtual bool initialize() {
         _data_type.initialize();
     }
 
-    std::vector<DataType> upload_data_to_server(std::vector<int>& data) {
+    virtual std::vector<DataType> upload_data_to_server(std::vector<int>& data) {
         // Encrypt
         auto encrypted_data = encrypt_data(data);
         // Send to Server
@@ -40,7 +41,7 @@ public:
         return encrypted_data;
     }
 
-    std::vector<DataType> encrypt_data(std::vector<int>& plain_input) {
+    virtual std::vector<DataType> encrypt_data(std::vector<int>& plain_input) {
         std::vector<DataType> encrypted_input;
         for(auto& entry: plain_input) {
             DataType encrypted_entry = DataType(entry);
@@ -49,14 +50,7 @@ public:
         return encrypted_input;
     }
 
-    template<class PlainQuery, class EncryptedQuery>
-    EncryptedQuery query_server(PlainQuery plain_query) {
-        EncryptedQuery encrypted_query = plain_query.encrypt();
-
-        return encrypted_query;
-    }
-
-    std::vector<int> retrieve_matches_indices(std::vector<DataType>&  encoded_encrypted_matches, TrustedThirdParty& trusted_third_party) {
+    virtual std::vector<int> retrieve_matches_indices(std::vector<DataType>&  encoded_encrypted_matches, TrustedThirdParty& trusted_third_party) {
         std::vector<int> encoded_matches = decrypt_encrypted_encoded_matches(encoded_encrypted_matches);
 
         // Decode encoded into decoded
@@ -66,7 +60,7 @@ public:
     }
 
 private:
-    std::vector<int> decrypt_encrypted_encoded_matches(std::vector<DataType>& encrypted_encoded_matches) {
+    virtual std::vector<int> decrypt_encrypted_encoded_matches(std::vector<DataType>& encrypted_encoded_matches) {
         std::vector<int> encoded_matches(encrypted_encoded_matches.size());
         for (int i_output = 0; i_output < encrypted_encoded_matches.size(); ++i_output) {
             encoded_matches[i_output] = encrypted_encoded_matches[i_output].to_int();
@@ -75,7 +69,8 @@ private:
         return encoded_matches;
     }
 
-    std::vector<int> decode_encoded_matches(std::vector<int>& encoded_matches, TrustedThirdParty& trusted_third_party) {
+    virtual std::vector<int> decode_encoded_matches(std::vector<int>& encoded_matches,
+            TrustedThirdParty& public_server) {
         /*
          * Description: Decode plain vector
          * */
@@ -86,21 +81,73 @@ private:
 
         Eigen::Map<Eigen::VectorXi> eigen_encoded_matches(&encoded_matches[0], encoded_matches.size());
 
-        VectorXi eigen_vector_matches = trusted_third_party._encoder.decode(eigen_encoded_matches);
+        auto encoder = get_disjunct_matrix(public_server);
+        VectorXi eigen_vector_matches = encoder.decode(eigen_encoded_matches);
         std::vector<int> matches = VectorUtils::eigen_vector_to_std_vector(eigen_vector_matches);
 
         return matches;
     }
+
+    virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) = 0;
 };
 
-class GenericClient: public Client<GenericZP> {
+template <typename DataType>
+class SecureReportClient: public Client<DataType> {
+    SecureReportQuery<DataType> _query;
 public:
-    GenericClient(int size, int sparsity, GenericPlainDataType& plain_data_type);
+    SecureReportClient(int datase_size, int maximal_number_of_matches_per_query, DatabaseDataType& data_type):
+            Client<DataType>(datase_size, maximal_number_of_matches_per_query, data_type) {}
+
+    EncryptedSecureReportQuery<DataType> query_server() {
+        EncryptedSecureReportQuery<DataType> encrypted_query = _query.encrypt();
+
+        return encrypted_query;
+    }
+
+    void initialize_query(int lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
+        _query.initialize(lookup_value, isMatch);
+    }
+
+    EncryptedSecureReportQuery<DataType> encrypt_query() {
+        return _query.encrypt();
+    }
+
+private:
+    virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
+        auto sketch_encoder = public_server.get_matrix_by_index(0);
+        return sketch_encoder;
+    }
 };
 
-class EncryptedClient: public Client<SimplifiedHelibNumber> {
+template <typename DataType>
+class SecureBatchRetrievalClient: public Client<DataType> {
+SecureBatchRetrievalQuery<DataType> _query;
 public:
-    EncryptedClient(int size, int sparsity, EncryptedDataTypeFromParameters& data_type);
+    SecureBatchRetrievalClient(int datase_size, int maximal_number_of_matches_per_query, DatabaseDataType& data_type):
+            Client<DataType>(datase_size, maximal_number_of_matches_per_query, data_type) {}
+
+    EncryptedSecureBatchRetrievalQuery<DataType> query_server() {
+        EncryptedSecureBatchRetrievalQuery<DataType> encrypted_query = _query.encrypt();
+
+        return encrypted_query;
+    }
+
+    void initialize_query(int lookup_value, int batch_size, int batch_index, int database_size, int number_of_matches,
+            DataType (*isMatch)(DataType&, DataType&)) {
+        _query.initialize(lookup_value, batch_size, batch_index, database_size, number_of_matches, isMatch);
+    }
+
+    EncryptedSecureBatchRetrievalQuery<DataType> encrypt_query() {
+        return _query.encrypt();
+    }
+
+private:
+    virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
+        auto encoder_index = ceil(log2(_query._batch_size));
+        auto sketch_encoder = public_server.get_matrix_by_index(encoder_index);
+        return sketch_encoder;
+    }
 };
+
 
 #endif //SECURE_REPORT_CLIENT_H

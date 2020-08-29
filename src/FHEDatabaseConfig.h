@@ -42,7 +42,7 @@ public:
     const DATA_TYPES _data_type = DATA_TYPES ::PLAIN;
     int _r;
 
-    GenericPlainDataType(int r): _r(r) {}
+    explicit GenericPlainDataType(int r);
 
     DATA_TYPES get_data_type() override;
 

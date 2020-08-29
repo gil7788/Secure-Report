@@ -1,7 +1,7 @@
 #include <iostream>
 #include "VectorUtils.h"
 
-VectorXi VectorUtils::number_to_binary(int value, int n) {
+VectorXi VectorUtils::number_to_binary(int value, int vector_size) {
 /*
     input: int i, int n
     output: array of size log(n)
@@ -9,7 +9,6 @@ VectorXi VectorUtils::number_to_binary(int value, int n) {
     running time: O(log(n))
 */
     int int_value_current = value;
-    int vector_size = int(std::ceil(std::log2(n)));
     VectorXi binary_value_vector(vector_size);
 
     for(int array_index = vector_size-1; array_index >= 0; --array_index) {
@@ -31,7 +30,7 @@ int VectorUtils::binary_to_number(VectorXi vector) {
     long vector_size = vector.size();
 
     for(int i = vector_size-1, power = 1; i >= 0; --i, power *= 2) {
-        value += vector(i) * power;
+        value += (vector(i) % 2) * power;
     }
 
     return value;
