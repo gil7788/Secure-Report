@@ -6,7 +6,6 @@
 #define SECURE_REPORT_DATABASE_H
 
 #include <zp.h>
-#include "Config.h"
 
 #include "Config.h"
 #include "FHEDatabase.h"
@@ -14,7 +13,7 @@
 #include "FHEUtils.h"
 #include "Client.h"
 #include "SimplifiedHelibNumber.h"
-#include "HashFunctionsFamily.h"
+#include "HashFunctions/HashFunctionsFamily.h"
 #include "Queries.h"
 
 template <typename DataType>
@@ -222,7 +221,9 @@ private:
             return batches_split;
         }
         else {
-            HashFunctionsFamily hash_function(domain_word_size, number_of_batches_word_length);
+            auto independence = ceil(log2(Server<DataType>::_database_size));
+            PolynomialHashFunctionsFamily hash_function(independence);
+            hash_function.initialize(domain_word_size, number_of_batches_word_length);
             vector<int> batches_split = hash_function.evaluate_all_domain();
             return batches_split;
         }

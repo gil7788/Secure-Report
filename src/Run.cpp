@@ -208,8 +208,8 @@ void test_plain_secure_batch_retrieval(int lookup_value,
 
 int main(int argc, char** argv) {
     std::cout << "Current path is: " << fs::current_path() << "\n";
-    int size = 128;
-    int number_of_matches = 3;
+    int size = 4128;
+    int number_of_matches = 32;
     int batch_size = 4;
 
     int r = constants::WORD_LENGTH;
@@ -229,21 +229,26 @@ int main(int argc, char** argv) {
     std::vector<int> arbitrary_data = VectorUtils::generate_int_vector(size, number_of_matches, arbitrary_lookup_value);
 
 
-//    serial_test(size, number_of_matches, encrypted_data_type, 100, encrypted_isMatch);
-//    int number_of_batches = ceil( ((double) number_of_matches / batch_size));
+    int number_of_batches = ceil( ((double) number_of_matches / batch_size));
+//    serial_test(size, number_of_matches, 100, encrypted_isMatch);
 //    for (int i = 0; i < number_of_batches; ++i) {
 //        cout << "Plain equals SBR - batch " << i << ": \n";
 //        test_plain_secure_batch_retrieval(one_lookup_value, batch_size, i, size, number_of_matches, generic_isMatch, ones_data);
 //    }
-//
+
+    for (int i = 0; i < number_of_batches; ++i) {
+        cout << "Plain equals SBR - batch " << i << ": \n";
+        test_plain_secure_batch_retrieval(one_lookup_value, batch_size, i, size, number_of_matches, generic_isMatch, ones_data);
+    }
+
 //    for (int i = 0; i < number_of_batches; ++i) {
 //        cout << "Encrypted equals SBR - batch " << i << ": \n";
 //        test_encrypted_secure_batch_retrieval(one_lookup_value, batch_size, i, size, number_of_matches, encrypted_isMatch, ones_data);
 //    }
 
 
-    cout << "Plain equals SR \n";
-    test_plain_secure_report(one_lookup_value, size, number_of_matches, generic_isMatch, ones_data);
-    cout << "Encrypted equals SR \n";
-    test_encrypted_secure_report(one_lookup_value, size, number_of_matches, encrypted_isMatch, ones_data);     int)>(encrypted_lessThan), arbitrary_data);
+//    cout << "Plain equals SR \n";
+//    test_plain_secure_report(one_lookup_value, size, number_of_matches, generic_isMatch, ones_data);
+//    cout << "Encrypted equals SR \n";
+//    test_encrypted_secure_report(one_lookup_value, size, number_of_matches, encrypted_isMatch, ones_data);
 }

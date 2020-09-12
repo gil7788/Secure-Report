@@ -160,7 +160,9 @@ std::string VectorUtils::to_string(VectorXi vector) {
     return result;
 }
 
-std::vector<int> VectorUtils::eigen_vector_to_std_vector(VectorXi eigen_vector) {
-    std::vector<int> std_vector(eigen_vector.data(), eigen_vector.data() + eigen_vector.size());
+std::vector<long> VectorUtils::eigen_vector_to_std_vector(VectorXi eigen_vector) {
+    std::vector<long> std_vector(eigen_vector.data(), eigen_vector.data() + eigen_vector.size());
     return std_vector;
 }
+
+

@@ -5,7 +5,7 @@
 
 using Eigen::MatrixXi;
 using Eigen::VectorXi;
-
+using namespace std;
 
 class VectorUtils {
 public:
@@ -39,7 +39,15 @@ public:
         return string_stream.str();
     }
 
-    static std::vector<int> eigen_vector_to_std_vector(VectorXi eigen_vector);
+    static std::vector<long> eigen_vector_to_std_vector(VectorXi eigen_vector);
+
+    static vector<long> xor_vectors(vector<long>& x, vector<long>& y) {
+        vector<long> result(x.size());
+        for(long i = 0; i < x.size(); ++i) {
+            result[i] = x[i] ^ y[i];
+        }
+        return result;
+    }
 };
 
 

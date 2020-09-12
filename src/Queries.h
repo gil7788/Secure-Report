@@ -6,7 +6,7 @@
 #define SECURE_REPORT_QUERIES_H
 
 #include "vector"
-#include "HashFunctionsFamily.h"
+
 
 using namespace std;
 
