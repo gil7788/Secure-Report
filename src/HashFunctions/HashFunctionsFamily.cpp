@@ -46,6 +46,12 @@ int HashFunctionFamily::get_range_word_length() {
     return _range_word_size;
 }
 
+string HashFunctionFamily::to_string() {
+    ostringstream ss;
+    ss << *this;
+    return ss.str();
+}
+
 int HashFunctionFamily::get_value_in_range(int x) {
     return ((x % get_range_size()) + get_range_size()) % get_range_size();
 }
@@ -54,7 +60,23 @@ void HashFunctionFamily::build() {
 
 }
 
+ostream& operator<<(ostream& os, HashFunctionFamily& hash_function) {
+    long domain_size = pow(2, hash_function._domain_word_size);
+    long range_size = pow(2, hash_function._range_word_size);
+    long number_of_random_bits = hash_function.get_number_of_random_bits();
+
+    os << "Domain size: " << domain_size << "\n";
+    os << "Range size: " << range_size << "\n";
+    os << "Number of random bits: " << number_of_random_bits << "\n";
+
+    return os;
+}
+
 // Trivial hash function family
+int TrivialHashFunctionsFamily::get_number_of_random_bits() {
+    return get_domain_word_length() * get_range_word_length();
+}
+
 int TrivialHashFunctionsFamily::evaluate_value(int x) {
     auto x_binary = VectorUtils::number_to_binary(x, get_domain_word_length());
     auto x_evaluation_binary = x_binary.transpose() * _sampledMatrix;
@@ -86,11 +108,26 @@ vector<int> TrivialHashFunctionsFamily::evaluate_subset(vector<int> &values_indi
 
 void KWiseIndependentHashFunctionFamily::initialize(int domain_word_size, int range_word_size, int k) {
     HashFunctionFamily::initialize(domain_word_size, range_word_size);
-    _k = k;
+    set_independence(k);
 }
 
 int KWiseIndependentHashFunctionFamily::get_independence() {
     return _k;
+}
+
+void KWiseIndependentHashFunctionFamily::set_independence(int k) {
+    _k = k;
+}
+
+ostream &operator<<(ostream &os, KWiseIndependentHashFunctionFamily &hash_function) {
+    int independence = hash_function.get_independence();
+    os << (HashFunctionFamily&) hash_function;
+    os << "Independence: " << independence << "\n";
+    return os;
+}
+
+int PolynomialHashFunctionsFamily::get_number_of_random_bits() {
+    return get_domain_word_length() * get_independence();
 }
 
 void PolynomialHashFunctionsFamily::initialize(int domain_word_size, int range_word_size, int k) {
@@ -166,7 +203,7 @@ VectorXi PolynomialHashFunctionsFamily::sample_seed() {
     vector<int> seed;
     VectorXi field_seed = VectorXi::Zero(get_independence());
 
-    for (int i = 0; i < get_domain_word_length() * get_independence(); ++i) {
+    for (int i = 0; i < get_number_of_random_bits(); ++i) {
         seed.push_back(sample_random_bit());
     }
 
@@ -192,8 +229,15 @@ vector<int> PolynomialHashFunctionsFamily::evaluate_subset(vector<int> &values_s
     return k_wise_independent_elements;
 }
 
+int GraduallyIncreasingHashFunctionsFamily::get_number_of_random_bits() {
+    int random_bits;
+    for(auto& hash_function: _hash_functions) {
+        random_bits += hash_function.get_number_of_random_bits();
+    }
+    return random_bits;
+}
+
 void GraduallyIncreasingHashFunctionsFamily::build() {
-    initialize_matrices();
     build_matrices();
     evaluate_all_domain();
 }
@@ -225,8 +269,19 @@ VectorXi GraduallyIncreasingHashFunctionsFamily::evaluate_all_domain() {
     return VectorXi();
 }
 
-void
-GraduallyIncreasingHashFunctionsFamily::initialize_matrices() {
+void GraduallyIncreasingHashFunctionsFamily::initialize(int domain_word_length, int range_word_length) {
+    assert(range_word_length >= 4);
+    // Clear object from previous initialization
+    _independence_degrees.clear();
+    _domains.clear();
+    _domains_word_length.clear();
+    _hash_functions.clear();
+    _evaluated_domain.clear();
+    HashFunctionFamily::initialize(domain_word_length, range_word_length);
+    initialize_matrices();
+}
+
+void GraduallyIncreasingHashFunctionsFamily::initialize_matrices() {
     auto n = get_range_size();
     int n_i = n;
     int l_i = floor(log2(n_i)/4);
@@ -282,6 +337,14 @@ vector<int> GraduallyIncreasingHashFunctionsFamily::evaluate_subset(vector<int> 
 
 vector<int> GraduallyIncreasingHashFunctionsFamily::get_evaluated_domain() {
     return _evaluated_domain;
+}
+
+int Tabulation::get_number_of_random_bits() {
+    int random_bits;
+    for(auto& hash_function: _hash_tables) {
+        random_bits += hash_function.get_number_of_random_bits();
+    }
+    return random_bits;
 }
 
 void Tabulation::initialize(int domain_word_size, int range_word_size) {
@@ -348,6 +411,10 @@ int Tabulation::get_word_length() {
     return word_length;
 }
 
+int TwistedTabulation::get_number_of_random_bits() {
+    return _twister.get_number_of_random_bits() + _simple_tabulation.get_number_of_random_bits();
+}
+
 void TwistedTabulation::initialize(int domain_word_size, int range_word_size) {
     HashFunctionFamily::initialize(domain_word_size, range_word_size);
     int number_of_hash_tables = ceil(domain_word_size/range_word_size);
@@ -400,6 +467,15 @@ vector<int> TwistedTabulation::evaluate_subset(vector<int> &values_indices) {
         selected_values.push_back(_evaluated_domain[i]);
     }
     return selected_values;
+}
+
+int NisanGenerator::get_number_of_random_bits() {
+    int number_of_random_bits;
+    for(auto& hash_function: _pair_wise_indpendent_hash_funtions) {
+        number_of_random_bits += hash_function.get_number_of_random_bits();
+    }
+
+    return number_of_random_bits;
 }
 
 void NisanGenerator::initialize(int domain_word_length, int k) {

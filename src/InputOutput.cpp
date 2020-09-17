@@ -11,7 +11,7 @@ namespace fs = std::experimental::filesystem;
 
 InputOutput::InputOutput(bool output_to_console, const std::string& output_file_path, int output_level):
         _output_to_console{output_to_console},
-        _output_file_path{output_file_path},
+        _output_file_path{fs::absolute(output_file_path)},
         _output_level{output_level}{
     _output_to_file = {not output_file_path.empty()};
 }
@@ -27,8 +27,7 @@ bool InputOutput::output(const std::string& message, int output_level){
 
     bool created_or_appended_to_file = false;
     if(_output_to_file){
-        auto absolute_output_file_path = fs::absolute(_output_file_path);
-        created_or_appended_to_file = create_or_append_to_file(message, absolute_output_file_path);
+        created_or_appended_to_file = create_or_append_to_file(message);
     }
 
     bool output_successful = (not _output_to_file) or created_or_appended_to_file;
@@ -56,17 +55,17 @@ std::string InputOutput::read_file() {
     }
 }
 
-bool InputOutput::create_or_append_to_file(const std::string& message, const std::string& file_path) {
+// TODO: Currently the function recreate the file, doesn't append.
+bool InputOutput::create_or_append_to_file(const std::string& message) {
     std::ofstream outfile;
-    const fs::path path = file_path;
-    bool created = fs::create_directories(path.parent_path());
-    if(not (fs::is_directory(path.parent_path()) || created)) {
+    bool created = fs::create_directories(_output_file_path.parent_path());
+    if(not (fs::is_directory(_output_file_path.parent_path()) || created)) {
         return false;
     }
-    outfile.open(file_path, std::ios_base::ate);
+
+    outfile.open(_output_file_path);
     if(not outfile.is_open()){
-        outfile.open(file_path,  std::fstream::in | std::fstream::out | std::fstream::trunc);
-        std::cout << "Failed to open file at path: "<< _output_file_path << ".\n Failed to write the following message: " << message << std::endl;
+        std::cout << "Failed to open file at path: "<< _output_file_path.u8string() << ".\n Failed to write the following message: " << message << std::endl;
         return false;
     }
     else {

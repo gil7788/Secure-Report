@@ -34,5 +34,5 @@ target_link_libraries(run Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++
 #add_executable(test_read_write_encrypted_number test_read_write_encrypted_number.cpp FHEUtils.h InputOutput.cpp InputOutput.h)
 #target_link_libraries(test_read_write_encrypted_number Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)
 
-add_executable(test_vandermonde vandermonde_matrix/vandermonde_test.cpp vandermonde_matrix/vandermonde.cpp vandermonde_matrix/vandermonde.hpp HashFunctions/HashFunctionsFamily.h HashFunctions/HashFunctionsFamily.cpp VectorUtils.cpp VectorUtils.h HashFunctions/TestHashFunctionFamily.cpp HashFunctions/TestHashFunctionFamily.h)
+add_executable(test_vandermonde vandermonde_matrix/vandermonde_test.cpp vandermonde_matrix/vandermonde.cpp vandermonde_matrix/vandermonde.hpp HashFunctions/HashFunctionsFamily.h HashFunctions/HashFunctionsFamily.cpp VectorUtils.cpp VectorUtils.h HashFunctions/TestHashFunctionFamily.cpp HashFunctions/TestHashFunctionFamily.h Config.h InputOutput.cpp InputOutput.h)
 target_link_libraries(test_vandermonde Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)

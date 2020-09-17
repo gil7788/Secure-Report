@@ -16,10 +16,10 @@ using Eigen::Map;
 
 
 using namespace std;
+
 class HashFunctionFamily {
     int _domain_word_size;
     int _range_word_size;
-    MatrixXi _sampledMatrix;
 
 protected:
     virtual double tests_bit_randomness(int number_of_tests);
@@ -37,6 +37,11 @@ public:
     virtual int get_domain_size();
 
     virtual int get_range_size();
+
+    virtual int get_number_of_random_bits() = 0;
+
+    virtual string to_string();
+
 public:
 
     virtual void initialize(int domain_word_size, int range_word_size);
@@ -46,12 +51,16 @@ public:
     virtual vector<int> evaluate_subset(vector<int> &values_indices) = 0;
 
     virtual VectorXi evaluate_all_domain()  = 0;
+
+    friend ostream& operator<<(ostream& os, HashFunctionFamily& duration);
 };
 
 class TrivialHashFunctionsFamily: public HashFunctionFamily {
     MatrixXi _sampledMatrix;
 
 public:
+    int get_number_of_random_bits() override;
+
     void initialize(int domain_word_size, int range_word_size) override;
 
     virtual vector<int> evaluate_subset(vector<int> &values_indices);
@@ -68,6 +77,10 @@ public:
     virtual void initialize(int domain_word_size, int range_word_size, int k) = 0;
 
     virtual int get_independence();
+
+    void set_independence(int k);
+
+    friend ostream& operator<<(ostream& os, KWiseIndependentHashFunctionFamily& hash_function);
 private:
     using HashFunctionFamily::initialize;
 };
@@ -87,7 +100,10 @@ private:
     vector<int> get_vandermonde_elements(int number_of_element);
 
     VectorXi  sample_seed();
+
 public:
+    int get_number_of_random_bits() override;
+
     void initialize(int domain_word_size, int range_word_size, int k) override;
 
     void build() override;
@@ -107,14 +123,17 @@ class GraduallyIncreasingHashFunctionsFamily: public HashFunctionFamily {
     vector<int> _evaluated_domain;
 
 private:
-    vector<MatrixXi> build_vandermonde_matrices();
-
     void build_matrices();
 
     void initialize_matrices();
 
     vector<int> get_evaluated_domain();
+
 public:
+    int get_number_of_random_bits() override;
+
+    void initialize(int domain_word_length, int range_word_length) override ;
+
     void build() override;
 
     // TODO fix returns type. Make private.
@@ -132,6 +151,8 @@ private:
     int _number_of_hash_tables;
 
 public:
+    int get_number_of_random_bits() override;
+
     void initialize(int domain_word_size, int range_word_size) override ;
 
     virtual void build() override;
@@ -154,6 +175,8 @@ private:
     VectorXi _evaluated_domain;
 
 public:
+    int get_number_of_random_bits() override;
+
     void initialize(int domain_word_size, int range_word_size) override;
 
     virtual void build() override;
@@ -172,7 +195,10 @@ private:
     VectorXi _evaluated_domain;
 
     vector<long> evaluate_value(int value);
+
 public:
+    int get_number_of_random_bits() override;
+
     void initialize(int word_length, int k);
 
     void build();
