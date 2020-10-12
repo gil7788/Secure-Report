@@ -16,6 +16,14 @@ InputOutput::InputOutput(bool output_to_console, const std::string& output_file_
     _output_to_file = {not output_file_path.empty()};
 }
 
+InputOutput::InputOutput(bool output_to_console, const fs::path& output_file_path, int output_level):
+        _output_to_console{output_to_console},
+        _output_file_path{fs::absolute(output_file_path)},
+        _output_level{output_level}{
+    _output_to_file = {not output_file_path.empty()};
+}
+
+
 bool InputOutput::output(const std::string& message, int output_level){
     if(not at_output_level(output_level)) {
         return true;

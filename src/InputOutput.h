@@ -18,6 +18,7 @@ class InputOutput {
 
 public:
     InputOutput(bool output_to_console, const std::string& output_file_path, int output_level);
+    InputOutput(bool output_to_console, const fs::path& output_file_path, int output_level);
     bool output(const std::string& message, int output_level);
     bool create_or_append_to_file(const std::string& message);
     std::string read_file();

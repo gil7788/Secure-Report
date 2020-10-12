@@ -51,8 +51,11 @@ std::vector<long> VectorUtils::number_to_std_vector(int value, int length) {
 
 long VectorUtils::std_vector_to_number(std::vector<long>& binary_representation) {
     long value = 0;
-    for(long i = (long) binary_representation.size() - 1, power = 1; i >= 0; --i, power *= 2) {
+    long power = 1;
+    int first_index = (int) (binary_representation.size() - 1);
+    for(int i = first_index; i >= 0; --i) {
         value += binary_representation[i] * power;
+        power *= 2;
     }
     return value;
 }
@@ -121,6 +124,30 @@ std::vector<int> VectorUtils::generate_int_vector(int vector_size, int value_occ
     return result;
 }
 
+vector<int> VectorUtils::sample_random_ints(int amount, int range_upper_bound, int range_lower_bound) {
+    vector<int> random_ints;
+    for (int i = 0; i < amount; ++i) {
+        int value = generate_random_int(range_upper_bound, range_lower_bound);
+
+        while(binary_search(random_ints.begin(), random_ints.end(), value)) {
+            value = generate_random_int(range_upper_bound, range_lower_bound);
+        }
+        random_ints.push_back(value);
+    }
+    return random_ints;
+}
+
+int VectorUtils::generate_random_int(int range_upper_bound, int range_lower_bound) {
+    int range_size =  range_upper_bound - range_lower_bound + 1;
+    // Define random number generator
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dis(0, range_size-1);
+
+    // Generate values until new unique index is generated
+    int randPos = (dis(mt) % range_size) + range_lower_bound;
+    return randPos;
+}
 
 std::vector<int> VectorUtils::getMatches(VectorXi x) {
     /*

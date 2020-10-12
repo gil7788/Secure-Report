@@ -7,10 +7,12 @@
 
 #include <experimental/filesystem>
 #include <chrono>
+#include <malloc.h>
 
 #include "HashFunctionsFamily.h"
 #include "../Config.h"
 #include "../InputOutput.h"
+#include "HashFunctionLogData.h"
 
 namespace fs = std::experimental::filesystem;
 using namespace std::chrono;
@@ -34,24 +36,21 @@ public:
 
 class TestHashFunctionFamily {
 private:
-    vector<int> get_batches_size(vector<int>& split, int number_of_matches);
-
-    double vector_mean(vector<int>& v);
-
-    double diviation(vector<int>& v);
-
+    HashFunctionLogData _data;
 public:
-    string log_result(HashFunctionFamily& hash_function, vector<int> &evaluated_domain,
-            Duration& build_time_duration, Duration& evaluation_time_duration);
+    bool log_result();
 
-    string test_hash_function(HashFunctionFamily & h, vector<int>& indices_indicator);
+    void test_hash_function(HashFunctionFamily & h, vector<int>& indices_indicator, int number_of_matches);
 
     vector<int> test_subset(HashFunctionFamily& hash_function, vector<int>& subset);
 
-    string test_single_instance(HashFunctionFamily& hash_function, int domain_word_length,
+    void test_single_instance(HashFunctionFamily& hash_function, int domain_word_length,
                                 int range_word_length, int number_of_matches);
 
-    std::vector<int> sample_indices(int number_of_indices);
+    void try_test_hash_function_and_log(HashFunctionFamily& hash_function, int domain_word_length,
+                                        int number_of_batches_word_length, int number_of_matches_word_length);
+
+    std::vector<int> sample_indices(int number_of_indices, int range_upper_bound);
 };
 
 #endif //SECURE_REPORT_TESTHASHFUNCTIONFAMILY_H

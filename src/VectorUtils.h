@@ -23,6 +23,10 @@ public:
 
     static std::vector<int> generate_int_vector(int vector_size, int value_occurences, int value);
 
+    static vector<int> sample_random_ints(int amount, int range_upper_bound, int range_lower_bound = 0);
+
+    static int generate_random_int(int range_upper_bound, int range_lower_bound = 0);
+
     static std::vector<int> getMatches(VectorXi x);
 
     static std::vector<int> get_matches_std_vector(std::vector<int> x, int comparison_value);
@@ -42,9 +46,9 @@ public:
     static std::vector<long> eigen_vector_to_std_vector(VectorXi eigen_vector);
 
     static vector<long> xor_vectors(vector<long>& x, vector<long>& y) {
-        vector<long> result(x.size());
+        vector<long> result(x.size(), 0);
         for(long i = 0; i < x.size(); ++i) {
-            result[i] = x[i] ^ y[i];
+            result.at(i) = x[i] ^ y[i];
         }
         return result;
     }

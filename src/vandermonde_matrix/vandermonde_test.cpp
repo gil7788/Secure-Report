@@ -17,77 +17,49 @@ double evaluate_probability(int number_of_matches, int batch_size_slackness,
     return probability;
 }
 
-fs::path build_log_file_path(string& hash_function_name) {
-    auto hash_function_name_with_underscore = hash_function_name;
-    std::replace( hash_function_name_with_underscore.begin(), hash_function_name_with_underscore.end(), ' ', '_' );
-    string file_name = hash_function_name_with_underscore + "_log";
-    auto file_path = fs::path(constants::PROCESSED_FILE_PATH);
-    file_path.concat(file_name);
-    return file_path;
-}
-
-void test_hash_function(HashFunctionFamily& hash_function, string& hash_function_name, int database_size,
+void test_hash_function(HashFunctionFamily& hash_function, int database_size,
         int range_word_length_lower_bound = 1) {
-
-    fs::path file_path = build_log_file_path(hash_function_name);
-
-    InputOutput io(constants::OUTPUT_TO_CONSOLE, file_path.u8string(), constants::OUTPUT_LEVEL);
-    string output = "Test " + hash_function_name + ": \n";
-    output += "Database size: " + std::to_string(database_size) + "\n";
-    output += "-------------------------------\n";
-
     TestHashFunctionFamily tester;
     int database_word_length = ceil(log2(database_size));
     int maximal_number_of_matches = pow(ceil(log10(database_size)), 3);
     int maximal_number_of_matches_word_length = ceil(log2(maximal_number_of_matches));
     int maximal_number_of_batches_word_length = maximal_number_of_matches_word_length;
 
-    for(auto number_of_matches_word_length: range(range_word_length_lower_bound+1, maximal_number_of_matches_word_length)) {
-        for(auto number_of_batches_word_length: range(number_of_matches_word_length, maximal_number_of_batches_word_length)) {
-            int number_of_batches = ceil(pow(2, number_of_batches_word_length));
-            try {
-                output += tester.test_single_instance(hash_function, database_word_length, number_of_matches_word_length,
-                                                      number_of_batches);
-            }
-            catch (const std::exception& e) {
-                string error_string = "Failed to test hash function \n" + hash_function.to_string();
-                output += error_string;
-            }
-            io.output(output, constants::OUTPUT_LEVELS::LOG);
+    for(auto number_of_batches_word_length: range(range_word_length_lower_bound, maximal_number_of_matches_word_length)) {
+        for(auto number_of_matches_word_length: range(number_of_batches_word_length, maximal_number_of_batches_word_length)) {
+            tester.try_test_hash_function_and_log(hash_function, database_word_length, number_of_batches_word_length,
+                                                  number_of_matches_word_length);
         }
     }
 }
 
-void test_k_wise_hash_function(KWiseIndependentHashFunctionFamily& hash_function, string& hash_function_name, int database_size,
+void test_k_wise_hash_function(KWiseIndependentHashFunctionFamily& hash_function, int database_size,
         int independence) {
     hash_function.set_independence(independence);
-    test_hash_function(hash_function, hash_function_name, database_size);
+    test_hash_function(hash_function, database_size);
 }
 
 int main(int argc, char** argv) {
     int database_size = 10000000;
+//    int database_size = 1000;
 
-//    TrivialHashFunctionsFamily trivial_hash_function;
-//    string trivial_hash_function_name = "Trivial Hash Function Family";
-//    test_hash_function(trivial_hash_function, trivial_hash_function_name, database_size);
-//
-//    PolynomialHashFunctionsFamily polynomial_hash_function;
-//    string polynomial_hash_function_name = "Polynomial Hash Function Family";
-//    test_k_wise_hash_function(polynomial_hash_function, polynomial_hash_function_name, database_size, 4);
-//
-    GraduallyIncreasingHashFunctionsFamily increasing_hash_function;
-    string increasing_hash_function_name = "Increasing Hash Function Family";
-    int increasing_hash_function_lower_bound = 4;
-    test_hash_function(increasing_hash_function, increasing_hash_function_name, database_size, increasing_hash_function_lower_bound);
+    TestHashFunctionFamily tester;
 
-//    Tabulation tabulation_hash;
-//    string tabulation_hash_function_name = "Tabulation Hash Function Family";
-//    test_hash_function(tabulation_hash, tabulation_hash_function_name, database_size);
+    TrivialHashFunctionsFamily hash;
+    Tabulation tabulation_hash;
+    TwistedTabulation twisted_hash;
+    GraduallyIncreasingHashFunctionsFamily gradually_increasing_hash;
+    PolynomialHashFunctionsFamily polynomial_hash;
+    int independence = 4;
+    NisanGenerator nisan_generator;
 
-//    TwistedTabulation twisted_hash;
-//    string twisted_hash_hash_function_name = "Twisted Tabulation Hash Function Family";
-//    test_hash_function(twisted_hash, twisted_hash_hash_function_name, database_size, 8);
-
-//    NisanGenerator nisan_generator;
-//    nisan_generator.initialize(4, 2);
+//    Done
+//    test_hash_function(hash, database_size);
+//    test_k_wise_hash_function(polynomial_hash, database_size, independence);
+//    Done
+//    test_hash_function(twisted_hash, database_size, independence);
+    test_hash_function(tabulation_hash, database_size);
+//    Done
+//    test_hash_function(gradually_increasing_hash, database_size, 5);
+//    test_hash_function(nisan_generator, database_size);
 }

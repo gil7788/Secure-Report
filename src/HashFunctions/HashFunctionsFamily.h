@@ -8,7 +8,11 @@
 #include <iostream>
 #include <random>
 #include <Eigen/Dense>
+#include <experimental/filesystem>
+
 #include "../VectorUtils.h"
+#include "../InputOutput.h"
+#include "../Config.h"
 
 using Eigen::MatrixXi;
 using Eigen::VectorXi;
@@ -16,10 +20,12 @@ using Eigen::Map;
 
 
 using namespace std;
+namespace fs = std::experimental::filesystem;
 
 class HashFunctionFamily {
     int _domain_word_size;
     int _range_word_size;
+    vector<int> _evaluated_domain;
 
 protected:
     virtual double tests_bit_randomness(int number_of_tests);
@@ -40,32 +46,50 @@ public:
 
     virtual int get_number_of_random_bits() = 0;
 
+    int get_evaluated_value(int i);
+
+    VectorXi get_evaluated_domain();
+
+    void set_evaluated_domain(vector<int>& evaluated_domain);
+
+    void set_evaluated_domain(VectorXi& evaluated_domain);
+
+    void clear_evaluated_domain();
+
     virtual string to_string();
+
+    fs::path build_log_file_path();
 
 public:
 
     virtual void initialize(int domain_word_size, int range_word_size);
 
-    virtual void build();
+    virtual void build() = 0;
 
-    virtual vector<int> evaluate_subset(vector<int> &values_indices) = 0;
+    virtual void evaluate_all_domain() = 0;
 
-    virtual VectorXi evaluate_all_domain()  = 0;
+    vector<int> evaluate_subset(vector<int> &values_indices) ;
+
+    virtual string get_function_name() = 0;
 
     friend ostream& operator<<(ostream& os, HashFunctionFamily& duration);
+
+    bool write_evaluated_domain_to_file();
 };
 
 class TrivialHashFunctionsFamily: public HashFunctionFamily {
-    MatrixXi _sampledMatrix;
+    MatrixXi _sampled_matrix;
 
 public:
     int get_number_of_random_bits() override;
 
     void initialize(int domain_word_size, int range_word_size) override;
 
-    virtual vector<int> evaluate_subset(vector<int> &values_indices);
+    void build() override ;
 
-    VectorXi evaluate_all_domain() override;
+    void evaluate_all_domain() override;
+
+    string get_function_name() override;
 
     int evaluate_value(int x);
 };
@@ -108,11 +132,9 @@ public:
 
     void build() override;
 
-    VectorXi evaluate_all_domain() override;
+    void evaluate_all_domain() override;
 
-    MatrixXi evaluate_all_domain_binary();
-
-    vector<int> evaluate_subset(vector<int>& values_subset) override;
+    string get_function_name() override;
 };
 
 class GraduallyIncreasingHashFunctionsFamily: public HashFunctionFamily {
@@ -120,14 +142,11 @@ class GraduallyIncreasingHashFunctionsFamily: public HashFunctionFamily {
     vector<int> _domains;
     vector<int> _domains_word_length;
     vector<PolynomialHashFunctionsFamily> _hash_functions;
-    vector<int> _evaluated_domain;
 
 private:
     void build_matrices();
 
     void initialize_matrices();
-
-    vector<int> get_evaluated_domain();
 
 public:
     int get_number_of_random_bits() override;
@@ -136,17 +155,16 @@ public:
 
     void build() override;
 
-    // TODO fix returns type. Make private.
-    VectorXi evaluate_all_domain() override;
+    void evaluate_all_domain() override;
 
     int evaluate_value(int value);
 
-    vector<int> evaluate_subset(vector<int>& values_subset) override ;
+    string get_function_name() override;
 };
 
 class Tabulation: public HashFunctionFamily {
 private:
-    vector<PolynomialHashFunctionsFamily> _hash_tables;
+    vector<TrivialHashFunctionsFamily> _hash_tables;
     VectorXi _tabulation_table;
     int _number_of_hash_tables;
 
@@ -157,22 +175,21 @@ public:
 
     virtual void build() override;
 
+    void evaluate_all_domain() override ;
+
     virtual int get_number_of_hash_tables();
 
-    virtual int get_word_length();
+    int get_word_length();
 
     VectorXi evaluate(int i);
 
-    vector<int> evaluate_subset(vector<int> &values_indices) override ;
-
-    VectorXi evaluate_all_domain();
+    string get_function_name() override;
 };
 
 class TwistedTabulation: public Tabulation {
 private:
     Tabulation _twister;
     Tabulation _simple_tabulation;
-    VectorXi _evaluated_domain;
 
 public:
     int get_number_of_random_bits() override;
@@ -181,18 +198,19 @@ public:
 
     virtual void build() override;
 
+    int get_word_length();
+
+    void evaluate_all_domain();
+
     VectorXi evaluate(int i);
 
-    vector<int> evaluate_subset(vector<int> &values_indices) override;
-
-    VectorXi evaluate_all_domain();
+    string get_function_name() override;
 };
 
 class NisanGenerator: public HashFunctionFamily{
 private:
     using HashFunctionFamily::initialize;
     vector<TrivialHashFunctionsFamily> _pair_wise_indpendent_hash_funtions;
-    VectorXi _evaluated_domain;
 
     vector<long> evaluate_value(int value);
 
@@ -203,8 +221,8 @@ public:
 
     void build();
 
-    VectorXi evaluate_all_domain();
+    void evaluate_all_domain();
 
-    vector<int> evaluate_subset(vector<int> &values_indices);
+    string get_function_name() override;
 };
 #endif //SECURE_REPORT_HASHFUNCTIONSFAMILY_H
