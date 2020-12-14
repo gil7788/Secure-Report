@@ -98,15 +98,13 @@ class KWiseIndependentHashFunctionFamily:public HashFunctionFamily {
     int _k;
 
 public:
-    virtual void initialize(int domain_word_size, int range_word_size, int k) = 0;
+    virtual void initialize(int domain_word_size, int range_word_size, int independence);
 
     virtual int get_independence();
 
     void set_independence(int k);
 
     friend ostream& operator<<(ostream& os, KWiseIndependentHashFunctionFamily& hash_function);
-private:
-    using HashFunctionFamily::initialize;
 };
 
 class PolynomialHashFunctionsFamily: public KWiseIndependentHashFunctionFamily {
@@ -127,8 +125,6 @@ private:
 
 public:
     int get_number_of_random_bits() override;
-
-    void initialize(int domain_word_size, int range_word_size, int k) override;
 
     void build() override;
 

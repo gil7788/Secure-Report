@@ -114,6 +114,7 @@ ostream& operator<<(ostream& os, HashFunctionFamily& hash_function) {
     return os;
 }
 
+// TODO: Consider to delete
 bool HashFunctionFamily::write_evaluated_domain_to_file() {
 //    auto file_path = build_log_file_path();
 //    InputOutput io(false, file_path, constants::OUTPUT_LEVELS::REGULAR);
@@ -189,10 +190,6 @@ int PolynomialHashFunctionsFamily::get_number_of_random_bits() {
     return get_domain_word_length() * get_independence();
 }
 
-void PolynomialHashFunctionsFamily::initialize(int domain_word_size, int range_word_size, int k) {
-    KWiseIndependentHashFunctionFamily::initialize(domain_word_size, range_word_size, k);
-}
-
 void PolynomialHashFunctionsFamily::build() {
     sample_polynom();
     build_domain_matrix();
@@ -252,6 +249,7 @@ void PolynomialHashFunctionsFamily::evaluate_all_domain() {
 //    vector<int> k_wise_independent_elements(evaluated_domain.data(), evaluated_domain.data() + evaluated_domain.rows() * evaluated_domain.cols());
 }
 
+// TODO: Consider to delete
 //MatrixXi PolynomialHashFunctionsFamily::evaluate_all_domain_binary() {
 //    VectorXi evaluated_domain = evaluate_all_domain();
 //    MatrixXi binary_evaluated_domain = MatrixXi::Zero(evaluated_domain.size(), get_range_size());
@@ -379,6 +377,7 @@ void GraduallyIncreasingHashFunctionsFamily::build_matrices() {
     }
 }
 
+// TODO: Not used, consider to delete
 int GraduallyIncreasingHashFunctionsFamily::evaluate_value(int value) {
     return get_evaluated_value(value);
 }
@@ -403,7 +402,7 @@ void Tabulation::initialize(int domain_word_size, int range_word_size) {
     for(int i = 0; i < _number_of_hash_tables; ++i) {
         TrivialHashFunctionsFamily hash;
         auto tables_domain_size = ceil(get_domain_word_length()/_number_of_hash_tables);
-        hash.initialize(tables_domain_size, get_domain_word_length());
+        hash.initialize(tables_domain_size, range_word_size);
         _hash_tables.push_back(hash);
     }
 }
@@ -417,7 +416,6 @@ void Tabulation::build() {
 void Tabulation::evaluate_all_domain() {
     vector<int> evaluated_domain;
 
-//    TODO un comment
     for (int i = 0; i < get_domain_size(); ++i) {
         auto evaluated_value = VectorUtils::binary_to_number(evaluate(i));
         evaluated_domain.push_back(evaluated_value);
@@ -426,13 +424,17 @@ void Tabulation::evaluate_all_domain() {
 }
 
 VectorXi Tabulation::evaluate(int value) {
-    vector<long> accumulated(get_word_length(), 1);
+    vector<long> accumulated(get_range_word_length(), 1);
     auto binary_number = VectorUtils::number_to_std_vector(value, get_domain_word_length());
-    for (int i = 0; i < get_number_of_hash_tables()-1; ++i) {
+    for (int i = 0; i < get_number_of_hash_tables(); ++i) {
+        auto hash_table = _hash_tables[i];
         vector<long>::iterator number_begin = binary_number.begin() + get_word_length() * i;
         vector<long>::iterator number_end = number_begin + get_word_length();
         vector<long> word_i(number_begin, number_end);
-        accumulated = VectorUtils::xor_vectors(accumulated, word_i);
+        vector<int> word_i_int{(int)VectorUtils::std_vector_to_number(word_i)};
+        int evaluated_word_i = hash_table.evaluate_subset(word_i_int)[0];
+        auto evaluated_word_i_binary = VectorUtils::number_to_std_vector(evaluated_word_i, get_range_word_length());
+        accumulated = VectorUtils::xor_vectors(accumulated, evaluated_word_i_binary);
     }
 
     std::vector<int> acc(begin(accumulated), end(accumulated));

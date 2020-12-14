@@ -1,7 +1,9 @@
 cmake_minimum_required (VERSION 3.0)
-
+project(Secure)
 # Eigen package
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
+set (CMAKE_CXX_FLAGS "-std=c++11")
 
 set(INCLUDE_DIR /usr/local/include)
 set(LIBRARY_DIR usr/local/lib)
@@ -27,14 +29,14 @@ link_directories(${MYSQLPP_LIBRARY})
 
 file(GLOB SOURCE_FILES *.cpp)
 
-#add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp FileUtils.h PlainFileSystemDatabase.h test_read_write_encrypted_number.cpp zp_binary.cpp zp_binary.h GenericZP.h GenericZP.cpp SimplifiedHelibNumber.h SimplifiedHelibNumber.cpp SimplifiedHelibKeys.cpp EncryptedBits.h ../test_secure_batch_retrieval.cpp Queries.h HashFunctions/HashFunctionsFamily.cpp HashFunctions/HashFunctionsFamily.h)
-##add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.cpp Server.cpp Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp )
+#add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp FileUtils.h PlainFileSystemDatabase.h test_read_write_encrypted_number.cpp zp_binary.cpp zp_binary.h GenericZP.h GenericZP.cpp SimplifiedHelibNumber.h SimplifiedHelibNumber.cpp SimplifiedHelibKeys.cpp EncryptedBits.h ../test_secure_batch_retrieval.cpp Queries.h HashFunctions/HashFunctionsFamily.cpp HashFunctions/HashFunctionsFamily.h Protocol.cpp Protocol.h)
+#add_executable(run Run.cpp SketchEncoder.cpp SketchEncoder.h VectorUtils.cpp VectorUtils.h FHEDatabase.h PlainDatabase.cpp PlainDatabase.h InputOutput.cpp InputOutput.h Config.h FHEDatabaseConfig.cpp FHEDatabaseConfig.h Server.cpp Server.cpp Server.h Client.h FHEUtils.h TrustedThirdParty.cpp TrustedThirdParty.h templates_test.cpp FileUtils.cpp )
 #target_link_libraries(run Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)
 
 #add_executable(test_read_write_encrypted_number test_read_write_encrypted_number.cpp FHEUtils.h InputOutput.cpp InputOutput.h)
 #target_link_libraries(test_read_write_encrypted_number Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)
 
-add_executable(test_vandermonde vandermonde_matrix/vandermonde_test.cpp vandermonde_matrix/vandermonde.cpp vandermonde_matrix/vandermonde.hpp HashFunctions/HashFunctionsFamily.h HashFunctions/HashFunctionsFamily.cpp VectorUtils.cpp VectorUtils.h HashFunctions/TestHashFunctionFamily.cpp HashFunctions/TestHashFunctionFamily.h Config.h InputOutput.cpp InputOutput.h HashFunctions/HashFunctionData.cpp HashFunctions/HashFunctionData.h HashFunctions/HashFunctionLogData.cpp HashFunctions/HashFunctionLogData.h)
+add_executable(test_vandermonde vandermonde_matrix/vandermonde_test.cpp vandermonde_matrix/vandermonde.cpp vandermonde_matrix/vandermonde.hpp HashFunctions/HashFunctionsFamily.h HashFunctions/HashFunctionsFamily.cpp VectorUtils.cpp VectorUtils.h HashFunctions/TestHashFunctionFamily.cpp HashFunctions/TestHashFunctionFamily.h Config.h InputOutput.cpp InputOutput.h HashFunctions/HashFunctionData.cpp HashFunctions/HashFunctionData.h HashFunctions/HashFunctionLogData.cpp HashFunctions/HashFunctionLogData.h HashFunctions/SBRTestData.cpp HashFunctions/SBRTestData.h)
 target_link_libraries(test_vandermonde Eigen3::Eigen liphe fhe ntl gmp pthread mysqlpp stdc++fs)
 
 add_executable(memory_check_run memory_check/MemoryCheck.cpp)

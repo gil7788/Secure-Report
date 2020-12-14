@@ -6,7 +6,7 @@
 #include "HashFunctionData.h"
 
 void TestHashFunctionFamily::try_test_hash_function_and_log(HashFunctionFamily& hash_function, int domain_word_length,
-                                                            int number_of_batches_word_length, int number_of_matches_word_length) {
+        int number_of_matches_word_length, int number_of_batches_word_length) {
     try {
         test_single_instance(hash_function, domain_word_length, number_of_batches_word_length,
                                     number_of_matches_word_length);
@@ -28,8 +28,6 @@ void TestHashFunctionFamily::test_hash_function(HashFunctionFamily &hash_functio
     auto end_construction_time = high_resolution_clock::now();
     auto construction_time = end_construction_time - start_construction_time;
     long construction_time_in_nanoseconds = duration_cast<nanoseconds>(construction_time).count();
-    // TODO consider to delete
-    Duration build_time_duration = Duration(construction_time);
 
     auto start_build_time = high_resolution_clock::now();
     hash_function.evaluate_all_domain();
@@ -42,8 +40,6 @@ void TestHashFunctionFamily::test_hash_function(HashFunctionFamily &hash_functio
     auto end_evaluation_time = high_resolution_clock::now();
     auto evaluation_time = end_evaluation_time - start_evaluation_time;
     long evaluation_time_in_nanoseconds = duration_cast<nanoseconds>(evaluation_time).count();
-    // TODO consider to delete
-    Duration evaluation_time_duration = Duration(evaluation_time);
 
     HashFunctionData hash_data(hash_function, number_of_matches);
     hash_data.set_running_results(evaluated_subset, construction_time_in_nanoseconds, build_time_in_nanoseconds,
@@ -54,16 +50,6 @@ bool TestHashFunctionFamily::log_result() {
     bool log_saved = _data.save_log();
     return log_saved;
 }
-//string TestHashFunctionFamily::log_result(HashFunctionFamily& hash, int number_of_matches, vector<int> &evaluated_domain,
-//                                          long construction_time, long evaluation_time) {
-//
-//    string output = hash_function.to_string();
-//    output += "Construction Time: " + build_time_duration.to_string() + "\n";
-//    output += "Evaluation Time: " + evaluation_time_duration.to_string() + "\n";
-//    output += "Mean batch size: " + std::to_string(vector_mean(matches_per_batch)) + "\n";
-//    output += "Batch size diviation: " + std::to_string(diviation(matches_per_batch)) + "\n";
-//    return output;
-//}
 
 vector<int> TestHashFunctionFamily::test_subset(HashFunctionFamily& hash_function, vector<int>& subset) {
     auto evaluated_subset = hash_function.evaluate_subset(subset);
@@ -81,17 +67,11 @@ void TestHashFunctionFamily::test_single_instance(HashFunctionFamily& hash_funct
 }
 
 std::vector<int> TestHashFunctionFamily::sample_indices(int number_of_indices, int range_upper_bound) {
-    auto sampled_indices = VectorUtils::sample_random_ints(number_of_indices, range_upper_bound);
+    auto sampled_indices = VectorUtils::sample_random_ints(number_of_indices, range_upper_bound-1);
     return sampled_indices;
-
-//    // TODO add random selection
-//    std::vector<int> indices;
-//    for( int i = 0; i < number_of_indices; i++)
-//        indices.push_back(i);
-//
-//    return indices;
 }
 
+// TODO: Save as a utility out side of this project
 Duration::Duration(std::chrono::duration<double> duration) {
     normalize_duration(duration);
 }
