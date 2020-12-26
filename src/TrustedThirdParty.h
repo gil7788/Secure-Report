@@ -17,11 +17,11 @@ public:
     vector<int> _matrices_sparsity;
     vector<SketchEncoder> _encoders;
 
-    TrustedThirdParty(int database_size, int maximal_number_of_matches_per_query);
-
-    TrustedThirdParty(int database_size, vector<int>& matrices_sparsity);
-
     void initialize();
+
+    void initialize(int database_size, int maximal_number_of_matches_per_query);
+
+    void initialize(int database_size, vector<int>& matrices_sparsity);
 
     SketchEncoder get_matrix_by_index(int i);
 

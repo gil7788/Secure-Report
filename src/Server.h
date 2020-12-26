@@ -21,15 +21,18 @@ class Server {
 public:
     int _database_size;
     int _number_of_matches;
-    FHEDatabase<DataType> _fhe_database;
+    InputOutput _io;
     DatabaseDataType& _data_type;
-    InputOutput _io = InputOutput(constants::OUTPUT_TO_CONSOLE, constants::OUTPUT_FILE_PATH, constants::OUTPUT_LEVEL);
+    FHEDatabase<DataType> _fhe_database;
     bool _is_connected = false;
+    unique_ptr<EncryptedQuery<DataType>> _query;
 
     Server(int size, int sparsity, DatabaseDataType& data_type):
             _database_size{size},
             _number_of_matches{sparsity},
-            _fhe_database(_database_size, _io), _data_type(data_type) {}
+            _io(constants::OUTPUT_TO_CONSOLE, constants::OUTPUT_FILE_PATH, constants::OUTPUT_LEVEL),
+            _data_type(data_type),
+            _fhe_database(size, _io) {}
 
     virtual void connect_database() {
         if(_is_connected)
@@ -68,11 +71,18 @@ public:
     }
 
     virtual TrustedThirdParty initialize() {
-        construct_public_server();
         auto public_server = construct_public_server();
         construct_disjunct_matrices(public_server);
         return public_server;
     };
+
+    void initialize_query(unique_ptr<EncryptedQuery<DataType>> query) {
+        _query = move(query);
+    }
+
+//    PlainQuery<DataType>& get_query() {
+//        return _query;
+//    }
 
     virtual vector<DataType> evaluate_matches() = 0;
 
@@ -105,7 +115,7 @@ public:
 
 template <typename DataType>
 class SecureReportServer: public Server<DataType> {
-EncryptedSecureReportQuery<DataType> _current_query;
+//EncryptedSecureReportQuery<DataType> _current_query;
 
 public:
     SecureReportServer(int size, int sparsity, DatabaseDataType& data_type):
@@ -123,7 +133,8 @@ public:
 
     virtual TrustedThirdParty construct_public_server() {
         auto number_of_matches = Server<DataType>::_number_of_matches;
-        auto public_server = TrustedThirdParty(Server<DataType>::_database_size, number_of_matches);
+        TrustedThirdParty public_server;
+        public_server.initialize(Server<DataType>::_database_size, number_of_matches);
         return public_server;
     }
 
@@ -132,10 +143,6 @@ public:
         return disjunct_matrix;
     }
 
-    void initialize_query(EncryptedSecureReportQuery<DataType>& query) {
-        _current_query.initialize(query._encrypted_lookup_value,
-                                  query._isMatch);
-    }
 private:
     vector<DataType> evaluate_is_match_on_database(vector<DataType>& database) {
         vector<DataType> isMatch_indicator;
@@ -147,16 +154,16 @@ private:
     }
 
     DataType evaluate_is_match_on_element(DataType element) {
-        return _current_query._isMatch(_current_query._encrypted_lookup_value, element);
+        return Server<DataType>::_query._isMatch(Server<DataType>::_query._encrypted_lookup_value, element);
     }
 };
 
 template <typename DataType>
 class SecureBatchRetrievalServer: public Server<DataType>{
 private:
-vector<vector<int>> _batches_splits;
+vector<std::shared_ptr<HashFunctionFamily>> _hash_function_familys;
 vector<MatrixXi> _disjunct_matrices;
-EncryptedSecureBatchRetrievalQuery<DataType> _current_query;
+//EncryptedSecureBatchRetrievalQuery<DataType> _current_query;
 
 public:
     SecureBatchRetrievalServer(int size, int sparsity, DatabaseDataType& data_type):
@@ -170,26 +177,29 @@ public:
 
     virtual vector<DataType> evaluate_matches() {
         auto database = Server<DataType>::_fhe_database.table_to_vector();
-        int batch_size_word_length = ceil(log2(_current_query._batch_size));
-        auto batches_split = _batches_splits[batch_size_word_length];
-        auto is_match_indicators = evaluate_is_match_on_database(database, batches_split);
+        int batch_size_word_length = ceil(log2(get_query()._batch_size));
+        auto hash_function = move(_hash_function_familys[batch_size_word_length]);
+        auto is_match_indicators = evaluate_is_match_on_database(database, hash_function);
         return is_match_indicators;
     }
 
     virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
-        auto matrix_index = ceil(log2(_current_query._batch_size));
+        auto matrix_index = ceil(log2(get_query()._batch_size));
         auto disjunct_matrix = public_server.get_matrix_by_index(matrix_index);
         return disjunct_matrix;
     }
 
-    void initialize_query(EncryptedSecureBatchRetrievalQuery<DataType>& query) {
-        _current_query.initialize(query._encrypted_lookup_value,
-                                  query._batch_index,
-                                  query._batch_size,
-                                  query._isMatch);
+private:
+    EncryptedSecureBatchRetrievalQuery<DataType> get_query() {
+//        @TODO Add asseif query is pointing to null ptr
+//        Derived *derivedPointer = dynamic_cast<Derived*>(basePointer.get());
+        EncryptedSecureBatchRetrievalQuery<DataType>* query =
+                dynamic_cast<EncryptedSecureBatchRetrievalQuery<DataType>*> (Server<DataType>::_query.get());
+        if(query != nullptr) {
+            return *query;
+        }
     }
 
-private:
     virtual TrustedThirdParty construct_public_server() {
         auto number_of_matches_word_length = ceil(log2(Server<DataType>::_number_of_matches));
         auto database = Server<DataType>::_database_size;
@@ -200,49 +210,50 @@ private:
             matrices_sparsities.push_back(sparsity_at_i);
         }
 
-        auto public_server = TrustedThirdParty(database, matrices_sparsities);
+        TrustedThirdParty public_server;
+        public_server.initialize(database, matrices_sparsities);
         return public_server;
     }
 private:
     void sample_all_hash_mappings() {
         int number_of_matches_word_length = ceil(log2(Server<DataType>::_number_of_matches));
         for (int i = 0; i <= number_of_matches_word_length; ++i) {
-            vector<int> split_i = split_database_to_batches(i);
-            _batches_splits.push_back(split_i);
+            auto hash_function_i = split_database_to_batches(i);
+            _hash_function_familys.push_back(hash_function_i);
         }
     }
 
-    vector<int> split_database_to_batches(int number_of_batches_word_length) {
+    std::shared_ptr<HashFunctionFamily> split_database_to_batches(int number_of_batches_word_length) {
         int domain_word_size = log2(Server<DataType>::_database_size);
-
+        std::shared_ptr<PolynomialHashFunctionsFamily> hash_function(new PolynomialHashFunctionsFamily());
 
         if(number_of_batches_word_length == 0) {
             vector<int> batches_split(Server<DataType>::_database_size, 0);
-            return batches_split;
         }
         else {
             auto independence = ceil(log2(Server<DataType>::_database_size));
-            PolynomialHashFunctionsFamily hash_function(independence);
-            hash_function.initialize(domain_word_size, number_of_batches_word_length);
-            vector<int> batches_split = hash_function.evaluate_all_domain();
-            return batches_split;
+            hash_function->initialize(domain_word_size, number_of_batches_word_length, independence);
+            hash_function->build();
+            hash_function->evaluate_all_domain();
         }
+        return hash_function;
     }
 
 private:
     vector<DataType> evaluate_is_match_on_database(vector<DataType>& database,
-                                                   vector<int>& batches_split) {
+                                                   shared_ptr<HashFunctionFamily>& hash_function) {
         vector<DataType> isMatch_indicator;
         for(int element_index = 0; element_index <  database.size(); ++element_index) {
-            auto element_isMatch_indicator = evaluate_is_match_on_element(database[element_index], element_index, batches_split);
+            auto element_isMatch_indicator = evaluate_is_match_on_element(database[element_index], element_index, hash_function);
             isMatch_indicator.push_back(element_isMatch_indicator);
         }
         return isMatch_indicator;
     }
 
-    DataType evaluate_is_match_on_element(DataType element, int element_index, vector<int>& batches_split) {
-        if(batches_split[element_index] == _current_query._batch_index) {
-            return _current_query._isMatch(_current_query._encrypted_lookup_value, element);
+    DataType evaluate_is_match_on_element(DataType element, int element_index, shared_ptr<HashFunctionFamily>& hash_function) {
+        if(hash_function->get_evaluated_value(element_index) == get_query()._batch_index) {
+            auto encrypted_value = get_query()._encrypted_lookup_value;
+            return get_query()._isMatch(encrypted_value, element);
         }
         else {
             return DataType(0);

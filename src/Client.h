@@ -23,14 +23,20 @@ public:
     int _datase_size;
     int _maximal_number_of_matches_per_query;
     DatabaseDataType& _data_type;
+    unique_ptr<PlainQuery<DataType>> _query;
 
     Client(int datase_size, int maximal_number_of_matches_per_query, DatabaseDataType& data_type):
             _datase_size{datase_size},
             _maximal_number_of_matches_per_query{maximal_number_of_matches_per_query},
-            _data_type(data_type){}
+            _data_type(data_type) {}
 
     virtual bool initialize() {
         _data_type.initialize();
+    }
+
+    void initialize_query(unique_ptr<PlainQuery<DataType>> query) {
+        _query = move(query);
+//        _query = query;
     }
 
     virtual std::vector<DataType> upload_data_to_server(std::vector<int>& data) {
@@ -50,6 +56,11 @@ public:
         return encrypted_input;
     }
 
+    unique_ptr<EncryptedQuery<DataType>> encrypt_query() {
+        auto encrypted_query = _query.get()->encrypt();
+        return encrypted_query;
+    }
+
     virtual std::vector<int> retrieve_matches_indices(std::vector<DataType>&  encoded_encrypted_matches, TrustedThirdParty& trusted_third_party) {
         std::vector<int> encoded_matches = decrypt_encrypted_encoded_matches(encoded_encrypted_matches);
 
@@ -58,6 +69,10 @@ public:
 
         return matches;
     }
+//  @TODO delete
+//    unique_ptr<PlainQuery<DataType>> get_query() {
+//        return _query.get();
+//    }
 
 private:
     virtual std::vector<int> decrypt_encrypted_encoded_matches(std::vector<DataType>& encrypted_encoded_matches) {
@@ -83,7 +98,8 @@ private:
 
         auto encoder = get_disjunct_matrix(public_server);
         VectorXi eigen_vector_matches = encoder.decode(eigen_encoded_matches);
-        std::vector<int> matches = VectorUtils::eigen_vector_to_std_vector(eigen_vector_matches);
+        auto matches_long = VectorUtils::eigen_vector_to_std_vector(eigen_vector_matches);
+        std::vector<int> matches(begin(matches_long), end(matches_long));
 
         return matches;
     }
@@ -93,23 +109,18 @@ private:
 
 template <typename DataType>
 class SecureReportClient: public Client<DataType> {
-    SecureReportQuery<DataType> _query;
 public:
     SecureReportClient(int datase_size, int maximal_number_of_matches_per_query, DatabaseDataType& data_type):
             Client<DataType>(datase_size, maximal_number_of_matches_per_query, data_type) {}
 
     EncryptedSecureReportQuery<DataType> query_server() {
-        EncryptedSecureReportQuery<DataType> encrypted_query = _query.encrypt();
+        EncryptedSecureReportQuery<DataType> encrypted_query = Client<DataType>::get_query().encrypt();
 
         return encrypted_query;
     }
 
-    void initialize_query(int lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
-        _query.initialize(lookup_value, isMatch);
-    }
-
     EncryptedSecureReportQuery<DataType> encrypt_query() {
-        return _query.encrypt();
+        return Client<DataType>::get_query().get().encrypt();
     }
 
 private:
@@ -126,26 +137,39 @@ public:
     SecureBatchRetrievalClient(int datase_size, int maximal_number_of_matches_per_query, DatabaseDataType& data_type):
             Client<DataType>(datase_size, maximal_number_of_matches_per_query, data_type) {}
 
+    // @TODO: Consider to delete
+    SecureBatchRetrievalClient& operator=(SecureBatchRetrievalClient client) {
+        Client<DataType>(client._datase_size, client._maximal_number_of_matches_per_query, client._data_type);
+        return *this;
+    }
+
     EncryptedSecureBatchRetrievalQuery<DataType> query_server() {
+//        @TODO use get query
         EncryptedSecureBatchRetrievalQuery<DataType> encrypted_query = _query.encrypt();
 
         return encrypted_query;
     }
 
-    void initialize_query(int lookup_value, int batch_size, int batch_index, int database_size, int number_of_matches,
-            DataType (*isMatch)(DataType&, DataType&)) {
-        _query.initialize(lookup_value, batch_size, batch_index, database_size, number_of_matches, isMatch);
-    }
-
     EncryptedSecureBatchRetrievalQuery<DataType> encrypt_query() {
+//        @TODO use get query
         return _query.encrypt();
     }
 
 private:
     virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
-        auto encoder_index = ceil(log2(_query._batch_size));
+        auto encoder_index = ceil(log2(get_query()._batch_size));
         auto sketch_encoder = public_server.get_matrix_by_index(encoder_index);
         return sketch_encoder;
+    }
+
+    SecureBatchRetrievalQuery<DataType> get_query() {
+//        @TODO Add asseif query is pointing to null ptr
+//        Derived *derivedPointer = dynamic_cast<Derived*>(basePointer.get());
+        SecureBatchRetrievalQuery<DataType>* query =
+                dynamic_cast<SecureBatchRetrievalQuery<DataType>*> (Client<DataType>::_query.get());
+        if(query != nullptr) {
+            return *query;
+        }
     }
 };
 

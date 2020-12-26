@@ -11,12 +11,12 @@
 #include "Server.h"
 #include "FileUtils.h"
 #include "GenericZP.h"
-#include <zp.h>
 #include "SimplifiedHelibNumber.h"
 #include "Queries.h"
+#include "Protocol.h"
 
 #include <random>
-#include <iostream>
+
 
 #define SIMD_FACTOR constants::WORD_LENGTH
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -39,7 +39,6 @@ template <typename DataType>
 TrustedThirdParty initialize(Server<DataType>& server) {
     // Public server
     TrustedThirdParty public_server = server.construct_public_server();
-    public_server.initialize();
     return public_server;
 }
 
@@ -79,64 +78,64 @@ EncryptedDataTypeFromParameters get_encrypted_data_type(int size) {
     return encrypted_data_type;
 }
 
-template <typename DataType>
-void test_secure_report(SecureReportClient<DataType>& client,
-                        SecureReportServer<DataType>& server,
-                                        int lookup_value,
-                                        int database_size,
-                                        int number_of_matches,
-                                        DataType (*isMatch)(DataType&, DataType&),
-                                        std::vector<int>& plain_data) {
-    bool uploaded_successful = upload<DataType>(client, server, plain_data, lookup_value);
+//template <typename DataType>
+//void test_secure_report(SecureReportClient<DataType>& client,
+//                        SecureReportServer<DataType>& server,
+//                                        int lookup_value,
+//                                        int database_size,
+//                                        int number_of_matches,
+//                                        DataType (*isMatch)(DataType&, DataType&),
+//                                        std::vector<int>& plain_data) {
+//    bool uploaded_successful = upload<DataType>(client, server, plain_data, lookup_value);
+//
+//    if(! uploaded_successful) {
+//        std::cout << "Failed to upload data\n";
+//        return;
+//    }
+//
+//    TrustedThirdParty public_server = initialize<DataType>(server);
+//
+//    client.initialize_query(lookup_value, isMatch);
+//    auto encrypted_query = client.encrypt_query();
+//    server.initialize_query(encrypted_query);
+//    std::vector<int> matches_indices =
+//            retrieve<DataType>(client, server, public_server);
+//
+//    string result_string = VectorUtils::std_vector_to_string(matches_indices);
+//    std::cout << "Result: " << result_string << std::endl;
+//}
 
-    if(! uploaded_successful) {
-        std::cout << "Failed to upload data\n";
-        return;
-    }
+//void test_encrypted_secure_report(int lookup_value,
+//                                           int database_size,
+//                                           int number_of_matches,
+//                                           SimplifiedHelibNumber (*isMatch)(SimplifiedHelibNumber&, SimplifiedHelibNumber&),
+//                                           std::vector<int>& plain_data) {
+//
+//    EncryptedDataTypeFromParameters encrypted_plain_data_type = get_encrypted_data_type(database_size);
+//    SecureReportClient<SimplifiedHelibNumber> client(database_size, number_of_matches, encrypted_plain_data_type);
+//    SecureReportServer<SimplifiedHelibNumber> server(database_size, number_of_matches, encrypted_plain_data_type);
+//
+//    server.initialize();
+//
+//    test_secure_report<SimplifiedHelibNumber>(client, server, lookup_value,
+//                                                       database_size, number_of_matches, isMatch, plain_data);
+//}
 
-    TrustedThirdParty public_server = initialize<DataType>(server);
-
-    client.initialize_query(lookup_value, isMatch);
-    auto encrypted_query = client.encrypt_query();
-    server.initialize_query(encrypted_query);
-    std::vector<int> matches_indices =
-            retrieve<DataType>(client, server, public_server);
-
-    string result_string = VectorUtils::std_vector_to_string(matches_indices);
-    std::cout << "Result: " << result_string << std::endl;
-}
-
-void test_encrypted_secure_report(int lookup_value,
-                                           int database_size,
-                                           int number_of_matches,
-                                           SimplifiedHelibNumber (*isMatch)(SimplifiedHelibNumber&, SimplifiedHelibNumber&),
-                                           std::vector<int>& plain_data) {
-
-    EncryptedDataTypeFromParameters encrypted_plain_data_type = get_encrypted_data_type(database_size);
-    SecureReportClient<SimplifiedHelibNumber> client(database_size, number_of_matches, encrypted_plain_data_type);
-    SecureReportServer<SimplifiedHelibNumber> server(database_size, number_of_matches, encrypted_plain_data_type);
-
-    server.initialize();
-
-    test_secure_report<SimplifiedHelibNumber>(client, server, lookup_value,
-                                                       database_size, number_of_matches, isMatch, plain_data);
-}
-
-void test_plain_secure_report(int lookup_value,
-                                       int database_size,
-                                       int number_of_matches,
-                                       GenericZP (*isMatch)(GenericZP&, GenericZP&),
-                                       std::vector<int>& plain_data) {
-
-    GenericPlainDataType generic_plain_data_type = get_plain_data_type();
-    SecureReportClient<GenericZP> client(database_size, number_of_matches, generic_plain_data_type);
-    SecureReportServer<GenericZP> server(database_size, number_of_matches, generic_plain_data_type);
-
-    server.initialize();
-
-    test_secure_report<GenericZP>(client, server, lookup_value,
-                                           database_size, number_of_matches, isMatch, plain_data);
-}
+//void test_plain_secure_report(int lookup_value,
+//                                       int database_size,
+//                                       int number_of_matches,
+//                                       GenericZP (*isMatch)(GenericZP&, GenericZP&),
+//                                       std::vector<int>& plain_data) {
+//
+//    GenericPlainDataType generic_plain_data_type = get_plain_data_type();
+//    SecureReportClient<GenericZP> client(database_size, number_of_matches, generic_plain_data_type);
+//    SecureReportServer<GenericZP> server(database_size, number_of_matches, generic_plain_data_type);
+//
+//    server.initialize();
+//
+//    test_secure_report<GenericZP>(client, server, lookup_value,
+//                                           database_size, number_of_matches, isMatch, plain_data);
+//}
 
 // =========== Secure Batch Retrieval =============
 template<typename DataType>
@@ -158,9 +157,13 @@ void test_secure_batch_retrieval(SecureBatchRetrievalClient<DataType>& client,
     }
 
     TrustedThirdParty public_server = initialize<DataType>(server);
+    unique_ptr<SecureBatchRetrievalQuery<DataType>> query_ptr =
+            unique_ptr<SecureBatchRetrievalQuery<DataType>> (new SecureBatchRetrievalQuery<DataType>());
+    query_ptr->initialize(lookup_value, batch_size, batch_index, database_size, number_of_matches, isMatch);
 
-    client.initialize_query(lookup_value, batch_size, batch_index, database_size, number_of_matches, isMatch);
-    auto encrypted_query = client.encrypt_query();
+//    query_ptr.get().initialize(lookup_value, batch_size, batch_index, database_size, number_of_matches, isMatch);
+    client.initialize_query(std::move(query_ptr));
+    EncryptedSecureBatchRetrievalQuery<DataType> encrypted_query = client.encrypt_query();
     server.initialize_query(encrypted_query);
     // Client
     std::vector<int> matches_indices =
@@ -170,47 +173,84 @@ void test_secure_batch_retrieval(SecureBatchRetrievalClient<DataType>& client,
     std::cout << "Result: " << result_string << std::endl;
 }
 
-void test_encrypted_secure_batch_retrieval(int lookup_value,
-                                           int batch_size,
-                                           int batch_index,
-                                           int database_size,
-                                           int number_of_matches,
-                                           SimplifiedHelibNumber (*isMatch)(SimplifiedHelibNumber&, SimplifiedHelibNumber&),
-                                           std::vector<int>& plain_data) {
+//void test_encrypted_secure_batch_retrieval(int lookup_value,
+//                                           int batch_size,
+//                                           int batch_index,
+//                                           int database_size,
+//                                           int number_of_matches,
+//                                           SimplifiedHelibNumber (*isMatch)(SimplifiedHelibNumber&, SimplifiedHelibNumber&),
+//                                           std::vector<int>& plain_data) {
+//
+//    EncryptedDataTypeFromParameters encrypted_plain_data_type = get_encrypted_data_type(database_size);
+//    SecureBatchRetrievalClient<SimplifiedHelibNumber> client(database_size, number_of_matches, encrypted_plain_data_type);
+//    SecureBatchRetrievalServer<SimplifiedHelibNumber> server(database_size, number_of_matches, encrypted_plain_data_type);
+//
+//    server.initialize();
+//
+//    test_secure_batch_retrieval<SimplifiedHelibNumber>(client, server, lookup_value, batch_size, batch_index,
+//            database_size, number_of_matches, isMatch, plain_data);
+//}
 
-    EncryptedDataTypeFromParameters encrypted_plain_data_type = get_encrypted_data_type(database_size);
-    SecureBatchRetrievalClient<SimplifiedHelibNumber> client(database_size, number_of_matches, encrypted_plain_data_type);
-    SecureBatchRetrievalServer<SimplifiedHelibNumber> server(database_size, number_of_matches, encrypted_plain_data_type);
-
-    server.initialize();
-
-    test_secure_batch_retrieval<SimplifiedHelibNumber>(client, server, lookup_value, batch_size, batch_index,
-            database_size, number_of_matches, isMatch, plain_data);
-}
-
-void test_plain_secure_batch_retrieval(int lookup_value,
-                                       int batch_size,
-                                       int batch_index,
-                                       int database_size,
-                                       int number_of_matches,
-                                       GenericZP (*isMatch)(GenericZP&, GenericZP&),
-                                       std::vector<int>& plain_data) {
-
+void test_plain_secure_batch_retrieval_protocol(int lookup_value,
+                                                int batch_size,
+                                                int batch_index,
+                                                int database_size,
+                                                int number_of_matches,
+                                                GenericZP (*isMatch)(GenericZP&, GenericZP&),
+                                                std::vector<int>& plain_data) {
     GenericPlainDataType generic_plain_data_type = get_plain_data_type();
+//    unique_ptr<Client<GenericZP>> client = unique_ptr<Client<GenericZP>>(new SecureBatchRetrievalClient<GenericZP>(database_size, number_of_matches, generic_plain_data_type));
+//    unique_ptr<Server<GenericZP>> server = unique_ptr<Server<GenericZP>>(new SecureBatchRetrievalServer<GenericZP>(database_size, number_of_matches, generic_plain_data_type));
+
     SecureBatchRetrievalClient<GenericZP> client(database_size, number_of_matches, generic_plain_data_type);
     SecureBatchRetrievalServer<GenericZP> server(database_size, number_of_matches, generic_plain_data_type);
-    client.initialize();
-    server.initialize();
 
-    test_secure_batch_retrieval<GenericZP>(client, server, lookup_value, batch_size, batch_index,
-                                                       database_size, number_of_matches, isMatch, plain_data);
+//    client.initialize();
+//    server.initialize();
+
+    SecureBatchRetrievalProtocol<GenericZP> protocol(server, client);
+    protocol.upload(plain_data, lookup_value);
+    protocol.initialize();
+//    int lookup_value,
+//    int batch_size,
+//    int batch_index,
+//    int database_size,
+//    int number_of_matches,
+//    DataType (*isMatch)(DataType&, DataType&)
+    SecureBatchRetrievalQuery<GenericZP> query;
+    query.initialize(lookup_value, batch_size, batch_index, database_size, number_of_matches, isMatch);
+    unique_ptr<PlainQuery<GenericZP>> query_ptr(new SecureBatchRetrievalQuery<GenericZP>(query));
+    protocol.query(move(query_ptr));
+    auto result = protocol.retrieve();
+    cout << "Result: " << VectorUtils::std_vector_to_string(result) << "\n";
+
+//    test_secure_batch_retrieval<GenericZP>(client, server, lookup_value, batch_size, batch_index,
+//                                           database_size, number_of_matches, isMatch, plain_data);
 }
+
+//void test_plain_secure_batch_retrieval(int lookup_value,
+//                                       int batch_size,
+//                                       int batch_index,
+//                                       int database_size,
+//                                       int number_of_matches,
+//                                       GenericZP (*isMatch)(GenericZP&, GenericZP&),
+//                                       std::vector<int>& plain_data) {
+//
+//    GenericPlainDataType generic_plain_data_type = get_plain_data_type();
+//    SecureBatchRetrievalClient<GenericZP> client(database_size, number_of_matches, generic_plain_data_type);
+//    SecureBatchRetrievalServer<GenericZP> server(database_size, number_of_matches, generic_plain_data_type);
+//    client.initialize();
+//    server.initialize();
+//
+//    test_secure_batch_retrieval<GenericZP>(client, server, lookup_value, batch_size, batch_index,
+//                                                       database_size, number_of_matches, isMatch, plain_data);
+//}
 
 int main(int argc, char** argv) {
     std::cout << "Current path is: " << fs::current_path() << "\n";
-    int size = 4128;
-    int number_of_matches = 32;
-    int batch_size = 4;
+    int size = 256;
+    int number_of_matches = 4;
+    int batch_size = 2;
 
     int r = constants::WORD_LENGTH;
 
@@ -236,17 +276,18 @@ int main(int argc, char** argv) {
 //        test_plain_secure_batch_retrieval(one_lookup_value, batch_size, i, size, number_of_matches, generic_isMatch, ones_data);
 //    }
 
-    for (int i = 0; i < number_of_batches; ++i) {
-        cout << "Plain equals SBR - batch " << i << ": \n";
-        test_plain_secure_batch_retrieval(one_lookup_value, batch_size, i, size, number_of_matches, generic_isMatch, ones_data);
-    }
+//    for (int i = 0; i < number_of_batches; ++i) {
+//        cout << "Plain equals SBR - batch " << i << ": \n";
+//        test_plain_secure_batch_retrieval(one_lookup_value, batch_size, i, size, number_of_matches, generic_isMatch, ones_data);
+//    }
 
 //    for (int i = 0; i < number_of_batches; ++i) {
 //        cout << "Encrypted equals SBR - batch " << i << ": \n";
 //        test_encrypted_secure_batch_retrieval(one_lookup_value, batch_size, i, size, number_of_matches, encrypted_isMatch, ones_data);
 //    }
 
-
+    test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 0, size, number_of_matches, generic_isMatch, ones_data);
+    test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 1, size, number_of_matches, generic_isMatch, ones_data);
 //    cout << "Plain equals SR \n";
 //    test_plain_secure_report(one_lookup_value, size, number_of_matches, generic_isMatch, ones_data);
 //    cout << "Encrypted equals SR \n";
