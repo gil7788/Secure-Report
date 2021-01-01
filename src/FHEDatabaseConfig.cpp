@@ -2,17 +2,8 @@
 // Created by gil on 28/04/20.
 //
 
-#include <helib_number.h>
-#include <zp.h>
-#include <primes.h>
 #include "FHEDatabaseConfig.h"
-#include "FHEDatabase.h"
 
-
-#define SIMD_FACTOR 1
-typedef ZP<SIMD_FACTOR> MyZP;
-
-namespace fs = std::experimental::filesystem;
 
 GenericPlainDataType::GenericPlainDataType(int r): _r(r) {}
 
@@ -29,7 +20,6 @@ void GenericPlainDataType::write_key_to_file(const std::string& key_file_path) {
 
 void GenericPlainDataType::read_key_from_file(const std::string& key_file_path) {}
 
-// EncryptedDataTypeFromParameters
 EncryptedDataTypeFromParameters::EncryptedDataTypeFromParameters(int database_size, long s, long R, long r,
                   long d, long c, long k, int L, long chosen_m, Vec<long>& gens, Vec<long>& ords,
                   const std::string& key_file_path):
@@ -44,7 +34,7 @@ EncryptedDataTypeFromParameters::EncryptedDataTypeFromParameters(int database_si
         _chosen_m(chosen_m),
         _gens(gens),
         _ords(ords),
-        _key_file_path{key_file_path}{}
+        _key_file_path{fs::absolute(key_file_path)}{}
 
 DATA_TYPES EncryptedDataTypeFromParameters::get_data_type() {
     return DATA_TYPES::ENCRYPTED;

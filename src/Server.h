@@ -16,25 +16,25 @@
 #include "HashFunctions/HashFunctionsFamily.h"
 #include "Queries.h"
 
+
+// TODO: Delete data type
 template <typename DataType>
 class Server {
 public:
     int _database_size;
     int _number_of_matches;
     InputOutput _io;
-    DatabaseDataType& _data_type;
     FHEDatabase<DataType> _fhe_database;
     bool _is_connected = false;
     unique_ptr<EncryptedQuery<DataType>> _query;
 
-    Server(int size, int sparsity, DatabaseDataType& data_type):
+    Server(int size, int sparsity):
             _database_size{size},
             _number_of_matches{sparsity},
             _io(constants::OUTPUT_TO_CONSOLE, constants::OUTPUT_FILE_PATH, constants::OUTPUT_LEVEL),
-            _data_type(data_type),
             _fhe_database(size, _io) {}
 
-    virtual void connect_database() {
+    void connect_database() {
         if(_is_connected)
             return;
 
@@ -45,7 +45,7 @@ public:
         }
     }
 
-    virtual bool upload(std::vector<DataType>& data) {
+    bool upload(std::vector<DataType>& data) {
         connect_database();
         if(not _is_connected){
             _io.output("Failed to connect_database to database \n", constants::OUTPUT_LEVELS::ERROR);
@@ -59,14 +59,9 @@ public:
         return database_built;
     }
 
-    virtual vector<DataType> send_matches_indices_to_client(TrustedThirdParty& trusted_third_party) {
-
-        // Query database
+    vector<DataType> send_matches_indices_to_client(TrustedThirdParty& trusted_third_party) {
         vector<DataType> matches_indicators {evaluate_matches()};
-
-        // Encode encrypted data
         vector<DataType> encoded_encrypted_matches {encode(matches_indicators, trusted_third_party)};
-
         return encoded_encrypted_matches;
     }
 
@@ -80,13 +75,9 @@ public:
         _query = move(query);
     }
 
-//    PlainQuery<DataType>& get_query() {
-//        return _query;
-//    }
-
     virtual vector<DataType> evaluate_matches() = 0;
 
-    virtual vector<DataType> encode(vector<DataType>& matches_indicators, TrustedThirdParty& public_server) {
+    vector<DataType> encode(vector<DataType>& matches_indicators, TrustedThirdParty& public_server) {
         MatrixXi disjunct_matrix{get_disjunct_matrix(public_server).get_sketch()};
         std::vector<DataType> out(disjunct_matrix.rows(), DataType(0));
 
@@ -101,11 +92,8 @@ public:
         return out;
     }
 
-    virtual void construct_disjunct_matrices(TrustedThirdParty& public_server) {
-        auto encoders = public_server._encoders;
-        for(auto& encoder: encoders){
-            encoder.construct_sketch_matrix();
-        }
+    void construct_disjunct_matrices(TrustedThirdParty& public_server) {
+        public_server.construct_sketch_matrices();
     }
 
     virtual TrustedThirdParty construct_public_server() = 0;
@@ -115,35 +103,44 @@ public:
 
 template <typename DataType>
 class SecureReportServer: public Server<DataType> {
-//EncryptedSecureReportQuery<DataType> _current_query;
-
 public:
-    SecureReportServer(int size, int sparsity, DatabaseDataType& data_type):
-            Server<DataType>(size, sparsity, data_type) {}
+    SecureReportServer(int size, int sparsity):
+            Server<DataType>(size, sparsity) {}
 
-    virtual TrustedThirdParty initialize() {
+    TrustedThirdParty initialize() {
         return Server<DataType>::initialize();
     }
 
-    virtual vector<DataType> evaluate_matches() {
+    vector<DataType> evaluate_matches() {
         auto vectorized_database = Server<DataType>::_fhe_database.table_to_vector();
         auto matches = evaluate_is_match_on_database(vectorized_database);
         return matches;
     }
 
-    virtual TrustedThirdParty construct_public_server() {
+    TrustedThirdParty construct_public_server() {
         auto number_of_matches = Server<DataType>::_number_of_matches;
+        vector<int> sparsities{number_of_matches};
         TrustedThirdParty public_server;
-        public_server.initialize(Server<DataType>::_database_size, number_of_matches);
+
+        public_server.initialize(Server<DataType>::_database_size, sparsities);
         return public_server;
     }
 
-    virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
+    SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
         auto disjunct_matrix = public_server.get_matrix_by_index(0);
         return disjunct_matrix;
     }
 
 private:
+    EncryptedSecureReportQuery<DataType> get_query() {
+        EncryptedSecureReportQuery<DataType>* query =
+                dynamic_cast<EncryptedSecureReportQuery<DataType>*> (Server<DataType>::_query.get());
+        if(query == nullptr) {
+            cerr << "Failed to cast Query abstract class to derived class\n";
+        }
+        return *query;
+    }
+
     vector<DataType> evaluate_is_match_on_database(vector<DataType>& database) {
         vector<DataType> isMatch_indicator;
         for(auto& element: database){
@@ -153,8 +150,9 @@ private:
         return isMatch_indicator;
     }
 
-    DataType evaluate_is_match_on_element(DataType element) {
-        return Server<DataType>::_query._isMatch(Server<DataType>::_query._encrypted_lookup_value, element);
+    DataType evaluate_is_match_on_element(DataType& element) {
+        auto encrypted_value = get_query()._encrypted_lookup_value;
+        return get_query()._isMatch(encrypted_value, element);
     }
 };
 
@@ -162,20 +160,18 @@ template <typename DataType>
 class SecureBatchRetrievalServer: public Server<DataType>{
 private:
 vector<std::shared_ptr<HashFunctionFamily>> _hash_function_familys;
-vector<MatrixXi> _disjunct_matrices;
-//EncryptedSecureBatchRetrievalQuery<DataType> _current_query;
 
 public:
-    SecureBatchRetrievalServer(int size, int sparsity, DatabaseDataType& data_type):
-            Server<DataType>(size, sparsity, data_type) {}
+    SecureBatchRetrievalServer(int size, int sparsity):
+    Server<DataType>(size, sparsity) {}
 
-    virtual TrustedThirdParty initialize() {
+    TrustedThirdParty initialize() {
         auto public_server = Server<DataType>::initialize();
         sample_all_hash_mappings();
         return public_server;
     };
 
-    virtual vector<DataType> evaluate_matches() {
+    vector<DataType> evaluate_matches() {
         auto database = Server<DataType>::_fhe_database.table_to_vector();
         int batch_size_word_length = ceil(log2(get_query()._batch_size));
         auto hash_function = move(_hash_function_familys[batch_size_word_length]);
@@ -183,7 +179,7 @@ public:
         return is_match_indicators;
     }
 
-    virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
+    SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
         auto matrix_index = ceil(log2(get_query()._batch_size));
         auto disjunct_matrix = public_server.get_matrix_by_index(matrix_index);
         return disjunct_matrix;
@@ -191,16 +187,15 @@ public:
 
 private:
     EncryptedSecureBatchRetrievalQuery<DataType> get_query() {
-//        @TODO Add asseif query is pointing to null ptr
-//        Derived *derivedPointer = dynamic_cast<Derived*>(basePointer.get());
         EncryptedSecureBatchRetrievalQuery<DataType>* query =
                 dynamic_cast<EncryptedSecureBatchRetrievalQuery<DataType>*> (Server<DataType>::_query.get());
-        if(query != nullptr) {
-            return *query;
+        if(query == nullptr) {
+            cerr << "Failed to cast Query abstract class to derived class\n";
         }
+        return *query;
     }
 
-    virtual TrustedThirdParty construct_public_server() {
+    TrustedThirdParty construct_public_server() {
         auto number_of_matches_word_length = ceil(log2(Server<DataType>::_number_of_matches));
         auto database = Server<DataType>::_database_size;
         vector<int> matrices_sparsities;
@@ -214,6 +209,7 @@ private:
         public_server.initialize(database, matrices_sparsities);
         return public_server;
     }
+
 private:
     void sample_all_hash_mappings() {
         int number_of_matches_word_length = ceil(log2(Server<DataType>::_number_of_matches));

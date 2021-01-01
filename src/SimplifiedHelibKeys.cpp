@@ -32,6 +32,7 @@ void SimplifiedHelibKeys::initKeys(long s, long R, long p, long r, long d, long 
             L += R * addPerRound;
         }
     }
+
     long m = FindM(k, L, c, p, d, s, chosen_m, true);
 
     vector<long> gens1, ords1;

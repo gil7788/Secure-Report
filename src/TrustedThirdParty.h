@@ -12,24 +12,13 @@ using namespace std;
 
 class TrustedThirdParty {
 public:
-
-    int _database_size;
-    vector<int> _matrices_sparsity;
     vector<SketchEncoder> _encoders;
 
-    void initialize();
-
-    void initialize(int database_size, int maximal_number_of_matches_per_query);
+    void construct_sketch_matrices();
 
     void initialize(int database_size, vector<int>& matrices_sparsity);
 
     SketchEncoder get_matrix_by_index(int i);
-
-    VectorXi encode_with_i_matrix(VectorXi& vector, int i);
-
-    VectorXi decode_with_i_matrix(VectorXi& vector, int i);
-
-    int get_number_of_matrices();
 };
 
 

@@ -28,25 +28,12 @@ public:
     DataType _encrypted_lookup_value;
     DataType (*_isMatch)(DataType&, DataType&);
 
-    EncryptedSecureReportQuery() = default;
-
-    EncryptedSecureReportQuery(EncryptedSecureReportQuery& query) {
-        _encrypted_lookup_value = query._encrypted_lookup_value;
-        _isMatch = query._isMatch;
-    }
-
-    EncryptedSecureReportQuery& operator=(const EncryptedSecureReportQuery& other) {
-        if (this == &other) return *this;
-        _encrypted_lookup_value = other._encrypted_lookup_value;
-        _isMatch = other._isMatch;
-        return *this;
-    }
-
     void initialize(int lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
-        initialize(DataType(lookup_value), isMatch);
+        auto encrypted_look_up_value = DataType(lookup_value);
+        initialize(encrypted_look_up_value, isMatch);
     }
 
-    void initialize(DataType encrypted_lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
+    void initialize(DataType& encrypted_lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
         _encrypted_lookup_value = encrypted_lookup_value;
         _isMatch = isMatch;
     }
@@ -59,29 +46,14 @@ private:
     DataType (*_isMatch)(DataType&, DataType&);
 
 public:
-    SecureReportQuery() = default;
-
-    SecureReportQuery(SecureReportQuery& query) {
-        _lookup_value = query._lookup_value;
-        _isMatch = query._isMatch;
-    }
-
-    SecureReportQuery& operator=(const SecureReportQuery& other) {
-        if (this == &other) return *this;
-        _lookup_value = other._encrypted_lookup_value;
-        _isMatch = other._isMatch;
-        return *this;
-    }
-
     void initialize(int lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
         _lookup_value = lookup_value;
         _isMatch = isMatch;
     }
 
     unique_ptr<EncryptedQuery<DataType>> encrypt() {
-        unique_ptr<EncryptedSecureReportQuery<DataType>> result;
+        unique_ptr<EncryptedSecureReportQuery<DataType>> result(new EncryptedSecureReportQuery<DataType>);
         result.get()->initialize(_lookup_value, _isMatch);
-//        result.initialize(_lookup_value, _isMatch);
         return result;
     }
 };
@@ -89,28 +61,10 @@ public:
 template <typename DataType>
 class EncryptedSecureBatchRetrievalQuery: public EncryptedQuery<DataType> {
 public:
-    EncryptedSecureBatchRetrievalQuery(EncryptedSecureBatchRetrievalQuery<DataType>& query) {
-        _encrypted_lookup_value = query._encrypted_lookup_value;
-        _batch_size = query._batch_size;
-        _batch_index = query._batch_index;
-        _isMatch = query._isMatch;
-    }
-
-    DataType _encrypted_lookup_value;
+     DataType _encrypted_lookup_value;
     int _batch_size;
     int _batch_index;
     DataType (*_isMatch)(DataType&, DataType&);
-
-    EncryptedSecureBatchRetrievalQuery() = default;
-
-    EncryptedSecureBatchRetrievalQuery& operator=(EncryptedSecureBatchRetrievalQuery other) {
-        if (this == &other) return *this;
-        _encrypted_lookup_value = other._encrypted_lookup_value;
-        _batch_size = other._batch_size;
-        _batch_index = other._batch_index;
-        _isMatch = other._isMatch;
-        return *this;
-    }
 
     void initialize(int lookup_value, int batch_index, int batch_size,
                     DataType (*isMatch)(DataType&, DataType&)) {
@@ -137,28 +91,6 @@ public:
     DataType (*_isMatch)(DataType&, DataType&);
 
 public:
-    SecureBatchRetrievalQuery() = default;
-
-    SecureBatchRetrievalQuery(SecureBatchRetrievalQuery& query) {
-        _lookup_value = query._lookup_value;
-        _batch_size = query._batch_size;
-        _batch_index = query._batch_index;
-        _database_size = query._database_size;
-        _number_of_matches = query._number_of_matches;
-        _isMatch = query._isMatch;
-    }
-
-    SecureBatchRetrievalQuery& operator=(const SecureBatchRetrievalQuery& other) {
-        if (this == &other) return *this;
-        _lookup_value = other._lookup_value;
-        _batch_size = other._batch_size;
-        _batch_index = other._batch_index;
-        _database_size = other._database_size;
-        _number_of_matches = other._number_of_matches;
-        _isMatch = other._isMatch;
-        return *this;
-    }
-
     void initialize(int lookup_value, int batch_size, int batch_index, int database_size, int number_of_matches, DataType (*isMatch)(DataType&, DataType&)) {
         _lookup_value = lookup_value;
         _batch_size = batch_size;

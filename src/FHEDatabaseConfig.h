@@ -6,20 +6,13 @@
 #define SECURE_REPORT_FHEDATABASECONFIG_H
 
 #include <iostream>
-#include "Config.h"
-#include "InputOutput.h"
+#include <experimental/filesystem>
 
-#include "PlainDatabase.h"
-#include "SketchEncoder.h"
-#include "VectorUtils.h"
-#include "FHEUtils.h"
-#include "Config.h"
-#include "InputOutput.h"
-#include <binomial_tournament.h>
-#include <Ctxt.h>
-#include <binaryCompare.h>
 #include "GenericZP.h"
 #include "SimplifiedHelibKeys.h"
+#include "SimplifiedHelibNumber.h"
+
+namespace fs = std::experimental::filesystem;
 
 enum class DATA_TYPES {PLAIN, ENCRYPTED, MIXED};
 
@@ -34,7 +27,7 @@ class DatabaseDataType {
 
     virtual void read_key_from_file(const std::string& key_file_path) = 0;
 
-    virtual ~DatabaseDataType() {};
+    virtual ~DatabaseDataType() = default;
 };
 
 class GenericPlainDataType: public DatabaseDataType {
@@ -63,10 +56,10 @@ class EncryptedDataTypeFromParameters: public DatabaseDataType {
     long _k;
     int _L;
     long _chosen_m;
-    Vec<long>& _gens;
-    Vec<long>& _ords;
+    Vec<long> _gens;
+    Vec<long> _ords;
     SimplifiedHelibKeys _keys;
-    const std::string& _key_file_path;
+    const fs::path _key_file_path;
 
 public:
     EncryptedDataTypeFromParameters(int database_size, long s, long R, long r,
