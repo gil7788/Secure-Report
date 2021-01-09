@@ -12,9 +12,9 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <experimental/filesystem>
-#include "InputOutput.h"
+#include "utils/file_system/InputOutput.h"
 #include "Config.h"
-#include "VectorUtils.h"
+#include "utils/mathmatical/VectorUtils.h"
 #include <iosfwd>
 #include <fstream>
 

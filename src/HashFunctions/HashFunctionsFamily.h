@@ -10,8 +10,8 @@
 #include <Eigen/Dense>
 #include <experimental/filesystem>
 
-#include "../VectorUtils.h"
-#include "../InputOutput.h"
+#include "../utils/mathmatical/VectorUtils.h"
+#include "../utils/file_system/InputOutput.h"
 #include "../Config.h"
 
 using Eigen::MatrixXi;

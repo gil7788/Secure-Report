@@ -5,17 +5,16 @@
 #ifndef SECURE_REPORT_HASHFUNCTIONLOGDATA_H
 #define SECURE_REPORT_HASHFUNCTIONLOGDATA_H
 
-#include "HashFunctionData.h"
+#include "data/HashFunctionData.h"
 
 using namespace std;
 
-// TODO rename filename to LogCreator
-class LogCreator {
+class JsonLogger {
 string _log_name;
 vector<unique_ptr<Data>> _data_vector;
 
 public:
-    LogCreator(string& log_name): _log_name{format_log_name(log_name)} {}
+    JsonLogger(string& log_name): _log_name{format_log_name(log_name)} {}
 
     void add_data(unique_ptr<Data>& data);
 
@@ -24,7 +23,7 @@ public:
     fs::path build_log_file_path();
 
     string to_json();
-
+// TODO consider to remove protected
 protected:
 
     string get_log_name();

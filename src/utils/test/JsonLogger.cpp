@@ -2,15 +2,14 @@
 // Created by gil on 1.10.2020.
 //
 
-#include "HashFunctionLogData.h"
+#include "JsonLogger.h"
 
 
-// TODO rename filename to LogCreator
-void LogCreator::add_data(unique_ptr<Data>& data) {
+void JsonLogger::add_data(unique_ptr<Data>& data) {
     _data_vector.push_back(move(data));
 }
 
-bool LogCreator::save_log() {    
+bool JsonLogger::save_log() {
     fs::path file_path = build_log_file_path();
     auto json_file = to_json();
 
@@ -20,13 +19,13 @@ bool LogCreator::save_log() {
     return log_saved;
 }
 
-fs::path LogCreator::build_log_file_path() {
+fs::path JsonLogger::build_log_file_path() {
     auto file_path = fs::path(constants::PROCESSED_FILE_PATH);
     file_path.concat(_log_name);
     return file_path;
 }
 
-string LogCreator::to_json() {
+string JsonLogger::to_json() {
     string json = "[ \n";
 
     for (int i = 0; i < _data_vector.size() - 1; ++i) {
@@ -38,11 +37,11 @@ string LogCreator::to_json() {
     return json;
 }
 
-string LogCreator::get_log_name() {
+string JsonLogger::get_log_name() {
     return _log_name;
 }
 
-string LogCreator::format_log_name(string& log_name) {
+string JsonLogger::format_log_name(string& log_name) {
     auto log_name_with_underscore = log_name;
     std::replace( log_name_with_underscore.begin(), log_name_with_underscore.end(), ' ', '_' );
     string file_name = log_name_with_underscore + "_log";

@@ -1,8 +1,8 @@
 #include <experimental/filesystem>
 
 #include "../HashFunctions/HashFunctionsFamily.h"
-#include "../HashFunctions/TestHashFunctionFamily.h"
-#include "../HashFunctions/SBRTestData.h"
+#include "../utils/test/tester/TestHashFunctionFamily.h"
+#include "../utils/test/test_case/HashTestCase.h"
 
 namespace fs = std::experimental::filesystem;
 

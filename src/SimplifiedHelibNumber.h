@@ -7,7 +7,7 @@
 
 #include <assert.h>
 #include "SimplifiedHelibKeys.h"
-#include "VectorUtils.h"
+#include "utils/mathmatical/VectorUtils.h"
 #include "EncryptedBits.h"
 #include <helib_number.h>
 

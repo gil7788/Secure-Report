@@ -6,7 +6,7 @@
 #define SECURE_PROTOCOL_H
 
 #include <iostream>
-#include "VectorUtils.h"
+#include "utils/mathmatical/VectorUtils.h"
 #include "Client.h"
 #include "Server.h"
 

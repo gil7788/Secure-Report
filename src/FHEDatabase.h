@@ -4,9 +4,9 @@
 #include "PlainDatabase.h"
 #include "SimplifiedHelibNumber.h"
 #include "GenericZP.h"
-#include "VectorUtils.h"
+#include "utils/mathmatical/VectorUtils.h"
 #include "Config.h"
-#include "InputOutput.h"
+#include "utils/file_system/InputOutput.h"
 #include "PlainFileSystemDatabase.h"
 
 

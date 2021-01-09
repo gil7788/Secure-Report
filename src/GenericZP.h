@@ -13,7 +13,7 @@
 #include <vector>
 #include <functional>
 #include "Config.h"
-#include "VectorUtils.h"
+#include "utils/mathmatical/VectorUtils.h"
 
 #include <stdio.h>
 
