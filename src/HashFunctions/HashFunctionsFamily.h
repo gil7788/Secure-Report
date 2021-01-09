@@ -35,6 +35,7 @@ protected:
     virtual int get_value_in_range(int x);
 
 public:
+    virtual ~HashFunctionFamily() = default;
 
     virtual int get_domain_word_length();
 

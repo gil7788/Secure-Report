@@ -17,7 +17,6 @@
 #include "Queries.h"
 
 
-// TODO: Delete data type
 template <typename DataType>
 class Server {
 public:

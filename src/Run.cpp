@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 
     int number_of_batches = ceil( ((double) number_of_matches / batch_size));
 
-    // test_plain_secure_report_protocol(one_lookup_value, size, number_of_matches, generic_isMatch, ones_data);
+    test_plain_secure_report_protocol(one_lookup_value, size, number_of_matches, generic_isMatch, ones_data);
     test_encrypted_secure_report_protocol(one_lookup_value, size, number_of_matches, encrypted_isMatch, ones_data);
     test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 0, size, number_of_matches, generic_isMatch, ones_data);
     test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 1, size, number_of_matches, generic_isMatch, ones_data);

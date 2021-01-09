@@ -11,7 +11,25 @@
 
 using namespace std;
 
-class HashFunctionData {
+class Data {
+public:
+    virtual ~Data() {};
+    
+    virtual string to_json() = 0;
+
+protected:
+    string add_first_json_element(string name, string value);
+
+    string add_middle_json_element(string name, string value);
+
+    string add_last_json_element(string name, string value);
+
+private:
+
+    string add_json_element_content(string name, string value);
+};
+
+class HashFunctionData: public Data {
 public:
     string _hash_name;
     int _number_of_matches;
@@ -27,20 +45,12 @@ public:
     double _batch_size_diviation;
 
 public:
-    HashFunctionData(HashFunctionFamily& hash, int number_of_matches);
-
-    void set_running_results(vector<int> &evaluated_domain, long build_time,
-            long construction_time, long evaluation_time);
+    HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int number_of_matches);
+    HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int number_of_matches, vector<int> &evaluated_domain,
+     long construction_time, long build_time, long evaluation_time);
 
     string to_json();
 
-    string add_first_json_element(string name, string value);
-
-    string add_middle_json_element(string name, string value);
-
-    string add_last_json_element(string name, string value);
-
-    string add_json_element_content(string name, string value);
 private:
     double get_mean_batch_size(vector<int>& split, int range_size);
 
