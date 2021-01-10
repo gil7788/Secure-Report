@@ -590,9 +590,9 @@ However, there are cases where you have to define your own:
     (`DISALLOW_EVIL_CONSTRUCTORS()` does this), then you need to define a
     default constructor, even if it would be empty.
 *   If `FooTest` has a const non-static data member, then you have to define the
-    default constructor *and* initialize the const member in the initializer
+    default constructor *and* construct_sketch_matrices the const member in the initializer
     list of the constructor. (Early versions of `gcc` doesn't force you to
-    initialize the const member. It's a bug that has been fixed in `gcc 4`.)
+    construct_sketch_matrices the const member. It's a bug that has been fixed in `gcc 4`.)
 
 ## Why does ASSERT_DEATH complain about previous threads that were already joined?
 

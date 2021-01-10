@@ -503,7 +503,7 @@ generate a fatal failure (`FAIL*` and `ASSERT_*`) can only be used in
 void-returning functions. This is a consequence of Google's not using
 exceptions. By placing it in a non-void function you'll get a confusing compile
 error like `"error: void value not ignored as it ought to be"` or `"cannot
-initialize return object of type 'bool' with an rvalue of type 'void'"` or
+construct_sketch_matrices return object of type 'bool' with an rvalue of type 'void'"` or
 `"error: no viable conversion from 'void' to 'string'"`.
 
 If you need to use fatal assertions in a function that returns non-void, one

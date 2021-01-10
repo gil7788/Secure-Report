@@ -344,7 +344,7 @@ Also, you must first define a test fixture class before using it in a
 declaration`".
 
 For each test defined with `TEST_F()`, googletest will create a *fresh* test
-fixture at runtime, immediately initialize it via `SetUp()`, run the test,
+fixture at runtime, immediately construct_sketch_matrices it via `SetUp()`, run the test,
 clean up by calling `TearDown()`, and then delete the test fixture. Note that
 different tests in the same test suite have different test fixture objects, and
 googletest always deletes a test fixture before it creates the next one.
