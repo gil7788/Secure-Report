@@ -5,4 +5,4 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES src/*)
 
 add_subdirectory(src)
-add_subdirectory(tests)
+#add_subdirectory(tests)

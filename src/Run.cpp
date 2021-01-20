@@ -7,9 +7,12 @@
 #include "GenericZP.h"
 #include "SimplifiedHelibNumber.h"
 #include "Protocol.h"
+#include "utils/test/test_case/SecureRetrievalTestCase.h"
+#include "utils/test/tester/ProtocolTester.h"
 
 
 #define SIMD_FACTOR constants::WORD_LENGTH
+using namespace std;
 
 // TODO implement protocol_tester class
 GenericPlainDataType get_plain_data_type() {
@@ -38,29 +41,7 @@ EncryptedDataTypeFromParameters get_encrypted_data_type(int size) {
     return encrypted_data_type;
 }
 
-template<class DataType>
-void test_secure_report_protocol(int lookup_value,
-                                          int database_size,
-                                          int number_of_matches,
-                                          DataType (*isMatch)(DataType&, DataType&),
-                                          std::vector<int>& plain_data,
-                                          unique_ptr<DatabaseDataType>& data_type_ptr) {
-
-    SecureReportClient<DataType> client(data_type_ptr);
-    SecureReportServer<DataType> server(database_size, number_of_matches);
-
-    SecureReportProtocol<DataType> protocol(server, client);
-    protocol.initialize();
-    protocol.upload(plain_data, lookup_value);
-    SecureReportQuery<DataType> query;
-    query.initialize(lookup_value, isMatch);
-    unique_ptr<PlainQuery<DataType>> query_ptr(new SecureReportQuery<DataType>(query));
-    protocol.query(move(query_ptr));
-    auto result = protocol.retrieve();
-    cout << "Result: " << VectorUtils::std_vector_to_string(result) << "\n";
-}
-
-void test_plain_secure_report_protocol(int lookup_value,
+unique_ptr<TestCase> test_plain_secure_report_protocol(int lookup_value,
                                                 int database_size,
                                                 int number_of_matches,
                                                 GenericZP (*isMatch)(GenericZP&, GenericZP&),
@@ -68,48 +49,31 @@ void test_plain_secure_report_protocol(int lookup_value,
     GenericPlainDataType generic_plain_data_type = get_plain_data_type();
     unique_ptr<DatabaseDataType> data_type_ptr(new GenericPlainDataType(generic_plain_data_type));
 
-    test_secure_report_protocol<GenericZP>(lookup_value, database_size,
-                                                    number_of_matches, isMatch, plain_data, data_type_ptr);
+    unique_ptr<TestCase> test_case_ptr(new SecureRetrievalTestCase<GenericZP>(lookup_value, database_size, number_of_matches,
+                                 isMatch, plain_data, data_type_ptr));
+
+    SecureRetrievalTestCase<GenericZP> test_case(lookup_value, database_size, number_of_matches,
+                                 isMatch, plain_data, data_type_ptr);
+
+                
+    return test_case_ptr;
 }
 
-void test_encrypted_secure_report_protocol(int lookup_value,
+unique_ptr<TestCase> test_encrypted_secure_report_protocol(int lookup_value,
                                                     int database_size,
                                                     int number_of_matches,
                                                     SimplifiedHelibNumber (*isMatch)(SimplifiedHelibNumber&, SimplifiedHelibNumber&),
                                                     std::vector<int>& plain_data) {
 
-    unique_ptr<DatabaseDataType> data_type_ptr(new EncryptedDataTypeFromParameters(get_encrypted_data_type(database_size)));
+    unique_ptr<DatabaseDataType> data_type_ptr = make_unique<EncryptedDataTypeFromParameters>(get_encrypted_data_type(database_size));
 
-    test_secure_report_protocol<SimplifiedHelibNumber>(lookup_value, database_size,
-                                                                number_of_matches, isMatch, plain_data, data_type_ptr);
+    unique_ptr<TestCase> test_case_ptr = make_unique<SecureRetrievalTestCase<SimplifiedHelibNumber>>(lookup_value, database_size, number_of_matches,
+                                 isMatch, plain_data, data_type_ptr);
+
+    return test_case_ptr;
 }
 
-
-template<class DataType>
-void test_secure_batch_retrieval_protocol(int lookup_value,
-                                                int batch_size,
-                                                int batch_index,
-                                                int database_size,
-                                                int number_of_matches,
-                                                DataType (*isMatch)(DataType&, DataType&),
-                                                std::vector<int>& plain_data,
-                                                unique_ptr<DatabaseDataType>& data_type_ptr) {
-
-    SecureBatchRetrievalClient<DataType> client(data_type_ptr);
-    SecureBatchRetrievalServer<DataType> server(database_size, number_of_matches);
-
-    SecureBatchRetrievalProtocol<DataType> protocol(server, client);
-    protocol.initialize();
-    protocol.upload(plain_data, lookup_value);
-    SecureBatchRetrievalQuery<DataType> query;
-    query.initialize(lookup_value, batch_size, batch_index, database_size, number_of_matches, isMatch);
-    unique_ptr<PlainQuery<DataType>> query_ptr(new SecureBatchRetrievalQuery<DataType>(query));
-    protocol.query(move(query_ptr));
-    auto result = protocol.retrieve();
-    cout << "Result: " << VectorUtils::std_vector_to_string(result) << "\n";
-}
-
-void test_plain_secure_batch_retrieval_protocol(int lookup_value,
+unique_ptr<TestCase> test_plain_secure_batch_retrieval_protocol(int lookup_value,
                                                 int batch_size,
                                                 int batch_index,
                                                 int database_size,
@@ -119,11 +83,13 @@ void test_plain_secure_batch_retrieval_protocol(int lookup_value,
     GenericPlainDataType generic_plain_data_type = get_plain_data_type();
     unique_ptr<DatabaseDataType> data_type_ptr(new GenericPlainDataType(generic_plain_data_type));
 
-    test_secure_batch_retrieval_protocol<GenericZP>(lookup_value, batch_size, batch_index, database_size,
-                                                    number_of_matches, isMatch, plain_data, data_type_ptr);
+    unique_ptr<TestCase> test_case_ptr(new SecureBatchRetrievalTestCase<GenericZP>(lookup_value, database_size, number_of_matches,
+                                 isMatch, plain_data, data_type_ptr, batch_size, batch_index));
+
+    return test_case_ptr;
 }
 
-void test_encrypted_secure_batch_retrieval_protocol(int lookup_value,
+unique_ptr<TestCase> test_encrypted_secure_batch_retrieval_protocol(int lookup_value,
                                                 int batch_size,
                                                 int batch_index,
                                                 int database_size,
@@ -133,9 +99,13 @@ void test_encrypted_secure_batch_retrieval_protocol(int lookup_value,
 
     unique_ptr<DatabaseDataType> data_type_ptr(new EncryptedDataTypeFromParameters(get_encrypted_data_type(database_size)));
 
-    test_secure_batch_retrieval_protocol<SimplifiedHelibNumber>(lookup_value, batch_size, batch_index, database_size,
-                                                    number_of_matches, isMatch, plain_data, data_type_ptr);
+
+    unique_ptr<TestCase> test_case_ptr(new SecureBatchRetrievalTestCase<SimplifiedHelibNumber>(lookup_value, database_size, number_of_matches,
+                                    isMatch, plain_data, data_type_ptr, batch_size, batch_index));
+    
+    return test_case_ptr;
 }
+
 
 int main(int argc, char** argv) {
     std::cout << "Current path is: " << fs::current_path() << "\n";
@@ -159,13 +129,24 @@ int main(int argc, char** argv) {
     std::vector<int> zeros_data = VectorUtils::generate_binary_std_vector(size, size-number_of_matches);
     std::vector<int> arbitrary_data = VectorUtils::generate_int_vector(size, number_of_matches, arbitrary_lookup_value);
 
-
     int number_of_batches = ceil( ((double) number_of_matches / batch_size));
 
-    test_plain_secure_report_protocol(one_lookup_value, size, number_of_matches, generic_isMatch, ones_data);
-    test_encrypted_secure_report_protocol(one_lookup_value, size, number_of_matches, encrypted_isMatch, ones_data);
-    test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 0, size, number_of_matches, generic_isMatch, ones_data);
-    test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 1, size, number_of_matches, generic_isMatch, ones_data);
-    test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 0, size, number_of_matches, encrypted_isMatch, ones_data);
-    test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 1, size, number_of_matches, encrypted_isMatch, ones_data);
+    std::vector<std::unique_ptr<TestCase>> test_cases;
+
+    test_cases.push_back(move(test_plain_secure_report_protocol(one_lookup_value, size, number_of_matches, generic_isMatch, ones_data)));
+    test_cases.push_back(move(test_encrypted_secure_report_protocol(one_lookup_value, size, number_of_matches, encrypted_isMatch, ones_data)));
+    test_cases.push_back(move(test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 0, size, number_of_matches, generic_isMatch, ones_data)));
+    test_cases.push_back(move(test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 1, size, number_of_matches, generic_isMatch, ones_data)));
+    test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 0, size, number_of_matches, encrypted_isMatch, ones_data)));
+    test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, 1, size, number_of_matches, encrypted_isMatch, ones_data)));
+    
+    string log_name = "run_test";
+    ProtocolTester tester(log_name);
+    tester.initialize(test_cases);
+    tester.test_and_log_all();
 }
+
+// TODO:
+// 1. Finish implement ProtocolTestCase class for SBR - retrieval by batches
+// 2. Implement In Protocol.cpp, SBR protocol, functionality to 1. retrieve batch, 2. retrieve all batches, 3. get number of batches 
+// 3. Test cases builder class

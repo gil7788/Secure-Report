@@ -83,7 +83,7 @@ private:
     int _number_of_batches;
 
 public:
-    SecureBatchRetrievalProtocol(Server<DataType>& server, Client<DataType>& client):
+    SecureBatchRetrievalProtocol(SecureBatchRetrievalServer<DataType>& server, SecureBatchRetrievalClient<DataType>& client):
             SecureRetrievalProtocol<DataType>(server, client) {}
 
     // TODO: Consider to delete
@@ -104,7 +104,7 @@ public:
 template <typename DataType>
 class SecureReportProtocol: public SecureRetrievalProtocol<DataType> {
 public:
-    SecureReportProtocol(Server<DataType>& server, Client<DataType>& client):
+    SecureReportProtocol(SecureReportServer<DataType>& server, SecureReportClient<DataType>& client):
             SecureRetrievalProtocol<DataType>(server, client) {}
 };
 

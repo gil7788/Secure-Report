@@ -41,6 +41,7 @@ unique_ptr<Data> HashFunctionTestCase::test() {
     unique_ptr<Data> hash_data_ptr(new HashFunctionData(_hash_function, _number_of_matches,
                                                         evaluated_subset, construction_time_in_nanoseconds, build_time_in_nanoseconds,
                                                         evaluation_time_in_nanoseconds));
+
     return hash_data_ptr;
 }
 
