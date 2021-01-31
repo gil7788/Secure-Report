@@ -137,6 +137,7 @@ std::vector<std::unique_ptr<TestCase>> generate_plain_secure_report_tests(int mi
     return test_cases;
 }
 
+
 int main(int argc, char** argv) {
     std::cout << "Current path is: " << fs::current_path() << "\n";
     int size = 2048;
@@ -173,7 +174,7 @@ int main(int argc, char** argv) {
     // test_cases.push_back(move(test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, all_matches, size, number_of_matches_in_database, generic_isMatch, ones_data)));
     // test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, batch_size_number_of_matches_in_database, size, number_of_matches_in_database, encrypted_isMatch, ones_data)));
     // test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, all_matches, size, number_of_matches_in_database, encrypted_isMatch, ones_data)));
-    
+
     string log_name = "run_test";
     ProtocolTester tester(log_name);
     tester.initialize(test_cases);

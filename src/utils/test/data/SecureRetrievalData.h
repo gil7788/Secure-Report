@@ -18,6 +18,7 @@ public:
     int _lookup_value;
     int _database_size;
     int _number_of_retrieved_matches;
+
     DataType (*_isMatch)(DataType&, DataType&);
     vector<int> _plain_data;
     unique_ptr<DatabaseDataType>& _data_type_ptr;
@@ -109,10 +110,10 @@ public:
     };
 
 private:
-int get_number_of_retrieved_batches() {
-    int number_of_retrieved_batches = int(ceil(_number_of_retrieved_matches/_batch_size));
-    return number_of_retrieved_batches;
-}
+    int get_number_of_retrieved_batches() {
+        int number_of_retrieved_batches = int(ceil(_number_of_retrieved_matches/_batch_size));
+        return number_of_retrieved_batches;
+    }
 };
 
 
