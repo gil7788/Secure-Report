@@ -25,7 +25,7 @@ private:
         Number encrypted_one(one_vector);
 
         if(encrypted_one.r() <= 1) {
-            Number result{encrypted_one - x + y};
+            Number result(encrypted_one - x + y);
             return result;
         }
         else {

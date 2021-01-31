@@ -36,7 +36,6 @@ public:
     }
 
     bool upload(vector<int>& plain_data, int comparison_value) {
-//        TODO Export to tester class
         vector<int> indices = VectorUtils::get_matches_std_vector(plain_data, comparison_value);
         string s = VectorUtils::std_vector_to_string(indices);
         std::cout << "Selected indices: " << s << std::endl;
@@ -83,7 +82,7 @@ private:
     int _number_of_batches;
 
 public:
-    SecureBatchRetrievalProtocol(Server<DataType>& server, Client<DataType>& client):
+    SecureBatchRetrievalProtocol(SecureBatchRetrievalServer<DataType>& server, SecureBatchRetrievalClient<DataType>& client):
             SecureRetrievalProtocol<DataType>(server, client) {}
 
     // TODO: Consider to delete
@@ -104,7 +103,7 @@ public:
 template <typename DataType>
 class SecureReportProtocol: public SecureRetrievalProtocol<DataType> {
 public:
-    SecureReportProtocol(Server<DataType>& server, Client<DataType>& client):
+    SecureReportProtocol(SecureReportServer<DataType>& server, SecureReportClient<DataType>& client):
             SecureRetrievalProtocol<DataType>(server, client) {}
 };
 

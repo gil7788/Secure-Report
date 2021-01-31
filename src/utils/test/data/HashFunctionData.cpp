@@ -5,7 +5,7 @@
 #include "HashFunctionData.h"
 
 string HashFunctionData::to_json() {
-    string json = add_first_json_element(get_hash_name_key(), _hash_name);
+    string json = add_first_json_element(get_name_key(), _name);
     json += add_middle_json_element(get_batches_key(), to_string(_batches));
     json += add_middle_json_element(get_domain_size_key(), to_string(_domain_size));
     json += add_middle_json_element(get_number_of_random_bits_key(), to_string(_number_of_random_bits));
@@ -22,7 +22,7 @@ string HashFunctionData::to_json() {
 }
 
 HashFunctionData::HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int number_of_matches):
-    _hash_name{hash->get_function_name()},
+    _name{hash->get_function_name()},
     _batches{hash->get_range_size()},
     _domain_size{hash->get_domain_size()},
     _number_of_random_bits{hash->get_number_of_random_bits()},
@@ -33,7 +33,7 @@ HashFunctionData::HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int num
 
 HashFunctionData::HashFunctionData(unique_ptr<HashFunctionFamily>& hash,
  int number_of_matches, vector<int> &evaluated_domain, long construction_time, long build_time, long evaluation_time):
-    _hash_name{hash->get_function_name()},
+    _name{hash->get_function_name()},
     _batches{hash->get_range_size()},
     _domain_size{hash->get_domain_size()},
     _number_of_random_bits{hash->get_number_of_random_bits()},
@@ -82,13 +82,13 @@ double HashFunctionData::diviation(vector<int>& v) {
     return stdev;
 }
 
-string HashFunctionData::get_hash_name_key() {
+string HashFunctionData::get_name_key() {
     string key = "hash_name";
     return key;
 }
 
 string HashFunctionData::get_number_of_matches_key() {
-    string key = "matches";
+    string key = "number_of_matches";
     return key;
 }
 

@@ -14,7 +14,7 @@ using namespace std;
 
 class HashFunctionData: public Data {
 public:
-    string _hash_name;
+    string _name;
     int _number_of_matches;
     int _batches;
     long _domain_size;
@@ -28,8 +28,8 @@ public:
     double _batch_size_diviation;
 
 public:
-    HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int number_of_matches);
-    HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int number_of_matches, vector<int> &evaluated_domain,
+    HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int number_of_retrieved_matches);
+    HashFunctionData(unique_ptr<HashFunctionFamily>& hash, int number_of_retrieved_matches, vector<int> &evaluated_domain,
      long construction_time, long build_time, long evaluation_time);
 
     string to_json();
@@ -45,7 +45,7 @@ private:
 
     double diviation(vector<int>& v);
 
-    string get_hash_name_key();
+    string get_name_key();
 
     string get_number_of_matches_key();
 

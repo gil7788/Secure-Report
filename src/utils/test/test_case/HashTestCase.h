@@ -9,6 +9,7 @@
 using namespace std::chrono;
 
 #include "../../../HashFunctions/HashFunctionsFamily.h"
+#include "../data/Data.h"
 #include "../data/HashFunctionData.h"
 #include "TestCase.h"
 

@@ -158,7 +158,7 @@ private:
 template <typename DataType>
 class SecureBatchRetrievalServer: public Server<DataType>{
 private:
-vector<std::shared_ptr<HashFunctionFamily>> _hash_function_familys;
+vector<std::unique_ptr<HashFunctionFamily>> _hash_function_familys;
 
 public:
     SecureBatchRetrievalServer(int size, int sparsity):
@@ -172,9 +172,8 @@ public:
 
     vector<DataType> evaluate_matches() {
         auto database = Server<DataType>::_fhe_database.table_to_vector();
-        int batch_size_word_length = ceil(log2(get_query()._batch_size));
-        auto hash_function = move(_hash_function_familys[batch_size_word_length]);
-        auto is_match_indicators = evaluate_is_match_on_database(database, hash_function);
+        int hash_function_index = ceil(log2(get_query()._batch_size));
+        auto is_match_indicators = evaluate_is_match_on_database(database, hash_function_index);
         return is_match_indicators;
     }
 
@@ -213,14 +212,13 @@ private:
     void sample_all_hash_mappings() {
         int number_of_matches_word_length = ceil(log2(Server<DataType>::_number_of_matches));
         for (int i = 0; i <= number_of_matches_word_length; ++i) {
-            auto hash_function_i = split_database_to_batches(i);
-            _hash_function_familys.push_back(hash_function_i);
+            _hash_function_familys.push_back(move(split_database_to_batches(i)));
         }
     }
 
-    std::shared_ptr<HashFunctionFamily> split_database_to_batches(int number_of_batches_word_length) {
+    std::unique_ptr<HashFunctionFamily> split_database_to_batches(int number_of_batches_word_length) {
         int domain_word_size = log2(Server<DataType>::_database_size);
-        std::shared_ptr<PolynomialHashFunctionsFamily> hash_function(new PolynomialHashFunctionsFamily());
+        std::unique_ptr<PolynomialHashFunctionsFamily> hash_function(new PolynomialHashFunctionsFamily());
 
         if(number_of_batches_word_length == 0) {
             vector<int> batches_split(Server<DataType>::_database_size, 0);
@@ -235,18 +233,17 @@ private:
     }
 
 private:
-    vector<DataType> evaluate_is_match_on_database(vector<DataType>& database,
-                                                   shared_ptr<HashFunctionFamily>& hash_function) {
+    vector<DataType> evaluate_is_match_on_database(vector<DataType>& database, int hash_function_index) {
         vector<DataType> isMatch_indicator;
         for(int element_index = 0; element_index <  database.size(); ++element_index) {
-            auto element_isMatch_indicator = evaluate_is_match_on_element(database[element_index], element_index, hash_function);
+            auto element_isMatch_indicator = evaluate_is_match_on_element(database[element_index], element_index, hash_function_index);
             isMatch_indicator.push_back(element_isMatch_indicator);
         }
         return isMatch_indicator;
     }
 
-    DataType evaluate_is_match_on_element(DataType element, int element_index, shared_ptr<HashFunctionFamily>& hash_function) {
-        if(hash_function->get_evaluated_value(element_index) == get_query()._batch_index) {
+    DataType evaluate_is_match_on_element(DataType element, int element_index, int hash_function_index) {
+        if(_hash_function_familys[hash_function_index]->get_evaluated_value(element_index) == get_query()._batch_index) {
             auto encrypted_value = get_query()._encrypted_lookup_value;
             return get_query()._isMatch(encrypted_value, element);
         }

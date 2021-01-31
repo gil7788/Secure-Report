@@ -1,4 +1,4 @@
-project(secure-report)
+    project(secure-report)
 
 cmake_minimum_required (VERSION 3.0)
 

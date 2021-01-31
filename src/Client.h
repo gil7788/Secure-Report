@@ -12,7 +12,6 @@ using Eigen::VectorXi;
 #include <bits/unique_ptr.h>
 #include "FHEDatabaseConfig.h"
 #include "TrustedThirdParty.h"
-#include "FileUtils.h"
 #include "SimplifiedHelibNumber.h"
 #include "Queries.h"
 
@@ -108,6 +107,7 @@ public:
             Client<DataType>(data_type) {}
 
 private:
+// TODO: Implement retrieval of relevant rows
     SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
         auto encoder_index = ceil(log2(get_query()._batch_size));
         auto sketch_encoder = public_server.get_matrix_by_index(encoder_index);
