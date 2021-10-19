@@ -81,7 +81,13 @@ std::vector<int> SketchEncoder::find_singletons(VectorXi vector, VectorXi* vecto
             int vector1_int = binary_to_number(vector1);
             *count = *count + 1;
 
-            if(std::find(G.begin(), G.end(), vector1_int) == G.end()) {
+
+            // TODO: Consider which option is valid
+            // if(std::find(G.begin(), G.end(), vector1_int) == G.end()) {
+            //     G.push_back(vector1_int);
+            // }
+
+            if(std::find(G.begin(), G.end(), vector1_int) == G.end() && vector1_int < _n) {
                 G.push_back(vector1_int);
             }
         }
@@ -104,11 +110,14 @@ VectorXi SketchEncoder::find_doubletons(std::vector<int> G, VectorXi vector_tag,
     const int word_size = letter_size * 6;
 
     for (int i = 0; i < G.size(); ++i) {
+        if (G[i] >= _n) {
+            std::cout << "Error !!!!!<>!";
+        }
         VectorXi U_g_l = _U.col(G[i]);
         VectorXi sig = U_g_l.replicate(_h - count, 1);
 
         VectorXi VTest = square_plus(vector_tag, sig);
-        VectorXi mask(VTest.size());
+        VectorXi mask = VectorXi::Zero(VTest.size());
 
         // Build mask
         for (int j = 0; j < _h - count; ++j) {
@@ -182,9 +191,15 @@ int SketchEncoder::binary_to_number(VectorXi vector) {
     int value = 0;
     long vector_size = vector.size();
 
+// TODO: Consider which version
     for(int i = vector_size-1, power = 1; i >= 0; --i, power *= 2) {
         value += vector(i) * power;
     }
+
+    // for(int i = 0, power = 1; i < vector_size; ++i, power *= 2) {
+    //     value += vector(i) * power;
+    // }
+
 
     return value;
 }
@@ -217,8 +232,8 @@ VectorXi SketchEncoder::line_plus(VectorXi vector_a, VectorXi vector_b) {
     description: returns ~a if b is unknown or b otherwise
     running time: O(|a|)
 */
-    VectorXi result(vector_a.size());
-    for(int i = 0; i < vector_a.size(); ++i) {
+    VectorXi result = VectorXi::Zero(vector_a.size());
+    for(int i = 0; i < result.size(); ++i) {    
         if(vector_a(i) >= 2) {
             result(i) = ((vector_b(i) == 0)  ? 1 : 0);
         }

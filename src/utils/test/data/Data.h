@@ -10,6 +10,7 @@
 using namespace std;
 
 class Data {
+    int x = 567;
 public:
     virtual ~Data() {};
 

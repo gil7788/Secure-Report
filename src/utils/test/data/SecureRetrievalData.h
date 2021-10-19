@@ -8,6 +8,7 @@
 #include <iostream>
 #include "../../../FHEDatabaseConfig.h"
 #include "Data.h"
+#include "TestResult.h"
 
 using namespace std;
 
@@ -17,7 +18,9 @@ public:
     const string _name;
     int _lookup_value;
     int _database_size;
-    int _number_of_retrieved_matches;
+    int _number_of_matches_in_database;
+    unique_ptr<RetrievalTestResult<int>> _test_result;
+
 
     DataType (*_isMatch)(DataType&, DataType&);
     vector<int> _plain_data;
@@ -26,92 +29,80 @@ public:
     long _upload_time;
     long _initialize_time;
     long _retrieval_time;
-
-    SecureRetrievalData(const string& name, int lookup_value, int database_size, int number_of_retrieved_matches,
-                        DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                        unique_ptr<DatabaseDataType>& data_type_ptr):
-                        _name{name},
-                        _lookup_value{lookup_value},
-                        _database_size{database_size}, _number_of_retrieved_matches{number_of_retrieved_matches},
-                        _isMatch{isMatch}, _plain_data(plain_data), _data_type_ptr(data_type_ptr), _results_are_set{false} {}
+    JsonParser parser;
     
-    SecureRetrievalData(const string& name, int lookup_value, int database_size, int number_of_retrieved_matches,
+    SecureRetrievalData(const string& name, int lookup_value, int database_size, int number_of_matches_in_database,
+                        vector<int>& selected_matches_indices, vector<int>& evaluated_matches_indices,
                         DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
                         unique_ptr<DatabaseDataType>& data_type_ptr,
                         long upload_time, long initialize_time, long retrieval_time):
                         _name{name},
                         _lookup_value{lookup_value},
-                        _database_size{database_size}, _number_of_retrieved_matches{number_of_retrieved_matches},
+                        _database_size{database_size},
+                        _number_of_matches_in_database{number_of_matches_in_database},
+                        _test_result{initialize_test_result(selected_matches_indices, evaluated_matches_indices, database_size)},
                         _isMatch{isMatch}, _plain_data(plain_data), _data_type_ptr(data_type_ptr), _results_are_set{true},
-                        _upload_time{upload_time}, _initialize_time{initialize_time}, _retrieval_time{retrieval_time} {}
+                        _upload_time{upload_time}, _initialize_time{initialize_time}, _retrieval_time(retrieval_time) {}
 
-//    TODO: Add more variables
-    string to_json() {
-        string json = add_first_json_element(string("name"),  _name);
-        json += this->add_middle_json_element(string("lookup_value"),  to_string(_lookup_value));
-        json += this->add_middle_json_element(string("database_size"), to_string(_database_size));
-        json += this->add_middle_json_element(string("number_of_retrieved_matches"), to_string(_number_of_retrieved_matches));
-        json += this->add_middle_json_element(string("initialize_time"), to_string(_initialize_time));
-        json += this->add_middle_json_element(string("upload_time"), to_string(_upload_time));
-        json += this->add_last_json_element(string("retrieval_time"), to_string(_retrieval_time));
+    virtual string to_json() override{
+        JsonParser parser = build_json_parser();
+        string json = parser.to_json();
         return json;
     };
+
+    virtual JsonParser build_json_parser() {
+        JsonParser parser;
+        parser.add_value("name",  _name);
+        parser.add_value("lookup_value",  to_string(_lookup_value));
+        parser.add_value("database_size", to_string(_database_size));
+        parser.add_value("number_of_matches_in_database", to_string(_number_of_matches_in_database));
+        parser.add_value("test_result", _test_result->to_json());
+        parser.add_value("initialize_time", to_string(_initialize_time));
+        parser.add_value("upload_time", to_string(_upload_time));
+        parser.add_value("retrieval_time", to_string(_retrieval_time));
+        return parser;
+    }
+
+private:
+    unique_ptr<RetrievalTestResult<int>> initialize_test_result(vector<int> selected_matches_indices, vector<int> evaluated_matches_indices, int database_size) {
+        unique_ptr<RetrievalTestResult<int>> test_result = make_unique<RetrievalTestResult<int>>(RetrievalTestResult<int>(selected_matches_indices, evaluated_matches_indices, database_size));
+        return test_result;
+    }
 };
 
 template<class DataType>
 class SecureReportData: public SecureRetrievalData<DataType> {
 public:
-    SecureReportData(const string& name, int lookup_value,int database_size, int number_of_retrieved_matches,
-                        DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                        unique_ptr<DatabaseDataType>& data_type_ptr):
-                        SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_retrieved_matches,
-                                      isMatch, plain_data, data_type_ptr) {}
-
-    SecureReportData(const string& name, int lookup_value,int database_size, int number_of_retrieved_matches,
+    SecureReportData(const string& name, int lookup_value,int database_size, int number_of_matches_in_database, int number_of_retrieved_matches,
                         DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
                         unique_ptr<DatabaseDataType>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time):
-                        SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_retrieved_matches,
+                        SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_matches_in_database, number_of_retrieved_matches,
                                       isMatch, plain_data, data_type_ptr, upload_time, initialize_time, retrieval_time) {}
 };
 
 template<class DataType>
 class SecureBatchRetrievalData: public SecureRetrievalData<DataType> {
     int _batch_size;
-    int _number_of_retrieved_matches;
+    int _number_of_requested_matches;
 
 public:
-    SecureBatchRetrievalData(const string& name, int lookup_value,int database_size, int number_of_retrieved_matches,
-                        DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                        unique_ptr<DatabaseDataType>& data_type_ptr, int batch_size):
-                        _batch_size{batch_size}, _number_of_retrieved_matches{number_of_retrieved_matches},
-                        SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_retrieved_matches,
-                                      isMatch, plain_data, data_type_ptr) {}
-
-    SecureBatchRetrievalData(const string& name, int lookup_value,int database_size, int number_of_retrieved_matches,
+    SecureBatchRetrievalData(const string& name, int lookup_value,int database_size, int number_of_matches_in_database, int number_of_requested_matches, vector<int> selected_matches_indices, vector<int> evaluated_matches_indices,
                         DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
                         unique_ptr<DatabaseDataType>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time, 
-                        int batch_size):
-                        _batch_size{batch_size}, _number_of_retrieved_matches{number_of_retrieved_matches},
-                        SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_retrieved_matches,
+                        int batch_size):  _batch_size{batch_size}, _number_of_requested_matches{number_of_requested_matches},
+                          SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_matches_in_database, selected_matches_indices, evaluated_matches_indices,
                                       isMatch, plain_data, data_type_ptr, upload_time, initialize_time, retrieval_time) {}
 
-    string to_json() {
-        string json = this->add_first_json_element(string("name"), this->_name);
-        json += this->add_middle_json_element("lookup_value", to_string(this->_lookup_value));
-        json += this->add_middle_json_element("database_size", to_string(this->_database_size));
-        json += this->add_middle_json_element("number_of_retrieved_matches", to_string(this->_number_of_retrieved_matches));
-        json += this->add_middle_json_element("initialize_time", to_string(this->_initialize_time));
-        json += this->add_middle_json_element("upload_time", to_string(this->_upload_time));
-        json += this->add_middle_json_element("retrieval_time", to_string(this->_retrieval_time));
-        json += this->add_middle_json_element("batch_size", to_string(_batch_size));
-        json += this->add_middle_json_element("number_of_retrieved_matches", to_string(_number_of_retrieved_matches));
-        json += this->add_last_json_element("number_of_retrieved_batches", to_string(get_number_of_retrieved_batches()));
-        return json;
-    };
+    JsonParser build_json_parser() override{
+        JsonParser parser = SecureRetrievalData<DataType>::build_json_parser();
+        parser.add_value("batch_size", to_string(_batch_size));
+        return parser;
+    }
 
 private:
+// TODO: implement, probabliy pass _number_of retrieved batches to Data class
     int get_number_of_retrieved_batches() {
-        int number_of_retrieved_batches = int(ceil(_number_of_retrieved_matches/_batch_size));
+        int number_of_retrieved_batches = 0;
         return number_of_retrieved_batches;
     }
 };

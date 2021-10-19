@@ -25,6 +25,6 @@ bool Tester::log_result() {
     return log_saved;
 }
 
-void Tester::add_test_run_to_log(unique_ptr<Data>& test_result) {
-    _log_data.add_data(test_result);
+void Tester::add_test_run_to_log(unique_ptr<Data> test_result) {
+    _log_data.add_data(move(test_result));
 }

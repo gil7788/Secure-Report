@@ -5,7 +5,7 @@
 #include "JsonLogger.h"
 
 
-void JsonLogger::add_data(unique_ptr<Data>& data) {
+void JsonLogger::add_data(unique_ptr<Data> data) {
     _data_vector.push_back(move(data));
 }
 
@@ -26,15 +26,13 @@ fs::path JsonLogger::build_log_file_path() {
 }
 
 string JsonLogger::to_json() {
-    string json = "[ \n";
-
-    for (int i = 0; i < _data_vector.size() - 1; ++i) {
+    vector<string> json_elements;
+    for (int i = 0; i < _data_vector.size(); ++i) {
         auto json_element = _data_vector[i].get()->to_json();
-        json += json_element + ", \n";
+        json_elements.push_back(json_element);
     }
-    int last_index = _data_vector.size()-1;
-    json += _data_vector[last_index].get()->to_json() + "] \n";
-    return json;
+    auto json_array = JsonParser::vector_to_json_string(json_elements);
+    return json_array;
 }
 
 string JsonLogger::get_log_name() {

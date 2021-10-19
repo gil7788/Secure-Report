@@ -35,11 +35,7 @@ public:
         _public_server = get_server().construct_public_server();
     }
 
-    bool upload(vector<int>& plain_data, int comparison_value) {
-        vector<int> indices = VectorUtils::get_matches_std_vector(plain_data, comparison_value);
-        string s = VectorUtils::std_vector_to_string(indices);
-        std::cout << "Selected indices: " << s << std::endl;
-
+    bool upload(vector<int>& plain_data) {
         auto encrypted_data = _client.upload_data_to_server(plain_data);
         bool uploaded_successful = _server.upload(encrypted_data);
         return uploaded_successful;

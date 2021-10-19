@@ -6,6 +6,7 @@
 #define SECURE_REPORT_HASHFUNCTIONLOGDATA_H
 
 #include "data/HashFunctionData.h"
+#include "../JsonParser.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ vector<unique_ptr<Data>> _data_vector;
 public:
     JsonLogger(string& log_name): _log_name{format_log_name(log_name)} {}
 
-    void add_data(unique_ptr<Data>& data);
+    void add_data(unique_ptr<Data> data);
 
     bool save_log();
 
