@@ -16,20 +16,35 @@ namespace fs = std::experimental::filesystem;
 
 enum class DATA_TYPES {PLAIN, ENCRYPTED, MIXED};
 
+/**
+ * Virtual API class for Fully Homomorphic context setting
+ */
 class DatabaseDataType {
     public:
 
+//    @TODO redundent function, consider to delete
     virtual DATA_TYPES get_data_type() = 0;
 
     virtual void initialize() = 0;
 
+    /**
+     * Write encryption key to file
+     * @param key_file_path encryption key file path
+     */
     virtual void write_key_to_file(const std::string& key_file_path) = 0;
 
+    /**
+     * Read encryption key from file
+     * @param key_file_path file to read encryption key
+     */
     virtual void read_key_from_file(const std::string& key_file_path) = 0;
 
     virtual ~DatabaseDataType() = default;
 };
 
+/**
+ * Plain Fully Homomorphic number class
+ */
 class GenericPlainDataType: public DatabaseDataType {
 public:
     const DATA_TYPES _data_type = DATA_TYPES ::PLAIN;
@@ -46,6 +61,10 @@ public:
     void initialize() override;
 };
 
+// @TODO understand classes parameter, and document. Probably read about Helib context setting
+/**
+ * Encrypted Homomorphic number class
+ */
 class EncryptedDataTypeFromParameters: public DatabaseDataType {
     int _database_size;
     long _s;

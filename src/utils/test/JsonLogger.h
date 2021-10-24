@@ -10,6 +10,11 @@
 
 using namespace std;
 
+// TODO consider to move to file_system directory
+
+/**
+ * Json logger class, output to console and save to file json strings
+ */
 class JsonLogger {
 string _log_name;
 vector<unique_ptr<Data>> _data_vector;
@@ -17,17 +22,29 @@ vector<unique_ptr<Data>> _data_vector;
 public:
     JsonLogger(string& log_name): _log_name{format_log_name(log_name)} {}
 
+    /**
+     * Add data element to data vector
+     * @param data Data element to add
+     */
     void add_data(unique_ptr<Data> data);
 
+    /**
+     * Log to file all data elements saved in data vector
+     * @return Logged successfully
+     */
     bool save_log();
 
-    fs::path build_log_file_path();
-
+    /**
+     * Convert all data elements saved in data vector to json string
+     * @return Convert all data elements saved in data vector to json string
+     */
     string to_json();
-// TODO consider to remove protected
-protected:
 
+// TODO consider to remove, not used
     string get_log_name();
+
+private:
+    fs::path build_log_file_path();
 
     string format_log_name(string& log_name);
 };

@@ -10,6 +10,9 @@
 
 using namespace std;
 
+/**
+ * Measure success percentage of test result
+ */
 class TestResult {
 public:
     virtual ~TestResult() {};

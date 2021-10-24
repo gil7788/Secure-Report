@@ -23,7 +23,10 @@ using Eigen::MatrixXi;
 using Eigen::VectorXi;
 namespace fs = std::experimental::filesystem;
 
-
+/**
+ * API for database creation
+ * @tparam Number Plain/Encrypted Fully Homomorphic number template.
+ */
 template<class Number>
 class PlainFileSystemDatabase {
 private:
@@ -43,6 +46,7 @@ private:
         return true;
     };
 
+//    @TODO Consider to delete, not implemented
     bool create_table(string table_name);
     bool truncate_table(string& table_name);
     bool fill_table(string& table_name, std::vector<Number>& init_vector);

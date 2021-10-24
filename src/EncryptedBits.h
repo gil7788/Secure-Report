@@ -10,6 +10,13 @@
 
 using namespace std;
 
+// @TODO consider to rename file and class name to FullyHomomorphicBits
+
+/**
+ * Convert Fully Homomorphic bit vector to Fully Homomorphic number.
+ *
+ * @tparam Number Plain/Encrypted Fully Homomorphic number template.
+ */
 template<class Number>
 class Bits {
 private:

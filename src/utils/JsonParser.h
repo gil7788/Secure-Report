@@ -7,6 +7,7 @@
 
 using namespace std;
 
+// TODO move to JsonParser class as private class
 class MyPair{
 public:
     string _key;

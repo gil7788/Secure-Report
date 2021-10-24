@@ -10,6 +10,10 @@
 using namespace std;
 using Eigen::VectorXi;
 
+/**
+ * Contains static methods for evaluating operations on encrypted numbers, in Fully Homomorphic fashion.
+ * @tparam Number Plain/Encrypted Fully Homomorphic number template.
+ */
 template<class Number>
 class FHEUtils{
 private:
@@ -44,22 +48,42 @@ private:
     }
 
 public:
+    /**
+     * @param x y Fully Homomorphic numbers
+     * @return x greater than or equals to y
+     */
     static Number greaterThanOrEquals(Number& x, Number& y) {
         return lessThan(y, x) + areEqualBinary(x, y);
     }
 
+    /**
+     * @param x y Fully Homomorphic numbers
+     * @return x less than or equals to y
+     */
     static Number lessThanOrEquals(Number& x, Number& y) {
         return lessThan(x, y) + areEqualBinary(x, y);
     }
 
+    /**
+     * @param x y Fully Homomorphic numbers
+     * @return x equals to y
+     */
     static Number areEqualBinary(Number& x, Number& y) {
         return areSuffixesEqual(x, y, 0);
     }
 
+    /**
+     * @param x y Fully Homomorphic numbers
+     * @return x greater than y
+     */
     static Number greaterThan(Number& x, Number& y) {
         return lessThan(y, x);
     }
 
+    /**
+     * @param x y Fully Homomorphic numbers
+     * @return x less than y
+     */
     static Number lessThan(Number& x, Number& y) {
         const int word_length = x.r();
         auto vec = std::vector<long>(word_length, 1);
@@ -86,12 +110,11 @@ public:
         }
     }
 
+    // @TODO consider to delete, not implemented
     static VectorXi encryptVectorXi(VectorXi plainVector);
 
     static Number* encryptArray(Number* plainVector);
 
     static Number test();
-
-
 };
 #endif //SECURE_REPORT_FHEUTILS_H

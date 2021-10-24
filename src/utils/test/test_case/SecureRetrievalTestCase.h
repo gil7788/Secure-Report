@@ -18,6 +18,7 @@
 #include <chrono>
 using namespace std::chrono;
 
+// TODO examine file, add detailed TODO list, at top of the file
 
 template<class DataType>
 class SecureRetrievalTestCase: public TestCase {
