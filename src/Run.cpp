@@ -4,11 +4,11 @@
 
 #include <iostream>
 
-#include "GenericZP.h"
-#include "SimplifiedHelibNumber.h"
-#include "Protocol.h"
-#include "utils/test/test_case/SecureRetrievalTestCase.h"
-#include "utils/test/tester/ProtocolTester.h"
+#include "algorithms/fully_homomorphic/GenericZP.h"
+#include "algorithms/fully_homomorphic/SimplifiedHelibNumber.h"
+#include "entities/Protocol.h"
+#include "infrastructure/test/test_case/SecureRetrievalTestCase.h"
+#include "infrastructure/test/tester/ProtocolTester.h"
 
 
 #define SIMD_FACTOR constants::WORD_LENGTH

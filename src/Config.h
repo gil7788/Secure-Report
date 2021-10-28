@@ -7,6 +7,7 @@
 
 #include <string>
 
+// TODO Rename PROCESSED_FILE_PATH to PROCESSED_DIR_PATH. Save table vector to PROCESSED_DIR_PATH
 namespace constants {
     const bool OUTPUT_TO_CONSOLE = true;
     const std::string OUTPUT_FILE_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/output_file.txt";
