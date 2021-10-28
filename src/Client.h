@@ -15,7 +15,11 @@ using Eigen::VectorXi;
 #include "SimplifiedHelibNumber.h"
 #include "Queries.h"
 
-
+/**
+ * This class implement virtual Client API for retrieval protocol SecureRetrievalProtocol.
+ * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
+ * plausible templates inherit from DatabaseDataType.
+ */
 template <typename DataType>
 class Client {
 public:
@@ -25,19 +29,38 @@ public:
     Client(unique_ptr<DatabaseDataType>& data_type):
             _data_type(data_type) {}
 
+    /**
+     * Initialize context for Fully Homomorphic evaluations
+     * @return [CHECK] bool indicating whether context intializtion succeeded
+     */
+//     TODO: Consider to change return type to void, as this function returns nothing. Check if varification is used.
     bool initialize() {
         _data_type.get()->initialize();
     }
 
+    /**
+     * Initialize query
+     * @param query Send to Server, to fetch data from server (see SecureRetrievalProtocol).
+     */
     void initialize_query(unique_ptr<PlainQuery<DataType>> query) {
         _query = move(query);
     }
 
+    /**
+     * Upload data to server
+     * @param data Plain integer data
+     * @return Encrypted data
+     */
     virtual std::vector<DataType> upload_data_to_server(std::vector<int>& data) {
         auto encrypted_data = encrypt_data(data);
         return encrypted_data;
     }
 
+    /**
+     * Encrypted plain data
+     * @param plain_input
+     * @return Encrypted data
+     */
     virtual std::vector<DataType> encrypt_data(std::vector<int>& plain_input) {
         std::vector<DataType> encrypted_input;
         for(auto& entry: plain_input) {
@@ -47,10 +70,20 @@ public:
         return encrypted_input;
     }
 
+    /**
+     * Encrypt query
+     * @return Encrypted query
+     */
     unique_ptr<EncryptedQuery<DataType>> encrypt_query() {
         return _query.get()->encrypt();
     }
 
+    /**
+     *
+     * @param encoded_encrypted_matches Processed EncryptedQuery output from Server
+     * @param trusted_third_party TrustedThirdParty
+     * @return Matches, evaluted plain data from Server encrypted output
+     */
     virtual std::vector<int> retrieve_matches_indices(std::vector<DataType>&  encoded_encrypted_matches, TrustedThirdParty& trusted_third_party) {
         std::vector<int> encoded_matches = decrypt_encrypted_encoded_matches(encoded_encrypted_matches);
         std::vector<int> matches = decode_encoded_matches(encoded_matches, trusted_third_party);
@@ -86,6 +119,11 @@ private:
     virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) = 0;
 };
 
+/**
+* This class implement Secure Report Client.
+* @tparam DataType Plain/Encrypted Fully Homomorphic number template,
+* plausible templates inherit from DatabaseDataType.
+*/
 template <typename DataType>
 class SecureReportClient: public Client<DataType> {
 public:
@@ -99,6 +137,11 @@ private:
     }
 };
 
+/**
+* This class implement  Secure Batch Retrieval Client.
+* @tparam DataType Plain/Encrypted Fully Homomorphic number template,
+* plausible templates inherit from DatabaseDataType.
+*/
 template <typename DataType>
 class SecureBatchRetrievalClient: public Client<DataType> {
 SecureBatchRetrievalQuery<DataType> _query;

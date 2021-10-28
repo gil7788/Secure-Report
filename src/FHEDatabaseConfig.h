@@ -16,6 +16,8 @@ namespace fs = std::experimental::filesystem;
 
 enum class DATA_TYPES {PLAIN, ENCRYPTED, MIXED};
 
+// TODO rename to FHNumber
+
 /**
  * Virtual API class for Fully Homomorphic context setting
  */

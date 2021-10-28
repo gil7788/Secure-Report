@@ -9,6 +9,12 @@ using Eigen::MatrixXi;
 using Eigen::VectorXi;
 
 
+/**
+ * This class is an encoder/decoder implemented based on the following paper:
+ * https://www.semanticscholar.org/paper/Non-Adaptive-Group-Testing-Framework-based-on-Code-Bui-Kuribayashi/c05152418cc0a666eaa333efc119ea3c639279b1?p2df
+ */
+class SketchEncoder {
+private:
 /*
     M: d-disjunct matrix denoted as sketch of type MatrixXi
     U: signature matrix
@@ -24,10 +30,6 @@ using Eigen::VectorXi;
     G: set of indices after decode
     Ce: used to determine the success of rate of the decoding
  * */
-
-class SketchEncoder {
-// Class variables
-private:
     const double Ce = 11.36;
     int _n;
     int _d;
@@ -46,12 +48,29 @@ private:
 public:
     SketchEncoder(int n, int d);
 
+    /**
+     * Retrieve stored sketch matrix
+     * @return sketch matrix
+     */
     MatrixXi get_sketch();
 
+    /**
+     * Encode vector to sketch vector
+     * @param vector Vector to encode
+     * @return encoded vector (sketch vector)
+     */
     VectorXi encode(VectorXi vector);
 
+    /**
+     * Decode sketch vector to vector
+     * @param vector Sketch vector to decode
+     * @return decoded vector
+     */
     VectorXi decode(VectorXi vector);
 
+    /**
+     * Construct sketch matrix
+     */
     void construct_sketch_matrix();
 
 // Helper functions

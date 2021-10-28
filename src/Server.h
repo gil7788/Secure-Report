@@ -16,7 +16,16 @@
 #include "HashFunctions/HashFunctionsFamily.h"
 #include "Queries.h"
 
+// @TODO
+// 1. Re-divide private, public functions
+//  TrustedThirdParty construct_public_server() in Server and SecureReportServer is public,
+//  but in SecureBatchRetrievalServer is private
 
+/**
+ * This class implement virtual Server API for retrieval protocol SecureRetrievalProtocol.
+ * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
+ * plausible templates inherit from DatabaseDataType.
+ */
 template <typename DataType>
 class Server {
 public:
@@ -33,6 +42,9 @@ public:
             _io(constants::OUTPUT_TO_CONSOLE, constants::OUTPUT_FILE_PATH, constants::OUTPUT_LEVEL),
             _fhe_database(size, _io) {}
 
+    /**
+     * Connect to database
+     */
     void connect_database() {
         if(_is_connected)
             return;
@@ -44,6 +56,11 @@ public:
         }
     }
 
+    /**
+     * Upload Encrypted data to database
+     * @param data Encrypted data
+     * @return Upload success
+     */
     bool upload(std::vector<DataType>& data) {
         connect_database();
         if(not _is_connected){
@@ -58,24 +75,47 @@ public:
         return database_built;
     }
 
+    /**
+     * Evaluate matches (encrypted and encoded) as a result to EncryptedQuery sent by Client.
+     * @param trusted_third_party TrustedThirdParty
+     * @return Encrypted and encoded matches
+     */
     vector<DataType> send_matches_indices_to_client(TrustedThirdParty& trusted_third_party) {
         vector<DataType> matches_indicators {evaluate_matches()};
         vector<DataType> encoded_encrypted_matches {encode(matches_indicators, trusted_third_party)};
         return encoded_encrypted_matches;
     }
 
+    /**
+     * Intialize TrustedThirdParty by processing pre-processed data
+     * @return TrustedThirdParty with pre-processed data
+     */
     virtual TrustedThirdParty initialize() {
         auto public_server = construct_public_server();
         construct_disjunct_matrices(public_server);
         return public_server;
     };
 
+    /**
+     * Initialize EncryptedQuery sent from Client.
+     * @param query EncryptedQuery sent from Client
+     */
     void initialize_query(unique_ptr<EncryptedQuery<DataType>> query) {
         _query = move(query);
     }
 
+    /**
+     * Evaluate encrypted matches, base on EncryptedQuery provided in Server::initialize_query
+     * @return Vector of encrypted matches indicators (vector of encrypted 0 or 1 values)
+     */
     virtual vector<DataType> evaluate_matches() = 0;
 
+    /**
+     * Encode encrypted matches (see Server::evaluate_matches)
+     * @param matches_indicators Vector of encrypted matches indicators (vector of encrypted 0 or 1 values)
+     * @param public_server TrustedThirdParty
+     * @return Encrypted and encoded vector of matches
+     */
     vector<DataType> encode(vector<DataType>& matches_indicators, TrustedThirdParty& public_server) {
         MatrixXi disjunct_matrix{get_disjunct_matrix(public_server).get_sketch()};
         std::vector<DataType> out(disjunct_matrix.rows(), DataType(0));
@@ -91,15 +131,29 @@ public:
         return out;
     }
 
+    /**
+     * Construct disjunct matrices in the public server
+     * @param public_server TrustedThirdParty
+     */
     void construct_disjunct_matrices(TrustedThirdParty& public_server) {
         public_server.construct_sketch_matrices();
     }
 
     virtual TrustedThirdParty construct_public_server() = 0;
 
+    /**
+     * Retrieve disjunct matrix from TrustedThirdParty according to EncryptedQuery.
+     * @param public_server TrustedThirdParty
+     * @return Disjunct matrix encoder
+     */
     virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) = 0;
 };
 
+/**
+* This class implement Secure Report Server.
+* @tparam DataType Plain/Encrypted Fully Homomorphic number template,
+* plausible templates inherit from DatabaseDataType.
+*/
 template <typename DataType>
 class SecureReportServer: public Server<DataType> {
 public:
@@ -155,6 +209,11 @@ private:
     }
 };
 
+/**
+* This class implement Secure Batch Retrieval Server.
+* @tparam DataType Plain/Encrypted Fully Homomorphic number template,
+* plausible templates inherit from DatabaseDataType.
+*/
 template <typename DataType>
 class SecureBatchRetrievalServer: public Server<DataType>{
 private:
