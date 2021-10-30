@@ -46,12 +46,6 @@ private:
         return true;
     };
 
-//    @TODO Consider to delete, not implemented
-    bool create_table(string table_name);
-    bool truncate_table(string& table_name);
-    bool fill_table(string& table_name, std::vector<Number>& init_vector);
-    void print_sql_exception(mysqlpp::BadQuery& e, string query);
-    bool execute_sql_query(string query);
 public:
     bool connect() {
         return true;

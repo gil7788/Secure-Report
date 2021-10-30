@@ -7,16 +7,15 @@
 
 using namespace std;
 
-// TODO move to JsonParser class as private class
-class MyPair{
-public:
-    string _key;
-    string _value;
-
-    MyPair(std::string key, std::string value): _key{key}, _value{value} {}
-};
-
 class JsonParser{
+    class MyPair{
+    public:
+        string _key;
+        string _value;
+
+        MyPair(std::string key, std::string value): _key{key}, _value{value} {}
+    };
+
     vector<MyPair> _values;
 
 public:

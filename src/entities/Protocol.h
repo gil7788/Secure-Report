@@ -20,7 +20,7 @@ using namespace std;
 /**
  * This class implement virtual Secure Retrieval Protocol API.
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class SecureRetrievalProtocol {
@@ -97,7 +97,7 @@ protected:
 /**
  * This class implement Secure Batch Retrieval Protocol API.
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class SecureBatchRetrievalProtocol: public SecureRetrievalProtocol<DataType> {
@@ -126,7 +126,7 @@ public:
 /**
  * This class implement Secure Report Protocol API.
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class SecureReportProtocol: public SecureRetrievalProtocol<DataType> {

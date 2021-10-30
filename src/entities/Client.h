@@ -10,7 +10,7 @@
 using Eigen::VectorXi;
 
 #include <bits/unique_ptr.h>
-#include "../algorithms/fully_homomorphic/FHEDatabaseConfig.h"
+#include "../algorithms/fully_homomorphic/Context.h"
 #include "TrustedThirdParty.h"
 #include "../algorithms/fully_homomorphic/SimplifiedHelibNumber.h"
 #include "Queries.h"
@@ -18,15 +18,15 @@ using Eigen::VectorXi;
 /**
  * This class implement virtual Client API for retrieval protocol SecureRetrievalProtocol.
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class Client {
 public:
-    unique_ptr<DatabaseDataType>& _data_type;
+    unique_ptr<VirtualContext>& _data_type;
     unique_ptr<PlainQuery<DataType>> _query;
 
-    Client(unique_ptr<DatabaseDataType>& data_type):
+    Client(unique_ptr<VirtualContext>& data_type):
             _data_type(data_type) {}
 
     /**
@@ -34,7 +34,7 @@ public:
      * @return [CHECK] bool indicating whether context intializtion succeeded
      */
 //     TODO: Consider to change return type to void, as this function returns nothing. Check if varification is used.
-    bool initialize() {
+    void initialize() {
         _data_type.get()->initialize();
     }
 
@@ -122,17 +122,17 @@ private:
 /**
 * This class implement Secure Report Client.
 * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
-* plausible templates inherit from DatabaseDataType.
+* plausible templates inherit from VirtualContext.
 */
 template <typename DataType>
 class SecureReportClient: public Client<DataType> {
 public:
-    SecureReportClient(unique_ptr<DatabaseDataType>& data_type):
+    SecureReportClient(unique_ptr<VirtualContext>& data_type):
             Client<DataType>(data_type) {}
 
 private:
     SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
-        auto sketch_encoder = public_server.get_matrix_by_index(0);
+        auto sketch_encoder = public_server.get_encoder_by_index(0);
         return sketch_encoder;
     }
 };
@@ -140,20 +140,20 @@ private:
 /**
 * This class implement  Secure Batch Retrieval Client.
 * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
-* plausible templates inherit from DatabaseDataType.
+* plausible templates inherit from VirtualContext.
 */
 template <typename DataType>
 class SecureBatchRetrievalClient: public Client<DataType> {
 SecureBatchRetrievalQuery<DataType> _query;
 public:
-    SecureBatchRetrievalClient(unique_ptr<DatabaseDataType>& data_type):
+    SecureBatchRetrievalClient(unique_ptr<VirtualContext>& data_type):
             Client<DataType>(data_type) {}
 
 private:
 // TODO: Implement retrieval of relevant rows
     SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
         auto encoder_index = ceil(log2(get_query()._batch_size));
-        auto sketch_encoder = public_server.get_matrix_by_index(encoder_index);
+        auto sketch_encoder = public_server.get_encoder_by_index(encoder_index);
         return sketch_encoder;
     }
 

@@ -12,7 +12,7 @@ using namespace std;
 /**
  * Encrypted query virtual class
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class EncryptedQuery {
@@ -23,7 +23,7 @@ public:
 /**
  * Plain query virtual class @see FHEDatabaseConfig.h
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class PlainQuery {
@@ -38,7 +38,7 @@ public:
 /**
  * Secure Report encrypted query class
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class EncryptedSecureReportQuery: public EncryptedQuery<DataType> {
@@ -48,14 +48,14 @@ public:
      */
     DataType _encrypted_lookup_value;
     /**
-     * Is match comperator @see FHEUtils.h
+     * Is match comperator @see Comparators.h
      */
     DataType (*_isMatch)(DataType&, DataType&);
 
     /**
-     * Initialize query with integer number and IsMatch comparator (see FHEUtils.h)
+     * Initialize query with integer number and IsMatch comparator (see Comparators.h)
      * @param lookup_value Look up value
-     * @param isMatch see FHEUtils.h
+     * @param isMatch see Comparators.h
      */
     void initialize(int lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
         auto encrypted_look_up_value = DataType(lookup_value);
@@ -63,10 +63,10 @@ public:
     }
 
     /**
-     * Initialize query with Fully Homomorphic number (see DatabaseDataType)
-     * and IsMatch comparator (see FHEUtils.h)
-     * @param lookup_value See DatabaseDataType
-     * @param isMatch See FHEUtils.h
+     * Initialize query with Fully Homomorphic number (see VirtualContext)
+     * and IsMatch comparator (see Comparators.h)
+     * @param lookup_value See VirtualContext
+     * @param isMatch See Comparators.h
      */
     void initialize(DataType& encrypted_lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
         _encrypted_lookup_value = encrypted_lookup_value;
@@ -77,7 +77,7 @@ public:
 /**
  * Secure Report query class
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class SecureReportQuery: public PlainQuery<DataType> {
@@ -87,9 +87,9 @@ private:
 
 public:
     /**
-     * Initialize query with integer number and IsMatch comparator (see FHEUtils.h)
+     * Initialize query with integer number and IsMatch comparator (see Comparators.h)
      * @param lookup_value Integer look up value
-     * @param isMatch see FHEUtils.h
+     * @param isMatch see Comparators.h
      */
     void initialize(int lookup_value, DataType (*isMatch)(DataType&, DataType&)) {
         _lookup_value = lookup_value;
@@ -109,7 +109,7 @@ public:
 /**
  * Encrypted Secure Batch Retrieval query class
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class EncryptedSecureBatchRetrievalQuery: public EncryptedQuery<DataType> {
@@ -123,15 +123,15 @@ public:
 //    Batch index to fetch from server
     int _batch_index;
 
-// IsMatch comparator, see FHEUtils
+// IsMatch comparator, see Comparators
     DataType (*_isMatch)(DataType&, DataType&);
 
     /**
-     * Initialize query with integer number, batch index, batch size, and IsMatch comparator (see FHEUtils.h)
+     * Initialize query with integer number, batch index, batch size, and IsMatch comparator (see Comparators.h)
      * @param lookup_value Integer look up value
      * @param batch_index Batch index to fetch from server
      * @param batch_size Batch size to fetch from server
-     * @param isMatch see FHEUtils.h
+     * @param isMatch see Comparators.h
      */
     void initialize(int lookup_value, int batch_index, int batch_size,
                     DataType (*isMatch)(DataType&, DataType&)) {
@@ -139,12 +139,12 @@ public:
     }
 
     /**
-     * Initialize query with Fully Homomorphic number (see DatabaseDataType),
-     * batch index, batch size, and IsMatch comparator (see FHEUtils.h)
+     * Initialize query with Fully Homomorphic number (see VirtualContext),
+     * batch index, batch size, and IsMatch comparator (see Comparators.h)
      * @param lookup_value Integer look up value
      * @param batch_index Batch index to fetch from server
      * @param batch_size Batch size to fetch from server
-     * @param isMatch see FHEUtils.h
+     * @param isMatch see Comparators.h
      */
     void initialize(DataType encrypted_lookup_value, int batch_index, int batch_size,
                                        DataType (*isMatch)(DataType&, DataType&)) {
@@ -158,7 +158,7 @@ public:
 /**
  * Encrypted Secure Batch Retrieval query class
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class SecureBatchRetrievalQuery: public PlainQuery<DataType> {
@@ -178,7 +178,7 @@ public:
 //    Number of matches in database
     int _number_of_matches;
 
-//    IsMatch comparator, see FHEUtils
+//    IsMatch comparator, see Comparators
     DataType (*_isMatch)(DataType&, DataType&);
 
 public:

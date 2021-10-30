@@ -5,7 +5,7 @@
 #include <helib_number.h>
 #include <binomial_tournament.h>
 #include "GenericZP.h"
-#include "EncryptedBits.h"
+#include "Bits.h"
 
 using namespace std;
 using Eigen::VectorXi;
@@ -15,7 +15,7 @@ using Eigen::VectorXi;
  * @tparam Number Plain/Encrypted Fully Homomorphic number template.
  */
 template<class Number>
-class FHEUtils{
+class Comparators{
 private:
     static Number areSuffixesEqual(Number& x, Number& y, int suffix_begining_index) {
         const int word_length = x.r();
@@ -109,12 +109,5 @@ public:
             return accumulated;
         }
     }
-
-    // @TODO consider to delete, not implemented
-    static VectorXi encryptVectorXi(VectorXi plainVector);
-
-    static Number* encryptArray(Number* plainVector);
-
-    static Number test();
 };
 #endif //SECURE_REPORT_FHEUTILS_H

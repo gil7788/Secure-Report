@@ -14,18 +14,12 @@
 
 namespace fs = std::experimental::filesystem;
 
-enum class DATA_TYPES {PLAIN, ENCRYPTED, MIXED};
-
-// TODO rename to FHNumber
 
 /**
  * Virtual API class for Fully Homomorphic context setting
  */
-class DatabaseDataType {
+class VirtualContext {
     public:
-
-//    @TODO redundent function, consider to delete
-    virtual DATA_TYPES get_data_type() = 0;
 
     virtual void initialize() = 0;
 
@@ -41,20 +35,17 @@ class DatabaseDataType {
      */
     virtual void read_key_from_file(const std::string& key_file_path) = 0;
 
-    virtual ~DatabaseDataType() = default;
+    virtual ~VirtualContext() = default;
 };
 
 /**
- * Plain Fully Homomorphic number class
+ * Plain Fully Homomorphic number context class
  */
-class GenericPlainDataType: public DatabaseDataType {
+class PlainContext: public VirtualContext {
 public:
-    const DATA_TYPES _data_type = DATA_TYPES ::PLAIN;
     int _r;
 
-    explicit GenericPlainDataType(int r);
-
-    DATA_TYPES get_data_type() override;
+    explicit PlainContext(int r);
 
     virtual void write_key_to_file(const std::string& key_file_path) override;
 
@@ -65,9 +56,9 @@ public:
 
 // @TODO understand classes parameter, and document. Probably read about Helib context setting
 /**
- * Encrypted Homomorphic number class
+ * Encrypted Homomorphic number context class
  */
-class EncryptedDataTypeFromParameters: public DatabaseDataType {
+class EncryptedContext: public VirtualContext {
     int _database_size;
     long _s;
     long _R;
@@ -83,11 +74,9 @@ class EncryptedDataTypeFromParameters: public DatabaseDataType {
     const fs::path _key_file_path;
 
 public:
-    EncryptedDataTypeFromParameters(int database_size, long s, long R, long r,
-                                    long d, long c, long k, int L, long chosen_m, Vec<long>& gens, Vec<long>& ords,
-                                    const std::string& key_file_path);
-
-    DATA_TYPES get_data_type() override;
+    EncryptedContext(int database_size, long s, long R, long r,
+                     long d, long c, long k, int L, long chosen_m, Vec<long>& gens, Vec<long>& ords,
+                     const std::string& key_file_path);
 
     void initialize() override;
 

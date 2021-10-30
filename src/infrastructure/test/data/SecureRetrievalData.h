@@ -6,7 +6,7 @@
 #define SECURE_SECURERETRIEVALDATA_H
 
 #include <iostream>
-#include "../../../algorithms/fully_homomorphic/FHEDatabaseConfig.h"
+#include "../../../algorithms/fully_homomorphic/Context.h"
 #include "Data.h"
 #include "TestResult.h"
 
@@ -24,7 +24,7 @@ public:
 
     DataType (*_isMatch)(DataType&, DataType&);
     vector<int> _plain_data;
-    unique_ptr<DatabaseDataType>& _data_type_ptr;
+    unique_ptr<VirtualContext>& _data_type_ptr;
     bool _results_are_set;
     long _upload_time;
     long _initialize_time;
@@ -34,7 +34,7 @@ public:
     SecureRetrievalData(const string& name, int lookup_value, int database_size, int number_of_matches_in_database,
                         vector<int>& selected_matches_indices, vector<int>& evaluated_matches_indices,
                         DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                        unique_ptr<DatabaseDataType>& data_type_ptr,
+                        unique_ptr<VirtualContext>& data_type_ptr,
                         long upload_time, long initialize_time, long retrieval_time):
                         _name{name},
                         _lookup_value{lookup_value},
@@ -73,9 +73,9 @@ private:
 template<class DataType>
 class SecureReportData: public SecureRetrievalData<DataType> {
 public:
-    SecureReportData(const string& name, int lookup_value,int database_size, int number_of_matches_in_database, int number_of_retrieved_matches,
-                        DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                        unique_ptr<DatabaseDataType>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time):
+    SecureReportData(const string& name, int lookup_value, int database_size, int number_of_matches_in_database, int number_of_retrieved_matches,
+                     DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
+                     unique_ptr<VirtualContext>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time):
                         SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_matches_in_database, number_of_retrieved_matches,
                                       isMatch, plain_data, data_type_ptr, upload_time, initialize_time, retrieval_time) {}
 };
@@ -86,10 +86,10 @@ class SecureBatchRetrievalData: public SecureRetrievalData<DataType> {
     int _number_of_requested_matches;
 
 public:
-    SecureBatchRetrievalData(const string& name, int lookup_value,int database_size, int number_of_matches_in_database, int number_of_requested_matches, vector<int> selected_matches_indices, vector<int> evaluated_matches_indices,
-                        DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                        unique_ptr<DatabaseDataType>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time, 
-                        int batch_size):  _batch_size{batch_size}, _number_of_requested_matches{number_of_requested_matches},
+    SecureBatchRetrievalData(const string& name, int lookup_value, int database_size, int number_of_matches_in_database, int number_of_requested_matches, vector<int> selected_matches_indices, vector<int> evaluated_matches_indices,
+                             DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
+                             unique_ptr<VirtualContext>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time,
+                             int batch_size):  _batch_size{batch_size}, _number_of_requested_matches{number_of_requested_matches},
                           SecureRetrievalData<DataType>(name, lookup_value, database_size, number_of_matches_in_database, selected_matches_indices, evaluated_matches_indices,
                                       isMatch, plain_data, data_type_ptr, upload_time, initialize_time, retrieval_time) {}
 

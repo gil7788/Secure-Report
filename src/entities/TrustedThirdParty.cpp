@@ -11,12 +11,12 @@ void TrustedThirdParty::initialize(int database_size, vector<int>& matrices_spar
     }
 }
 
-void TrustedThirdParty::construct_sketch_matrices() {
+void TrustedThirdParty::construct_sketch_encoders() {
     for(auto& encoder: _encoders) {
         encoder.construct_sketch_matrix();
     }
 }
 
-SketchEncoder TrustedThirdParty::get_matrix_by_index(int i) {
+SketchEncoder TrustedThirdParty::get_encoder_by_index(int i) {
     return _encoders[i];
 }

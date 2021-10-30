@@ -9,7 +9,7 @@
 #include <malloc.h>
 
 #include "Tester.h"
-#include "../../../hash_functions/HashFunctionsFamily.h"
+#include "../../../algorithms/hash_functions/HashFunctionsFamily.h"
 #include "../../../Config.h"
 #include "../../file_system/InputOutput.h"
 #include "../../file_system/JsonLogger.h"
@@ -17,9 +17,9 @@
 
 namespace fs = std::experimental::filesystem;
 
-class TestHashFunctionFamily: public Tester {
+class HashFunctionFamilyTester: public Tester {
 public:
-    explicit TestHashFunctionFamily(string& log_name): Tester::Tester(log_name) {}
+    explicit HashFunctionFamilyTester(string& log_name): Tester::Tester(log_name) {}
 
     void try_test_and_log(unique_ptr<TestCase>& test_case) override;
 };

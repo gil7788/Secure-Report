@@ -16,10 +16,6 @@ void Tester::test_and_log_all() {
     }
 }
 
-void Tester::test_element(unique_ptr<TestCase>& test) {
-    test.get()->test();
-}
-
 bool Tester::log_result() {
     bool log_saved = _log_data.save_log();
     return log_saved;

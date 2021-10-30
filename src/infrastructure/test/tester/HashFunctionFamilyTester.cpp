@@ -2,11 +2,11 @@
 // Created by gil on 4.9.2020.
 //
 
-#include "TestHashFunctionFamily.h"
+#include "HashFunctionFamilyTester.h"
 #include "../data/HashFunctionData.h"
 
 
-void TestHashFunctionFamily::try_test_and_log(unique_ptr<TestCase>& test_case) {
+void HashFunctionFamilyTester::try_test_and_log(unique_ptr<TestCase>& test_case) {
     try {
         unique_ptr<Data> test_result = move(test_case->test());
         Tester::add_test_run_to_log(test_result);

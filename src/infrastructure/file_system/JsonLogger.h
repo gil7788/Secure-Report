@@ -10,7 +10,6 @@
 
 using namespace std;
 
-// TODO consider to move to file_system directory
 
 /**
  * Json logger class, output to console and save to file json strings

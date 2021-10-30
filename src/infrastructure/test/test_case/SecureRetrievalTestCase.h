@@ -30,12 +30,12 @@ protected:
     int _number_of_matches_in_database;
     DataType (*_is_match)(DataType&, DataType&);
     vector<int> _plain_data;
-    unique_ptr<DatabaseDataType> _data_type_ptr;
+    unique_ptr<VirtualContext> _data_type_ptr;
 
 public:
     SecureRetrievalTestCase(const string& name, int lookup_value,int database_size, vector<int> matches_indices,
                         DataType (*is_match)(DataType&, DataType&), vector<int>& plain_data,
-                        unique_ptr<DatabaseDataType>& data_type_ptr):
+                        unique_ptr<VirtualContext>& data_type_ptr):
             _name{name},
             _lookup_value{lookup_value},
             _database_size{database_size}, _matches_indices{matches_indices}, _number_of_matches_in_database{int(matches_indices.size())},
@@ -71,7 +71,7 @@ protected:
         return _plain_data;
     }
 
-    unique_ptr<DatabaseDataType>& get_data_type_ptr() {
+    unique_ptr<VirtualContext>& get_data_type_ptr() {
         return _data_type_ptr;
     }
 };
@@ -81,8 +81,8 @@ class SecureReportTestCase: public SecureRetrievalTestCase<DataType> {
 public:
     SecureReportTestCase(const string& name, int lookup_value,int database_size, vector<int> matches_indices,
                             DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                            unique_ptr<DatabaseDataType>& data_type_ptr): SecureRetrievalTestCase<DataType>(name, lookup_value, database_size, matches_indices,
-                                          isMatch, plain_data, data_type_ptr) {}
+                            unique_ptr<VirtualContext>& data_type_ptr): SecureRetrievalTestCase<DataType>(name, lookup_value, database_size, matches_indices,
+                                                                                                          isMatch, plain_data, data_type_ptr) {}
 
     unique_ptr<Data> test() override {
         SecureReportClient<DataType> client(this->_data_type_ptr);
@@ -139,9 +139,9 @@ class SecureBatchRetrievalTestCase: public SecureRetrievalTestCase<DataType> {
     int _requested_number_of_matches;
 
 public:
-    SecureBatchRetrievalTestCase(const string& name, int lookup_value,int database_size, int requested_number_of_matches, vector<int>  matches_indices,
-                            DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-                            unique_ptr<DatabaseDataType>& data_type_ptr, int batch_size):
+    SecureBatchRetrievalTestCase(const string& name, int lookup_value, int database_size, int requested_number_of_matches, vector<int>  matches_indices,
+                                 DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
+                                 unique_ptr<VirtualContext>& data_type_ptr, int batch_size):
             _batch_size{batch_size}, _requested_number_of_matches{requested_number_of_matches},
              SecureRetrievalTestCase<DataType>(name, lookup_value, database_size, matches_indices,
                                           isMatch, plain_data, data_type_ptr) {}
@@ -194,7 +194,7 @@ public:
 
         // name, int lookup_value,int database_size, int number_of_matches_in_database, int number_of_requested_matches, vector<int> selected_matches_indices, vector<int> evaluated_matches_indices,
         //                 DataType (*isMatch)(DataType&, DataType&), vector<int> plain_data,
-        //                 unique_ptr<DatabaseDataType>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time, 
+        //                 unique_ptr<VirtualContext>& data_type_ptr, long upload_time, long initialize_time, long retrieval_time,
         //                 int batch_size
 
         

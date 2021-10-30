@@ -7,9 +7,14 @@
 
 #include <string>
 
-// TODO Rename PROCESSED_FILE_PATH to PROCESSED_DIR_PATH. Save table vector to PROCESSED_DIR_PATH
+// TODO
+// 1. Rename PROCESSED_FILE_PATH to PROCESSED_DIR_PATH. Save table vector to PROCESSED_DIR_PATH
+// 2. Rename paths relatively to project
+
 namespace constants {
     const bool OUTPUT_TO_CONSOLE = true;
+    const std::string PROCESSED_DIR_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/";
+//    const std::string TABLE_VECTOR_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/";
     const std::string OUTPUT_FILE_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/output_file.txt";
     const std::string PROCESSED_FILE_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/";
     const std::string KEY_FILE_PATH = "/home/gil/University/semester19a/crypto_lab/work/secure_report/processed/key";

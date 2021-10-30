@@ -8,7 +8,7 @@
 #include <assert.h>
 #include "SimplifiedHelibKeys.h"
 #include "../../infrastructure/VectorUtils.h"
-#include "EncryptedBits.h"
+#include "Bits.h"
 #include <helib_number.h>
 
 class SimplifiedHelibNumber {

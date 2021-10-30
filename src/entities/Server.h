@@ -9,8 +9,8 @@
 
 #include "../Config.h"
 #include "../infrastructure/file_system/FHEDatabase.h"
-#include "../algorithms/fully_homomorphic/FHEDatabaseConfig.h"
-#include "../algorithms/fully_homomorphic/FHEUtils.h"
+#include "../algorithms/fully_homomorphic/Context.h"
+#include "../algorithms/fully_homomorphic/Comparators.h"
 #include "Client.h"
 #include "../algorithms/fully_homomorphic/SimplifiedHelibNumber.h"
 #include "../algorithms/hash_functions/HashFunctionsFamily.h"
@@ -24,7 +24,7 @@
 /**
  * This class implement virtual Server API for retrieval protocol SecureRetrievalProtocol.
  * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
- * plausible templates inherit from DatabaseDataType.
+ * plausible templates inherit from VirtualContext.
  */
 template <typename DataType>
 class Server {
@@ -136,7 +136,7 @@ public:
      * @param public_server TrustedThirdParty
      */
     void construct_disjunct_matrices(TrustedThirdParty& public_server) {
-        public_server.construct_sketch_matrices();
+        public_server.construct_sketch_encoders();
     }
 
     virtual TrustedThirdParty construct_public_server() = 0;
@@ -152,7 +152,7 @@ public:
 /**
 * This class implement Secure Report Server.
 * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
-* plausible templates inherit from DatabaseDataType.
+* plausible templates inherit from VirtualContext.
 */
 template <typename DataType>
 class SecureReportServer: public Server<DataType> {
@@ -180,7 +180,7 @@ public:
     }
 
     SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
-        auto disjunct_matrix = public_server.get_matrix_by_index(0);
+        auto disjunct_matrix = public_server.get_encoder_by_index(0);
         return disjunct_matrix;
     }
 
@@ -212,7 +212,7 @@ private:
 /**
 * This class implement Secure Batch Retrieval Server.
 * @tparam DataType Plain/Encrypted Fully Homomorphic number template,
-* plausible templates inherit from DatabaseDataType.
+* plausible templates inherit from VirtualContext.
 */
 template <typename DataType>
 class SecureBatchRetrievalServer: public Server<DataType>{
@@ -238,7 +238,7 @@ public:
 
     SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
         auto matrix_index = ceil(log2(get_query()._batch_size));
-        auto disjunct_matrix = public_server.get_matrix_by_index(matrix_index);
+        auto disjunct_matrix = public_server.get_encoder_by_index(matrix_index);
         return disjunct_matrix;
     }
 

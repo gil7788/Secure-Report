@@ -28,8 +28,6 @@ protected:
     void add_test_run_to_log(unique_ptr<Data> test_result);
 
     virtual void try_test_and_log(unique_ptr<TestCase>& test_case) = 0;
-// TODO delete
-    void test_element(unique_ptr<TestCase>& test);
 };
 
 #endif //SECURE_TESTER_H

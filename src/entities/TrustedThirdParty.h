@@ -19,7 +19,7 @@ public:
     /**
      * Construct initialized encoders (first initialize encoders by TrustedThirdParty::initialize)
      */
-    void construct_sketch_matrices();
+    void construct_sketch_encoders();
 
     /**
      * Initialize Sketch Encoders (see SketchEncoder)
@@ -34,7 +34,7 @@ public:
      * @param i Encoder's index
      * @return SketchEncoder at i
      */
-    SketchEncoder get_matrix_by_index(int i);
+    SketchEncoder get_encoder_by_index(int i);
 };
 
 

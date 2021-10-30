@@ -10,8 +10,6 @@
 using namespace std;
 
 class Data {
-//    TODO delete x
-    int x = 567;
 public:
     virtual ~Data() {};
 
