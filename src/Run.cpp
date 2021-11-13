@@ -118,12 +118,6 @@ std::vector<std::unique_ptr<TestCase>> generate_plain_secure_report_tests(int mi
         database_sizes.push_back(database_size);
     }
 
-    // int tests = 10;
-    // for(int i = 0; i < tests; ++i) {
-    //     int database_size = min_database_size * int(pow(2, i));
-    //     database_sizes.push_back(database_size);
-    // }
-
     for(auto& database_size: database_sizes) {
         cout << "Database size: "  << database_size << "\n";
         std::vector<int> data = VectorUtils::generate_binary_std_vector(database_size, number_of_matches_in_database);
@@ -137,12 +131,48 @@ std::vector<std::unique_ptr<TestCase>> generate_plain_secure_report_tests(int mi
     return test_cases;
 }
 
+std::vector<std::unique_ptr<TestCase>> generate_plain_secure_batch_retrieval_tests(int min_database_size,
+                                                                                   int max_database_size,
+                                                                                   int lookup_value,
+                                                                                   int number_of_matches_in_database,
+                                                                                   GenericZP (*is_match)(GenericZP&, GenericZP&),
+                                                                                   int batch_size,
+                                                                                   int requested_number_of_matches) {
+    std::vector<std::unique_ptr<TestCase>> test_cases;
+    int tests = 15;
+    int size_delta = max_database_size - min_database_size;
+    int step_size = size_delta/tests;
+    vector<int> database_sizes;
+
+    for(int i = 0; i < tests; ++i) {
+        int database_size = min_database_size + int(ceil(i* step_size));
+        database_sizes.push_back(database_size);
+    }
+
+
+    for(auto& database_size: database_sizes) {
+        cout << "Database size: "  << database_size << "\n";
+        std::vector<int> data = VectorUtils::generate_binary_std_vector(database_size, number_of_matches_in_database);
+        // TODO: consider to delete
+        vector<int> matches_indices = VectorUtils::get_matches_std_vector(data, lookup_value);
+        string matches_indices_string = VectorUtils::std_vector_to_string(matches_indices);
+        std::cout << "Selected indices: " << matches_indices_string << std::endl;
+
+        test_cases.push_back(move(
+                test_plain_secure_batch_retrieval_protocol(
+                        lookup_value, batch_size, database_size, matches_indices, requested_number_of_matches, is_match, data)));
+    }
+
+    return test_cases;
+}
+
 
 int main(int argc, char** argv) {
     std::cout << "Current path is: " << fs::current_path() << "\n";
     int size = 2048;
     int number_of_matches_in_database = 4;
     int batch_size = 2;
+    int number_of_requested_matches = batch_size*4;
     int batch_size_number_of_matches = 2;
     int all_matches = 4;
 
@@ -153,10 +183,10 @@ int main(int argc, char** argv) {
     int arbitrary_lookup_value = 2;
     auto binary_arbitrary_lookup_value = VectorUtils::number_to_std_vector(arbitrary_lookup_value, (int) r);
 
-    auto generic_isMatch =  Comparators<GenericZP>::areEqualBinary;
+    auto genericis_match =  Comparators<GenericZP>::areEqualBinary;
     auto generic_lessThan = Comparators<GenericZP>::lessThan;
     auto encrypted_lessThan = Comparators<SimplifiedHelibNumber>::lessThan;
-    auto encrypted_isMatch =  Comparators<SimplifiedHelibNumber>::areEqualBinary;
+    auto encryptedis_match =  Comparators<SimplifiedHelibNumber>::areEqualBinary;
 
     std::vector<int> ones_data = VectorUtils::generate_binary_std_vector(size, number_of_matches_in_database);
     std::vector<int> zeros_data = VectorUtils::generate_binary_std_vector(size, size-number_of_matches_in_database);
@@ -167,21 +197,39 @@ int main(int argc, char** argv) {
     int min_database_size = 1024;
     vector<int> number_of_matches_in_databases{4, 8, 16};
     int max_database_size = min_database_size * 64;
+//    for(auto& matches: number_of_matches_in_databases) {
+//        std::vector<std::unique_ptr<TestCase>> test_cases = generate_plain_secure_report_tests(min_database_size, max_database_size ,one_lookup_value, number_of_matches_in_database, genericis_match);
+//        string log_name = "run_test_matches-" + to_string(matches);
+//        ProtocolTester tester(log_name);
+//        tester.initialize(test_cases);
+//        tester.test_and_log_all();
+//    }
+
     for(auto& matches: number_of_matches_in_databases) {
-        std::vector<std::unique_ptr<TestCase>> test_cases = generate_plain_secure_report_tests(min_database_size, max_database_size ,one_lookup_value, number_of_matches_in_database, generic_isMatch);
+        auto test_cases =
+                generate_plain_secure_batch_retrieval_tests(
+                        min_database_size, max_database_size, one_lookup_value, number_of_matches_in_database,
+                        genericis_match, batch_size, number_of_requested_matches);
+
         string log_name = "run_test_matches-" + to_string(matches);
         ProtocolTester tester(log_name);
         tester.initialize(test_cases);
         tester.test_and_log_all();
     }
+
+//    std::vector<std::unique_ptr<TestCase>> test_cases = generate_plain_secure_report_tests(min_database_size, min_database_size ,one_lookup_value, 4, genericis_match);
+//    string log_name = "run_test_matches-" + to_string(4);
+//    ProtocolTester tester(log_name);
+//    tester.initialize(test_cases);
+//    tester.test_and_log_all();
     
 
-    // test_cases.push_back(move(test_plain_secure_report_protocol(one_lookup_value, size, number_of_matches_in_database, generic_isMatch, ones_data)));
-    // test_cases.push_back(move(test_encrypted_secure_report_protocol(one_lookup_value, size, number_of_matches_in_database, encrypted_isMatch, ones_data)));
-    // test_cases.push_back(move(test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, batch_size_number_of_matches, size, number_of_matches_in_database, generic_isMatch, ones_data)));
-    // test_cases.push_back(move(test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, all_matches, size, number_of_matches_in_database, generic_isMatch, ones_data)));
-    // test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, batch_size_number_of_matches_in_database, size, number_of_matches_in_database, encrypted_isMatch, ones_data)));
-    // test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, all_matches, size, number_of_matches_in_database, encrypted_isMatch, ones_data)));
+    // test_cases.push_back(move(test_plain_secure_report_protocol(one_lookup_value, size, number_of_matches_in_database, genericis_match, ones_data)));
+    // test_cases.push_back(move(test_encrypted_secure_report_protocol(one_lookup_value, size, number_of_matches_in_database, encryptedis_match, ones_data)));
+    // test_cases.push_back(move(test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, batch_size_number_of_matches, size, number_of_matches_in_database, genericis_match, ones_data)));
+    // test_cases.push_back(move(test_plain_secure_batch_retrieval_protocol(one_lookup_value, batch_size, all_matches, size, number_of_matches_in_database, genericis_match, ones_data)));
+    // test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, batch_size_number_of_matches_in_database, size, number_of_matches_in_database, encryptedis_match, ones_data)));
+    // test_cases.push_back(move(test_encrypted_secure_batch_retrieval_protocol(one_lookup_value, batch_size, all_matches, size, number_of_matches_in_database, encryptedis_match, ones_data)));
 
     
 }

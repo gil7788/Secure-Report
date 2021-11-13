@@ -84,7 +84,7 @@ public:
      * @param trusted_third_party TrustedThirdParty
      * @return Matches, evaluted plain data from Server encrypted output
      */
-    virtual std::vector<int> retrieve_matches_indices(std::vector<DataType>&  encoded_encrypted_matches, TrustedThirdParty& trusted_third_party) {
+    virtual std::vector<int> retrieve_matches_indices(std::vector<DataType>&  encoded_encrypted_matches, const unique_ptr<TrustedThirdParty>& trusted_third_party) {
         std::vector<int> encoded_matches = decrypt_encrypted_encoded_matches(encoded_encrypted_matches);
         std::vector<int> matches = decode_encoded_matches(encoded_matches, trusted_third_party);
         return matches;
@@ -101,7 +101,7 @@ private:
     }
 
     virtual std::vector<int> decode_encoded_matches(std::vector<int>& encoded_matches,
-            TrustedThirdParty& public_server) {
+                                                    const unique_ptr<TrustedThirdParty>& public_server) {
         for (int i = 0; i < encoded_matches.size(); ++i) {
             (encoded_matches[i] > 0) ? encoded_matches[i] = 1 : encoded_matches[i] = 0;
         }
@@ -116,7 +116,7 @@ private:
         return matches;
     }
 
-    virtual SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) = 0;
+    virtual SketchEncoder get_disjunct_matrix(const unique_ptr<TrustedThirdParty>& public_server) = 0;
 };
 
 /**
@@ -131,8 +131,8 @@ public:
             Client<DataType>(data_type) {}
 
 private:
-    SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
-        auto sketch_encoder = public_server.get_encoder_by_index(0);
+    SketchEncoder get_disjunct_matrix(const unique_ptr<TrustedThirdParty>& public_server) {
+        auto sketch_encoder = public_server->get_encoder_by_index(0);
         return sketch_encoder;
     }
 };
@@ -144,22 +144,27 @@ private:
 */
 template <typename DataType>
 class SecureBatchRetrievalClient: public Client<DataType> {
-SecureBatchRetrievalQuery<DataType> _query;
 public:
     SecureBatchRetrievalClient(unique_ptr<VirtualContext>& data_type):
             Client<DataType>(data_type) {}
 
 private:
 // TODO: Implement retrieval of relevant rows
-    SketchEncoder get_disjunct_matrix(TrustedThirdParty& public_server) {
-        auto encoder_index = ceil(log2(get_query()._batch_size));
-        auto sketch_encoder = public_server.get_encoder_by_index(encoder_index);
+    SketchEncoder get_disjunct_matrix(const unique_ptr<TrustedThirdParty>& public_server) {
+        auto batch_query = get_next_batch_query();
+        auto encoder_index = ceil(log2(batch_query._batch_size));
+        auto sketch_encoder = public_server->get_encoder_by_index(encoder_index);
         return sketch_encoder;
     }
 
-    SecureBatchRetrievalQuery<DataType> get_query() {
-        SecureBatchRetrievalQuery<DataType>* query =
-                dynamic_cast<SecureBatchRetrievalQuery<DataType>*> (Client<DataType>::_query.get());
+    SingleBatchRetrievalQuery<DataType> get_next_batch_query() {
+        auto query = get_query();
+        return query.get_next_batch_query();
+    }
+
+    MultipleBatchRetrievalQuery<DataType> get_query() {
+        MultipleBatchRetrievalQuery<DataType>* query =
+                dynamic_cast<MultipleBatchRetrievalQuery<DataType>*> (Client<DataType>::_query.get());
         if(query == nullptr) {
             cerr << "Failed to cast Query abstract class to derived class\n";
         }

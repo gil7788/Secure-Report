@@ -30,7 +30,7 @@ private:
     G: set of indices after decode
     Ce: used to determine the success of rate of the decoding
  * */
-    const double Ce = 11.36;
+    double Ce = 11.36;
     int _n;
     int _d;
     int _L;
